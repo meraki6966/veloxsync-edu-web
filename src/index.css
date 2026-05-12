@@ -1,0 +1,323 @@
+@import "tailwindcss";
+
+/* ============================================================
+   VELOXSYNC V2 DESIGN SYSTEM TOKENS
+   Foundation for the full app redesign. Additive — does not
+   replace any existing styles. Pages will migrate over time.
+   ============================================================ */
+:root {
+  /* Colors */
+  --vs-void: #000000;
+  --vs-deep: #080810;
+  --vs-panel: #0D0D1A;
+  --vs-card: #111122;
+  --vs-card-hover: #161628;
+  --vs-amber: #D4A017;
+  --vs-amber-bright: #F5B800;
+  --vs-amber-dim: rgba(212,160,23,0.12);
+  --vs-amber-border: rgba(212,160,23,0.28);
+  --vs-teal: #0B9B8A;
+  --vs-teal-dim: rgba(11,155,138,0.12);
+  --vs-teal-border: rgba(11,155,138,0.28);
+  --vs-white: #F0EDE8;
+  --vs-white-dim: rgba(240,237,232,0.55);
+  --vs-white-faint: rgba(240,237,232,0.07);
+  --vs-red: #E53E3E;
+  --vs-red-dim: rgba(229,62,62,0.12);
+  --vs-green: #38A169;
+  --vs-green-dim: rgba(56,161,105,0.12);
+  --vs-border: rgba(240,237,232,0.08);
+  --vs-border-strong: rgba(240,237,232,0.16);
+
+  /* Typography */
+  --vs-font-display: 'Bebas Neue', sans-serif;
+  --vs-font-mono: 'Space Mono', monospace;
+  --vs-font-body: 'DM Sans', sans-serif;
+
+  /* Font sizes */
+  --vs-text-xs: 10px;
+  --vs-text-sm: 12px;
+  --vs-text-base: 14px;
+  --vs-text-md: 16px;
+  --vs-text-lg: 18px;
+  --vs-text-xl: 24px;
+  --vs-text-2xl: 32px;
+  --vs-text-3xl: 48px;
+  --vs-text-display: 64px;
+
+  /* Shadows */
+  --vs-shadow-card: 0 1px 3px rgba(0,0,0,0.4);
+  --vs-shadow-panel: 0 4px 24px rgba(0,0,0,0.5);
+  --vs-shadow-amber: 0 0 20px rgba(212,160,23,0.15);
+
+  /* Animations */
+  --vs-transition-fast: 0.15s ease;
+  --vs-transition-base: 0.25s ease;
+}
+
+/* Mobile Responsive Improvements */
+@media (max-width: 640px) {
+  /* Reduce padding on mobile */
+  .px-4 {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  /* Stack grid items */
+  .grid-cols-2 {
+    grid-template-columns: 1fr;
+  }
+  
+  /* Smaller text on mobile */
+  .text-5xl {
+    font-size: 2.25rem;
+  }
+  
+  .text-7xl {
+    font-size: 2.5rem;
+  }
+  
+  /* Hide some elements on mobile */
+  .hidden-mobile {
+    display: none;
+  }
+  
+  /* Full width buttons */
+  button, a.rounded-xl, a.rounded-2xl {
+    min-height: 44px; /* Touch target */
+  }
+  
+  /* Better modal sizing */
+  .max-w-lg, .max-w-2xl {
+    max-width: calc(100vw - 2rem);
+    margin: 1rem;
+  }
+  
+  /* Scrollable tables */
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Tablet adjustments */
+@media (max-width: 1024px) {
+  .lg\:grid-cols-3 {
+    grid-template-columns: 1fr;
+  }
+  
+  .lg\:col-span-2 {
+    grid-column: span 1;
+  }
+}
+
+/* Safe area for notched phones */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .min-h-screen {
+    min-height: calc(100vh - env(safe-area-inset-bottom));
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Prevent zoom on input focus (iOS) */
+input, select, textarea {
+  font-size: 16px !important;
+}
+
+/* Better touch scrolling */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+/* ============================================================
+   VELOXSYNC PLATFORM - Performance Intelligence Styles
+   Append to the END of src/index.css (after Tailwind directives)
+   Replaces all previous Aethos styles
+   ============================================================ */
+
+.font-heading {
+  font-family: 'Space Grotesk', 'Inter', sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.font-ui {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+h1, h2, h3 {
+  font-family: 'Space Grotesk', 'Inter', sans-serif;
+}
+
+/* Signal Amber for high-value metrics */
+.signal-amber-text { color: #F59E0B; }
+.signal-amber-bg { background-color: #F59E0B; }
+.signal-amber-glow { box-shadow: 0 0 16px rgba(245, 158, 11, 0.12); }
+
+/* Velox Navy */
+.velox-navy-text { color: #0B1426; }
+.velox-navy-bg { background-color: #0B1426; }
+
+/* Sync Flow metrics */
+.sync-optimal { color: #10B981; }
+.sync-high { color: #F59E0B; }
+.sync-caution { color: #F97316; }
+.sync-critical { color: #EF4444; }
+
+/* Performance card style */
+.velox-card {
+  background: rgba(19, 32, 68, 0.25);
+  border: 1px solid rgba(30, 51, 102, 0.3);
+  border-radius: 0.75rem;
+  backdrop-filter: blur(12px);
+  transition: all 0.2s ease;
+}
+
+.velox-card:hover {
+  border-color: rgba(59, 130, 246, 0.4);
+  box-shadow: 0 0 16px rgba(59, 130, 246, 0.08);
+}
+
+/* Signal badge for high-value items */
+.signal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  color: #F59E0B;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Focus states */
+input:focus, select:focus, textarea:focus, button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.4), 0 0 0 4px rgba(59, 130, 246, 0.15);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: rgba(11, 20, 38, 0.5); }
+::-webkit-scrollbar-thumb { background: rgba(30, 51, 102, 0.5); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(59, 130, 246, 0.4); }
+
+/* Selection */
+::selection { background: rgba(59, 130, 246, 0.25); color: white; }
+/* ============================================================
+   CLARITY MODE — Neurodiversity Accessibility UI
+   Reduces cognitive load, increases readability, removes distractions.
+   ============================================================ */
+
+body.clarity-mode {
+  font-size: 18px !important;
+  line-height: 1.8 !important;
+}
+
+body.clarity-mode * {
+  animation-duration: 0s !important;
+  transition-duration: 0.1s !important;
+}
+
+body.clarity-mode h1,
+body.clarity-mode h2,
+body.clarity-mode h3 {
+  letter-spacing: 0.02em;
+  font-weight: 700 !important;
+}
+
+body.clarity-mode .text-slate-400,
+body.clarity-mode .text-slate-500 {
+  color: #cbd5e1 !important;
+}
+
+body.clarity-mode .text-slate-300 {
+  color: #e2e8f0 !important;
+}
+
+body.clarity-mode .border,
+body.clarity-mode [class*="border-"] {
+  border-width: 2px !important;
+}
+
+body.clarity-mode .backdrop-blur-xl,
+body.clarity-mode .backdrop-blur-sm,
+body.clarity-mode .backdrop-blur {
+  backdrop-filter: none !important;
+}
+
+body.clarity-mode button,
+body.clarity-mode a,
+body.clarity-mode [role="button"] {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+body.clarity-mode *:focus-visible {
+  outline: 3px solid #f59e0b !important;
+  outline-offset: 2px !important;
+}
+
+body.clarity-mode .bg-gradient-to-br,
+body.clarity-mode .bg-gradient-to-r:not(button):not(a),
+body.clarity-mode .bg-gradient-to-b {
+  background: #0f172a !important;
+}
+
+body.clarity-mode .gap-4 { gap: 1.5rem !important; }
+body.clarity-mode .gap-6 { gap: 2rem !important; }
+
+body.clarity-mode::after {
+  content: 'Clarity Mode Active';
+  position: fixed;
+  bottom: 12px;
+  left: 12px;
+  background: #f59e0b;
+  color: #0f172a;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 6px;
+  z-index: 9999;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* ============================================================
+   CLARITY MODE — V2 OVERRIDES
+   Replace display/mono with DM Sans for neurodivergent
+   readability while keeping dark theme intact.
+   ============================================================ */
+.clarity-mode {
+  filter: none !important;
+}
+.clarity-mode * {
+  font-family: 'DM Sans', sans-serif !important;
+  letter-spacing: 0.02em !important;
+}
+.clarity-mode .vs-display,
+.clarity-mode [style*="Bebas Neue"],
+.clarity-mode [class*="display"] {
+  font-family: 'DM Sans', sans-serif !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.01em !important;
+}
+.clarity-mode .vs-mono,
+.clarity-mode [style*="Space Mono"],
+.clarity-mode [class*="mono"] {
+  font-family: 'DM Sans', sans-serif !important;
+  letter-spacing: 0.02em !important;
+}
+.clarity-mode {
+  --vs-void: #0F1117;
+  --vs-deep: #161B27;
+  --vs-card: #1E2535;
+  --vs-panel: #1A2030;
+  --vs-border: rgba(255,255,255,0.12);
+  --vs-white: #FFFFFF;
+  --vs-white-dim: rgba(255,255,255,0.7);
+}
