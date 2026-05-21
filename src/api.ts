@@ -53,8 +53,17 @@ export const auth = {
     organization_type?: string;
     user_type?: string;
   }) => api.post('/api/auth/register', data),
+  // Education-product signup: minimal payload, role is always 'homeschool'.
+  registerHomeschool: (data: { email: string; password: string }) =>
+    api.post('/api/auth/register', {
+      email: data.email,
+      password: data.password,
+      role: 'homeschool',
+      industry_type: 'education',
+    }),
   logout: () => {
     localStorage.removeItem('edu_token');
+    localStorage.removeItem('edu_user');
     window.location.href = '/education/login';
   },
 };

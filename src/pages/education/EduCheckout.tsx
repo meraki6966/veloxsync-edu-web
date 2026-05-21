@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { auth } from '../../api';
 
 const CHECKOUT_CSS = `
 .edu-checkout {
@@ -173,6 +174,65 @@ const CHECKOUT_CSS = `
   margin-top: 1px;
 }
 .edu-checkout-check svg { width: 9px; height: 9px; }
+.edu-checkout-form-divider {
+  margin: 8px 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(28,24,18,0.45);
+}
+.edu-checkout-form-divider::before,
+.edu-checkout-form-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(28,24,18,0.1);
+}
+.edu-checkout-field { margin-bottom: 16px; text-align: left; }
+.edu-checkout-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(28,24,18,0.6);
+  margin-bottom: 8px;
+}
+.edu-checkout-input {
+  width: 100%;
+  background: #FAF7F2;
+  border: 1px solid rgba(28,24,18,0.1);
+  border-radius: 8px;
+  padding: 13px 16px;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 14px;
+  color: #1C1812;
+  transition: border-color 0.2s;
+}
+.edu-checkout-input:focus {
+  outline: none;
+  border-color: #3D6B4F;
+}
+.edu-checkout-input::placeholder { color: rgba(28,24,18,0.35); }
+.edu-checkout-hint {
+  font-size: 11px;
+  color: rgba(28,24,18,0.45);
+  margin-top: 6px;
+}
+.edu-checkout-error {
+  background: rgba(229,62,62,0.08);
+  border: 1px solid rgba(229,62,62,0.25);
+  color: #B23A3A;
+  font-size: 13px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  text-align: left;
+}
 .edu-checkout-btn {
   display: block;
   width: 100%;
@@ -185,15 +245,28 @@ const CHECKOUT_CSS = `
   cursor: pointer;
   padding: 15px;
   border-radius: 100px;
-  transition: background 0.2s;
+  transition: background 0.2s, opacity 0.2s;
   margin-bottom: 12px;
 }
 .edu-checkout-btn:hover { background: #5A8F6A; }
+.edu-checkout-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .edu-checkout-note {
   font-size: 12px;
   color: rgba(28,24,18,0.5);
   text-align: center;
 }
+.edu-checkout-signin {
+  font-size: 13px;
+  color: rgba(28,24,18,0.55);
+  text-align: center;
+  margin-top: 18px;
+}
+.edu-checkout-signin a {
+  color: #3D6B4F;
+  text-decoration: none;
+  font-weight: 600;
+}
+.edu-checkout-signin a:hover { text-decoration: underline; }
 .edu-checkout-back {
   margin-top: 28px;
   text-align: center;
@@ -217,6 +290,8 @@ const FEATURES = [
   'IEP accommodation tracking and support',
 ];
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 const CheckSvg = () => (
   <svg viewBox="0 0 8 8" fill="none">
     <path d="M1.5 4L3.5 6L6.5 2" stroke="#3D6B4F" strokeWidth="1.3" strokeLinecap="round" />
@@ -226,6 +301,12 @@ const CheckSvg = () => (
 export default function EduCheckout() {
   const navigate = useNavigate();
   const [billing, setBilling] = useState<'monthly' | 'annual'>('monthly');
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const styleEl = document.createElement('style');
@@ -237,10 +318,48 @@ export default function EduCheckout() {
     };
   }, []);
 
-  const handleStart = () => {
-    // Stripe integration arrives in a later session — for now, route into
-    // onboarding so the family can be set up.
-    navigate('/education/onboarding');
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    if (!EMAIL_RE.test(email.trim())) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters.');
+      return;
+    }
+    if (password !== confirm) {
+      setError('Passwords do not match.');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const res = await auth.registerHomeschool({ email: email.trim(), password });
+      const data = res.data ?? {};
+      const token = data.token ?? data.accessToken;
+      if (!token) {
+        setError('Account created but no session token was returned. Please sign in.');
+        setSubmitting(false);
+        return;
+      }
+      localStorage.setItem('edu_token', token);
+      if (data.user) {
+        localStorage.setItem('edu_user', JSON.stringify(data.user));
+      }
+      navigate('/education/onboarding');
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { message?: string; error?: string } }; message?: string };
+      const msg =
+        e?.response?.data?.message ??
+        e?.response?.data?.error ??
+        e?.message ??
+        'Could not create your account. Please try again.';
+      setError(msg);
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -287,10 +406,69 @@ export default function EduCheckout() {
               </li>
             ))}
           </ul>
-          <button type="button" className="edu-checkout-btn" onClick={handleStart}>
-            Start 14-day free trial
-          </button>
-          <div className="edu-checkout-note">No credit card required. Cancel any time.</div>
+
+          <div className="edu-checkout-form-divider">Create your account</div>
+
+          <form onSubmit={handleSubmit} noValidate>
+            {error && <div className="edu-checkout-error">{error}</div>}
+
+            <div className="edu-checkout-field">
+              <label className="edu-checkout-label" htmlFor="edu-checkout-email">Email address</label>
+              <input
+                id="edu-checkout-email"
+                className="edu-checkout-input"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+              />
+            </div>
+
+            <div className="edu-checkout-field">
+              <label className="edu-checkout-label" htmlFor="edu-checkout-password">Password</label>
+              <input
+                id="edu-checkout-password"
+                className="edu-checkout-input"
+                type="password"
+                autoComplete="new-password"
+                required
+                minLength={8}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="At least 8 characters"
+              />
+              <div className="edu-checkout-hint">Use at least 8 characters.</div>
+            </div>
+
+            <div className="edu-checkout-field">
+              <label className="edu-checkout-label" htmlFor="edu-checkout-confirm">Confirm password</label>
+              <input
+                id="edu-checkout-confirm"
+                className="edu-checkout-input"
+                type="password"
+                autoComplete="new-password"
+                required
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                placeholder="Re-type your password"
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="edu-checkout-btn"
+              disabled={submitting || !email || !password || !confirm}
+            >
+              {submitting ? 'Creating account…' : 'Create account and start free trial'}
+            </button>
+            <div className="edu-checkout-note">No credit card required. Cancel any time.</div>
+          </form>
+
+          <div className="edu-checkout-signin">
+            Already have an account? <a href="/education/login">Sign in</a>
+          </div>
         </div>
 
         <div className="edu-checkout-back">
