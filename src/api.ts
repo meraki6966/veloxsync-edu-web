@@ -12,7 +12,7 @@ const api = axios.create({
 
 // Add auth token to requests
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('edu_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -30,8 +30,8 @@ api.interceptors.response.use(
       const url: string = error.config?.url ?? '';
       const isSilent = SILENT_401_PREFIXES.some((prefix) => url.startsWith(prefix));
       if (!isSilent) {
-        localStorage.removeItem('token');
-        window.location.href = '/onboarding';
+        localStorage.removeItem('edu_token');
+        window.location.href = '/education/login';
       }
     }
     return Promise.reject(error);
@@ -54,8 +54,8 @@ export const auth = {
     user_type?: string;
   }) => api.post('/api/auth/register', data),
   logout: () => {
-    localStorage.removeItem('token');
-    window.location.href = '/onboarding';
+    localStorage.removeItem('edu_token');
+    window.location.href = '/education/login';
   },
 };
 

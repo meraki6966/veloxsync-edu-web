@@ -48,7 +48,7 @@ export default function AssignmentGenerator() {
       setEduProfile(prof);
       if (prof.state) setPrefillState(prof.state);
     }
-    dashboard.me().then(r => setUser(r.data)).catch(() => navigate('/login'));
+    dashboard.me().then(r => setUser(r.data)).catch(() => navigate('/education/login'));
   }, []);
 
   return (

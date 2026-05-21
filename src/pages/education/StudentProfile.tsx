@@ -217,7 +217,7 @@ export default function StudentProfile() {
   useEffect(() => {
     const raw = localStorage.getItem('eduProfile');
     if (raw) setEduProfile(JSON.parse(raw) as EduProfile);
-    dashboard.me().then(r => setUser(r.data)).catch(() => navigate('/login'));
+    dashboard.me().then(r => setUser(r.data)).catch(() => navigate('/education/login'));
     if (id) loadStudentData(id);
   }, [id]);
 

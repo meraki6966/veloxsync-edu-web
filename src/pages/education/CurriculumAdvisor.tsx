@@ -81,7 +81,7 @@ export default function CurriculumAdvisor() {
       setEduProfile(prof);
       setState(prof.state || '');
     }
-    dashboard.me().then(r => setUser(r.data)).catch(() => navigate('/login'));
+    dashboard.me().then(r => setUser(r.data)).catch(() => navigate('/education/login'));
     loadSavedInterventions();
   }, []);
 

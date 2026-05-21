@@ -63,7 +63,7 @@ export default function CurriculumTracker() {
       setFilterState(profState);
       setFilterBand(profBand);
     }
-    dashboard.me().then(r => setUser(r.data)).catch(() => navigate('/login'));
+    dashboard.me().then(r => setUser(r.data)).catch(() => navigate('/education/login'));
     loadStudentsAndProgress();
     // Auto-load standards when navigating directly to the Standards Library
     if (location.pathname === '/education/standards' && profState && profBand) {
