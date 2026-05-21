@@ -1,8 +1,8 @@
 // src/pages/education/HomeschoolDashboard.tsx
-// VeloxSync for Education — Homeschool Family Dashboard (V3 cream/green design)
+// VeloxSync for Education — Homeschool morning planner (cream/green, family-first)
 
-import { useEffect, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { dashboard, edu } from '../../api';
 import EducationSidebar from '../../components/EducationSidebar';
 import EduTrialBanner from '../../components/EduTrialBanner';
@@ -11,16 +11,39 @@ import type { EduProfile, HomeschoolChild } from '../../types/education';
 const CURRICULUM_TYPES = ['Classical', 'Charlotte Mason', 'Unschooling', 'Eclectic', 'Online', 'Textbook'] as const;
 type CurriculumType = typeof CURRICULUM_TYPES[number];
 
-const CURRICULUM_DESCRIPTIONS: Record<CurriculumType, string> = {
-  Classical:        'Focuses on the trivium (grammar, logic, rhetoric) with Great Books and classical language study.',
-  'Charlotte Mason': 'Uses living books, nature study, narration, and short lessons to cultivate a love of learning.',
-  Unschooling:       'Child-led learning driven by natural curiosity and life experiences without formal curriculum.',
-  Eclectic:          'Mix of approaches tailored to each child, drawing from multiple philosophies and resources.',
-  Online:            'Structured online courses and digital curriculum platforms with tracking and assessments.',
-  Textbook:          'Traditional structured textbooks and workbooks following a sequential, subject-by-subject approach.',
-};
-
 const GRADE_LEVELS = ['K', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+
+// Soft pastel palette — one per child in order. Wraps after the sixth.
+const CHILD_COLORS = ['#C2D9C4', '#D4CCE6', '#F0D5C0', '#C4DBE8', '#E8C4C4', '#E8DCC4'];
+
+// Mock today's plan — three rotating lesson sets so a family of 3+ children
+// doesn't all show the same plan. Real plans come from Ei-Core in phase 2.
+type Lesson = { subject: string; title: string; desc: string; duration: number };
+const LESSON_SETS: Lesson[][] = [
+  [
+    { subject: 'Math',    title: 'Fraction Division',         desc: 'Visual models and practice problems.', duration: 25 },
+    { subject: 'Reading', title: "Charlotte's Web — Chapter 4", desc: 'Read aloud, then narrate the chapter.', duration: 20 },
+    { subject: 'Science', title: 'Plant Life Cycles',         desc: 'Observation walk and journal entry.',  duration: 25 },
+  ],
+  [
+    { subject: 'Python',  title: 'Build a Quiz Game',   desc: 'Functions and conditionals in a small project.', duration: 30 },
+    { subject: 'History', title: 'Ancient Egypt',       desc: 'Short reading and a written narration.',         duration: 20 },
+    { subject: 'Art',     title: 'Watercolor Landscape', desc: 'Wet-on-wet technique. Hands-on practice.',      duration: 25 },
+  ],
+  [
+    { subject: 'Math',    title: 'Multiplication — 7s',          desc: 'Quick recall drill and a game.',     duration: 15 },
+    { subject: 'Reading', title: 'Frog and Toad Are Friends',    desc: 'Read aloud, then narrate together.', duration: 20 },
+    { subject: 'Nature',  title: 'Backyard Bird Count',          desc: 'Tally observations in your journal.', duration: 25 },
+  ],
+];
+
+const getMockPlan = (i: number): Lesson[] => LESSON_SETS[i % LESSON_SETS.length];
+
+const formatToday = (d: Date) =>
+  d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+
+const greetingForHour = (h: number) =>
+  h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
 
 const DASHBOARD_CSS = `
 .edu-dash { display: flex; min-height: 100vh; background: #FAF7F2; font-family: 'Open Sans', sans-serif; color: #1C1812; }
@@ -40,12 +63,261 @@ const DASHBOARD_CSS = `
   }
 }
 
-.edu-dash-content {
-  padding: 48px 56px;
-  max-width: 1080px; margin: 0 auto;
-}
+.edu-dash-content { padding: 48px 56px; max-width: 1080px; margin: 0 auto; }
 @media (max-width: 767px) { .edu-dash-content { padding: 24px 18px; } }
 
+@keyframes eduFadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes eduPulseDot {
+  0%, 100% { opacity: 1;   transform: scale(1); }
+  50%      { opacity: 0.4; transform: scale(0.7); }
+}
+.edu-fade { opacity: 0; animation: eduFadeUp 0.6s ease-out forwards; }
+.edu-fade-1 { animation-delay: 0s; }
+.edu-fade-2 { animation-delay: 0.1s; }
+.edu-fade-3 { animation-delay: 0.2s; }
+.edu-fade-4 { animation-delay: 0.3s; }
+.edu-fade-5 { animation-delay: 0.4s; }
+
+/* — 1. Greeting header — */
+.morning-head {
+  display: flex; flex-direction: column; gap: 16px;
+  margin-bottom: 32px;
+}
+@media (min-width: 768px) {
+  .morning-head { flex-direction: row; align-items: flex-end; justify-content: space-between; gap: 24px; }
+}
+.morning-date {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 13px; font-weight: 500; color: rgba(28,24,18,0.4);
+  letter-spacing: 0.02em; margin-bottom: 10px;
+}
+.morning-greeting {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(34px, 4.4vw, 42px); font-weight: 400;
+  font-style: normal;
+  line-height: 1.1; color: #1C1812; margin: 0;
+}
+.morning-sub {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 15px; color: rgba(28,24,18,0.5);
+  margin-top: 10px; line-height: 1.55;
+}
+.morning-active-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: #3D6B4F; color: #FFFFFF;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.04em;
+  padding: 7px 14px; border-radius: 100px;
+  white-space: nowrap; align-self: flex-start;
+  box-shadow: 0 6px 18px rgba(61,107,79,0.25);
+}
+.morning-active-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #C2D9C4;
+  animation: eduPulseDot 1.6s ease-in-out infinite;
+}
+
+/* — 2. Children avatar row — */
+.children-row {
+  display: flex; gap: 22px; overflow-x: auto;
+  padding: 4px 0 16px; margin-bottom: 28px;
+  scrollbar-width: thin;
+}
+.children-row::-webkit-scrollbar { height: 6px; }
+.children-row::-webkit-scrollbar-thumb { background: rgba(28,24,18,0.12); border-radius: 100px; }
+.child-avatar-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  background: none; border: none; cursor: pointer; padding: 6px 4px 10px;
+  border-bottom: 2px solid transparent;
+  transition: border-color 0.2s, transform 0.2s;
+  flex-shrink: 0;
+}
+.child-avatar-btn:hover { transform: translateY(-2px); }
+.child-avatar-btn.is-active { border-bottom-color: #3D6B4F; }
+.child-avatar-circle {
+  width: 56px; height: 56px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 18px; font-weight: 700; color: #1C1812;
+  background: #EBF2EC;
+}
+.child-avatar-name {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 12px; font-weight: 600; color: #1C1812;
+  max-width: 72px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.child-avatar-grade {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 10px; color: rgba(28,24,18,0.5);
+}
+.child-avatar-all .child-avatar-circle {
+  background: #FFFFFF; border: 1px solid rgba(28,24,18,0.1);
+  color: #3D6B4F;
+}
+.child-avatar-add .child-avatar-circle {
+  background: #FFFFFF; border: 1px dashed rgba(61,107,79,0.4);
+  color: #3D6B4F; font-weight: 300;
+}
+
+/* — 3. Ei-Core morning insight — */
+.morning-insight {
+  background: #FFFFFF;
+  border: 1px solid rgba(28,24,18,0.1);
+  border-left: 3px solid #3D6B4F;
+  border-radius: 16px;
+  padding: 22px 26px;
+  margin-bottom: 36px;
+  box-shadow: 0 2px 16px rgba(28,24,18,0.05);
+}
+.morning-insight-head {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;
+}
+.morning-insight-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+  text-transform: uppercase; color: #3D6B4F;
+}
+.morning-insight-dismiss {
+  background: none; border: none; cursor: pointer;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 12px; color: rgba(28,24,18,0.45);
+  padding: 0;
+}
+.morning-insight-dismiss:hover { color: #1C1812; }
+.morning-insight-text {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 14px; color: #1C1812; line-height: 1.65; margin: 0;
+}
+
+/* — 4. Today's plan — */
+.plan-section { margin-bottom: 36px; }
+.plan-divider {
+  height: 1px; background: rgba(28,24,18,0.08);
+  margin: 28px 0 26px;
+}
+.plan-child-head {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+}
+.plan-child-dot {
+  width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0;
+  box-shadow: inset 0 0 0 1px rgba(28,24,18,0.06);
+}
+.plan-child-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 24px; font-weight: 400; font-style: normal;
+  color: #1C1812; line-height: 1;
+}
+.plan-blocks { display: flex; flex-direction: column; gap: 12px; }
+.plan-block {
+  position: relative;
+  background: #FFFFFF;
+  border: 1px solid rgba(28,24,18,0.1);
+  border-radius: 16px;
+  padding: 18px 22px 18px 28px;
+  display: flex; align-items: center; gap: 18px;
+  box-shadow: 0 2px 14px rgba(28,24,18,0.04);
+  transition: box-shadow 0.2s, transform 0.2s;
+  overflow: hidden;
+}
+.plan-block:hover { box-shadow: 0 8px 24px rgba(28,24,18,0.07); }
+.plan-block-stripe {
+  position: absolute; top: 0; left: 0; bottom: 0; width: 4px;
+}
+.plan-block-body { flex: 1; min-width: 0; }
+.plan-block-title {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 13px; font-weight: 700; color: #1C1812;
+  margin: 0 0 4px;
+}
+.plan-block-desc {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 12px; color: rgba(28,24,18,0.55);
+  line-height: 1.55; margin: 0;
+}
+.plan-block-meta {
+  display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+}
+.plan-pill {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.02em;
+  padding: 4px 10px; border-radius: 100px;
+}
+.plan-pill-duration {
+  background: #F3EDE3; color: rgba(28,24,18,0.65);
+}
+.plan-pill-focus {
+  background: #EDE6F6; color: #6B4F8F;
+}
+.plan-check {
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 1.5px solid rgba(28,24,18,0.18);
+  background: #FFFFFF; cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s, border-color 0.2s;
+  padding: 0;
+}
+.plan-check:hover { border-color: #3D6B4F; }
+.plan-check.is-done {
+  background: #3D6B4F; border-color: #3D6B4F;
+}
+.plan-check.is-done svg { color: #FFFFFF; opacity: 1; }
+.plan-check svg { color: #FFFFFF; opacity: 0; transition: opacity 0.2s; width: 14px; height: 14px; }
+
+/* — Empty state for plan — */
+.plan-empty {
+  background: #FFFFFF; border: 1px dashed rgba(28,24,18,0.15);
+  border-radius: 16px; padding: 72px 24px;
+  text-align: center;
+}
+.plan-empty-icon { color: #3D6B4F; margin: 0 auto 18px; display: block; }
+.plan-empty-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px; font-weight: 400; color: #1C1812; margin: 0 0 10px;
+}
+.plan-empty-sub {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 14px; color: rgba(28,24,18,0.55); line-height: 1.6;
+  margin: 0 0 22px;
+}
+.plan-empty-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 14px; font-weight: 600; color: #FFFFFF;
+  background: #3D6B4F; border: none; cursor: pointer;
+  padding: 12px 24px; border-radius: 100px;
+  transition: background 0.2s;
+}
+.plan-empty-btn:hover { background: #5A8F6A; }
+
+/* — 5. Quick stats — */
+.quick-stats {
+  display: grid; gap: 14px;
+  grid-template-columns: 1fr;
+  margin-bottom: 24px;
+}
+@media (min-width: 600px) { .quick-stats { grid-template-columns: repeat(3, 1fr); } }
+.quick-stat {
+  background: #FFFFFF;
+  border: 1px solid rgba(28,24,18,0.1);
+  border-radius: 16px;
+  padding: 22px 22px 20px;
+  box-shadow: 0 2px 14px rgba(28,24,18,0.04);
+}
+.quick-stat-value {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 36px; font-weight: 400; color: #1C1812;
+  line-height: 1.05; display: flex; align-items: center; gap: 8px;
+}
+.quick-stat-value svg { color: #3D6B4F; width: 22px; height: 22px; }
+.quick-stat-label {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 10px; color: rgba(28,24,18,0.5);
+  letter-spacing: 0.08em; text-transform: uppercase;
+  margin-top: 8px;
+}
+
+/* — Toast — */
 .edu-dash-toast {
   position: fixed; top: 18px; left: 50%; transform: translateX(-50%);
   z-index: 50; width: calc(100% - 32px); max-width: 420px;
@@ -62,201 +334,10 @@ const DASHBOARD_CSS = `
 .edu-dash-toast-close { background: none; border: none; cursor: pointer; color: rgba(28,24,18,0.4); padding: 0; flex-shrink: 0; }
 .edu-dash-toast-close:hover { color: #1C1812; }
 
-.edu-dash-header {
-  display: flex; flex-direction: column;
-  gap: 16px; margin-bottom: 36px;
-}
-@media (min-width: 768px) {
-  .edu-dash-header { flex-direction: row; align-items: center; justify-content: space-between; }
-}
-.edu-dash-eyebrow {
-  display: inline-flex; align-items: center; gap: 8px;
-  font-size: 11px; font-weight: 600; letter-spacing: 0.14em;
-  text-transform: uppercase; color: #3D6B4F; margin-bottom: 8px;
-}
-.edu-dash-eyebrow svg { width: 12px; height: 12px; }
-.edu-dash-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(36px, 4vw, 48px); font-weight: 400;
-  line-height: 1.1; color: #1C1812;
-}
-.edu-dash-title em { font-style: italic; color: #3D6B4F; }
-.edu-dash-welcome {
-  font-size: 14px; color: rgba(28,24,18,0.6);
-  margin-top: 8px; line-height: 1.6;
-}
-.edu-dash-add-btn {
-  display: inline-flex; align-items: center; gap: 8px;
-  font-family: 'Open Sans', sans-serif;
-  font-size: 14px; font-weight: 600; color: #FFFFFF;
-  background: #3D6B4F; border: none; cursor: pointer;
-  padding: 12px 22px; border-radius: 100px;
-  transition: background 0.2s;
-  align-self: flex-start;
-}
-.edu-dash-add-btn:hover { background: #5A8F6A; }
-.edu-dash-add-btn svg { width: 14px; height: 14px; }
-
-.edu-dash-insight {
-  background: #FFFFFF;
-  border: 1px solid rgba(28,24,18,0.1);
-  border-left: 3px solid #3D6B4F;
-  border-radius: 12px;
-  padding: 22px 26px;
-  margin-bottom: 36px;
-  box-shadow: 0 2px 16px rgba(28,24,18,0.05);
-}
-.edu-dash-insight-label {
-  display: inline-flex; align-items: center; gap: 8px;
-  font-size: 10px; font-weight: 700; letter-spacing: 0.14em;
-  text-transform: uppercase; color: #3D6B4F; margin-bottom: 10px;
-}
-.edu-dash-insight-label svg { width: 12px; height: 12px; }
-.edu-dash-insight-summary {
-  font-size: 14px; color: rgba(28,24,18,0.75);
-  line-height: 1.65; margin-bottom: 12px;
-}
-.edu-dash-insight-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
-.edu-dash-insight-list li {
-  display: flex; align-items: flex-start; gap: 8px;
-  font-size: 12.5px; color: rgba(28,24,18,0.65); line-height: 1.55;
-}
-.edu-dash-insight-list li::before {
-  content: '→'; color: #3D6B4F; font-weight: 700; flex-shrink: 0;
-}
-
-.edu-dash-empty {
-  text-align: center; padding: 72px 24px;
-  background: #FFFFFF; border: 1px dashed rgba(28,24,18,0.15);
-  border-radius: 16px;
-}
-.edu-dash-empty-icon { color: rgba(61,107,79,0.5); margin-bottom: 16px; }
-.edu-dash-empty-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 24px; font-weight: 500; color: #1C1812; margin-bottom: 8px;
-}
-.edu-dash-empty-sub { font-size: 13px; color: rgba(28,24,18,0.55); margin-bottom: 20px; }
-
-.edu-dash-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 18px;
-  margin-bottom: 36px;
-}
-@media (min-width: 720px) { .edu-dash-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 1100px) { .edu-dash-grid { grid-template-columns: repeat(3, 1fr); } }
-
-.edu-dash-child {
-  background: #FFFFFF;
-  border: 1px solid rgba(28,24,18,0.1);
-  border-radius: 16px;
-  overflow: hidden;
-  cursor: pointer;
-  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
-  box-shadow: 0 2px 16px rgba(28,24,18,0.04);
-  display: flex; flex-direction: column;
-}
-.edu-dash-child:hover {
-  border-color: rgba(61,107,79,0.45);
-  box-shadow: 0 8px 28px rgba(28,24,18,0.08);
-  transform: translateY(-2px);
-}
-.edu-dash-child-header {
-  padding: 20px 22px;
-  background: #EBF2EC;
-  border-bottom: 1px solid rgba(61,107,79,0.18);
-  display: flex; align-items: center; gap: 12px;
-}
-.edu-dash-child-avatar {
-  width: 44px; height: 44px; border-radius: 10px;
-  background: #3D6B4F; color: #FFFFFF;
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: 15px;
-  flex-shrink: 0;
-}
-.edu-dash-child-name {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 22px; font-weight: 500; color: #1C1812; line-height: 1.15;
-}
-.edu-dash-child-meta {
-  font-size: 12px; color: rgba(28,24,18,0.55); margin-top: 2px;
-  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-}
-.edu-dash-iep-pill {
-  font-size: 9px; font-weight: 700; letter-spacing: 0.1em;
-  text-transform: uppercase; color: #FFFFFF;
-  background: #3D6B4F; padding: 2px 7px; border-radius: 100px;
-}
-.edu-dash-child-body { padding: 18px 22px 20px; display: flex; flex-direction: column; gap: 14px; }
-.edu-dash-child-row { display: flex; align-items: center; justify-content: space-between; }
-.edu-dash-child-row-label {
-  font-size: 10px; font-weight: 700; letter-spacing: 0.14em;
-  text-transform: uppercase; color: rgba(28,24,18,0.5);
-}
-.edu-dash-child-curriculum {
-  font-size: 12px; font-weight: 600; color: #1C1812;
-  background: #F3EDE3; padding: 4px 10px; border-radius: 100px;
-}
-.edu-dash-progress-track {
-  width: 100%; height: 6px;
-  background: rgba(28,24,18,0.06);
-  border-radius: 100px; overflow: hidden;
-}
-.edu-dash-progress-fill {
-  height: 100%; border-radius: 100px;
-  transition: width 0.4s ease;
-}
-.edu-dash-progress-fill.high { background: #3D6B4F; }
-.edu-dash-progress-fill.mid { background: #C4831A; }
-.edu-dash-progress-fill.low { background: rgba(28,24,18,0.3); }
-.edu-dash-child-progress-row {
-  display: flex; align-items: center; justify-content: space-between;
-  font-size: 11px; color: rgba(28,24,18,0.5); margin-bottom: 4px;
-  font-weight: 500;
-}
-.edu-dash-child-progress-val { color: #1C1812; font-weight: 700; }
-.edu-dash-child-desc { font-size: 12px; color: rgba(28,24,18,0.55); line-height: 1.55; }
-.edu-dash-strengths { display: flex; flex-wrap: wrap; gap: 6px; }
-.edu-dash-strength-pill {
-  font-size: 10px; font-weight: 600;
-  background: #EBF2EC; color: #3D6B4F;
-  border: 1px solid rgba(61,107,79,0.2);
-  padding: 3px 9px; border-radius: 100px;
-}
-
-.edu-dash-guidance {
-  background: #FFFFFF; border: 1px solid rgba(28,24,18,0.1);
-  border-radius: 16px; padding: 28px 32px;
-  box-shadow: 0 2px 16px rgba(28,24,18,0.04);
-}
-.edu-dash-guidance-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
-.edu-dash-guidance-icon {
-  width: 38px; height: 38px; border-radius: 10px;
-  background: #EBF2EC; color: #3D6B4F;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-}
-.edu-dash-guidance-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 22px; font-weight: 500; color: #1C1812; line-height: 1.2;
-}
-.edu-dash-guidance-sub { font-size: 12px; color: rgba(28,24,18,0.5); margin-top: 2px; }
-.edu-dash-guidance-text {
-  font-size: 13px; color: rgba(28,24,18,0.7);
-  line-height: 1.65; margin-bottom: 18px;
-}
-.edu-dash-guidance-link {
-  display: inline-flex; align-items: center; gap: 8px;
-  font-size: 13px; font-weight: 600; color: #FFFFFF;
-  background: #3D6B4F; padding: 10px 22px; border-radius: 100px;
-  text-decoration: none; transition: background 0.2s;
-}
-.edu-dash-guidance-link:hover { background: #5A8F6A; }
-.edu-dash-guidance-link svg { width: 14px; height: 14px; }
-
+/* — Modal — */
 .edu-dash-modal-overlay {
   position: fixed; inset: 0; z-index: 50;
-  background: rgba(28,24,18,0.6); backdrop-filter: blur(4px);
+  background: rgba(250,247,242,0.85); backdrop-filter: blur(6px);
   display: flex; align-items: center; justify-content: center;
   padding: 18px;
   font-family: 'Open Sans', sans-serif;
@@ -265,16 +346,20 @@ const DASHBOARD_CSS = `
   background: #FFFFFF; border: 1px solid rgba(28,24,18,0.1);
   border-radius: 16px; padding: 28px;
   width: 100%; max-width: 460px; max-height: 90vh; overflow-y: auto;
-  box-shadow: 0 24px 60px rgba(28,24,18,0.2);
+  box-shadow: 0 24px 60px rgba(28,24,18,0.18);
 }
 .edu-dash-modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
-.edu-dash-modal-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 500; color: #1C1812; }
+.edu-dash-modal-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 26px; font-weight: 400; font-style: normal; color: #1C1812;
+}
 .edu-dash-modal-close { background: none; border: none; color: rgba(28,24,18,0.5); cursor: pointer; padding: 0; }
 .edu-dash-modal-close:hover { color: #1C1812; }
 .edu-dash-modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
 .edu-dash-modal-field { margin-bottom: 14px; }
 .edu-dash-modal-label {
-  display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+  display: block; font-family: 'Open Sans', sans-serif;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
   text-transform: uppercase; color: rgba(28,24,18,0.55); margin-bottom: 6px;
 }
 .edu-dash-modal-input,
@@ -287,12 +372,8 @@ const DASHBOARD_CSS = `
   transition: border-color 0.2s;
 }
 .edu-dash-modal-input:focus,
-.edu-dash-modal-select:focus {
-  outline: none; border-color: #3D6B4F;
-}
-.edu-dash-modal-curr {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
-}
+.edu-dash-modal-select:focus { outline: none; border-color: #3D6B4F; }
+.edu-dash-modal-curr { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .edu-dash-modal-curr button {
   font-family: 'Open Sans', sans-serif;
   font-size: 12.5px; font-weight: 500;
@@ -304,9 +385,7 @@ const DASHBOARD_CSS = `
 .edu-dash-modal-curr button.on {
   background: #EBF2EC; border-color: #3D6B4F; color: #3D6B4F; font-weight: 600;
 }
-.edu-dash-modal-toggle-row {
-  display: flex; align-items: center; gap: 12px; margin: 8px 0 4px;
-}
+.edu-dash-modal-toggle-row { display: flex; align-items: center; gap: 12px; margin: 8px 0 4px; }
 .edu-dash-modal-toggle {
   position: relative; width: 38px; height: 22px; border-radius: 100px;
   background: rgba(28,24,18,0.15); border: none; cursor: pointer;
@@ -330,9 +409,7 @@ const DASHBOARD_CSS = `
   color: rgba(28,24,18,0.65);
 }
 .edu-dash-modal-btn-ghost:hover { border-color: #3D6B4F; color: #3D6B4F; }
-.edu-dash-modal-btn-primary {
-  flex: 1; background: #3D6B4F; color: #FFFFFF;
-}
+.edu-dash-modal-btn-primary { flex: 1; background: #3D6B4F; color: #FFFFFF; }
 .edu-dash-modal-btn-primary:hover { background: #5A8F6A; }
 .edu-dash-modal-btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
 `;
@@ -352,9 +429,16 @@ function ensureDashStyles() {
   dashStylesInjected = true;
 }
 
-function AddChildModal({ onClose, onSave }: { onClose: () => void; onSave: (c: Omit<HomeschoolChild, 'id' | 'created_at' | 'overall_progress'>) => void }) {
+function AddChildModal({
+  onClose,
+  onSave,
+}: {
+  onClose: () => void;
+  onSave: (c: Omit<HomeschoolChild, 'id' | 'created_at' | 'overall_progress'>) => void;
+}) {
   const [form, setForm] = useState({
-    first_name: '', last_name: '', grade_level: '3', age: '', curriculum_type: 'Eclectic' as CurriculumType,
+    first_name: '', last_name: '', grade_level: '3', age: '',
+    curriculum_type: 'Eclectic' as CurriculumType,
     strengths: '', challenge_areas: '', has_iep: false,
   });
 
@@ -377,7 +461,7 @@ function AddChildModal({ onClose, onSave }: { onClose: () => void; onSave: (c: O
     <div className="edu-dash-modal-overlay">
       <div className="edu-dash-modal">
         <div className="edu-dash-modal-head">
-          <h2 className="edu-dash-modal-title">Add Child</h2>
+          <h2 className="edu-dash-modal-title">Add a learner.</h2>
           <button onClick={onClose} className="edu-dash-modal-close" aria-label="Close">
             <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -504,6 +588,9 @@ export default function HomeschoolDashboard() {
   const [showAdd, setShowAdd] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [familyInsight, setFamilyInsight] = useState<{ summary: string; recommendations: string[] } | null>(null);
+  const [insightDismissed, setInsightDismissed] = useState(false);
+  const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
+  const [completed, setCompleted] = useState<Record<string, boolean>>({});
   const [showTrialBanner, setShowTrialBanner] = useState(searchParams.get('checkout') === 'success');
 
   useEffect(() => { ensureDashStyles(); }, []);
@@ -560,12 +647,7 @@ export default function HomeschoolDashboard() {
     } catch {
       setFamilyInsight({
         summary: `Your learning family has ${children.length} child${children.length !== 1 ? 'ren' : ''} with diverse curriculum approaches. Ei-Core has analyzed their pacing and learning styles to provide personalized recommendations.`,
-        recommendations: [
-          'Consider a weekly family "learning circle" to build shared vocabulary across subjects',
-          'Leverage your strongest learner as a peer teacher for younger siblings on topics they\'ve mastered',
-          'Schedule lighter lesson days mid-week to prevent cognitive fatigue and maintain engagement',
-          'Document observations in each child\'s portfolio weekly — pattern recognition improves over time',
-        ],
+        recommendations: [],
       });
     }
   };
@@ -579,7 +661,27 @@ export default function HomeschoolDashboard() {
     (eduProfile as unknown as { firstName?: string } | null)?.firstName ??
     'friend';
 
-  const progressClass = (p: number) => p >= 70 ? 'high' : p >= 40 ? 'mid' : 'low';
+  const today = useMemo(() => new Date(), []);
+  const greeting = `${greetingForHour(today.getHours())}, ${firstName}.`;
+  const dateLabel = formatToday(today);
+
+  const colorFor = (idx: number) => CHILD_COLORS[idx % CHILD_COLORS.length];
+
+  const visibleChildren = selectedChildId
+    ? children.filter(c => c.id === selectedChildId)
+    : children;
+
+  const totalLessons = children.length * 3;
+  const standardsMastered = children.reduce((sum, c) => sum + Math.floor((c.overall_progress || 0) / 10), 0);
+
+  const toggleComplete = (key: string) =>
+    setCompleted(prev => ({ ...prev, [key]: !prev[key] }));
+
+  const insightCopy =
+    children.length === 0
+      ? 'Add your first child and Ei-Core will generate personalized insights by tomorrow morning.'
+      : familyInsight?.summary
+        ?? 'Ei-Core is reviewing your family\'s pacing this morning. Insights will appear here shortly.';
 
   return (
     <div className="edu-dash">
@@ -616,152 +718,179 @@ export default function HomeschoolDashboard() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <span className="edu-dash-mobile-bar-title">My Learning Family</span>
+          <span className="edu-dash-mobile-bar-title">Today</span>
         </div>
 
         <div className="edu-dash-content">
-          <div className="edu-dash-header">
+          {/* 1. Greeting */}
+          <header className="morning-head edu-fade edu-fade-1">
             <div>
-              <div className="edu-dash-eyebrow">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                Ei-Core Edu · Homeschool
-              </div>
-              <h1 className="edu-dash-title">Your <em>learning family.</em></h1>
-              <p className="edu-dash-welcome">
-                Welcome, {firstName}.{' '}
-                {children.length > 0
-                  ? `${children.length} learner${children.length !== 1 ? 's' : ''} tracked.`
-                  : 'Add your first child to get started.'}
-              </p>
+              <div className="morning-date">{dateLabel}</div>
+              <h1 className="morning-greeting">{greeting}</h1>
+              <p className="morning-sub">Here is your family's plan for today.</p>
             </div>
-            <button className="edu-dash-add-btn" onClick={() => setShowAdd(true)}>
-              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-              </svg>
-              Add Child
+            <span className="morning-active-pill" aria-label="Ei-Core is active">
+              <span className="morning-active-dot" />
+              Ei-Core Active
+            </span>
+          </header>
+
+          {/* 2. Children avatar row */}
+          <div className="children-row edu-fade edu-fade-2" role="tablist" aria-label="Filter by child">
+            {children.length > 0 && (
+              <button
+                type="button"
+                className={`child-avatar-btn child-avatar-all${selectedChildId === null ? ' is-active' : ''}`}
+                onClick={() => setSelectedChildId(null)}
+                aria-pressed={selectedChildId === null}
+              >
+                <div className="child-avatar-circle">All</div>
+                <div className="child-avatar-name">Everyone</div>
+                <div className="child-avatar-grade">family view</div>
+              </button>
+            )}
+            {children.map((child, i) => {
+              const initials = `${child.first_name[0] ?? ''}${child.last_name?.[0] ?? ''}`.toUpperCase();
+              const isActive = selectedChildId === child.id;
+              return (
+                <button
+                  key={child.id}
+                  type="button"
+                  className={`child-avatar-btn${isActive ? ' is-active' : ''}`}
+                  onClick={() => setSelectedChildId(isActive ? null : child.id)}
+                  aria-pressed={isActive}
+                >
+                  <div className="child-avatar-circle" style={{ background: colorFor(i) }}>{initials}</div>
+                  <div className="child-avatar-name">{child.first_name}</div>
+                  <div className="child-avatar-grade">{child.grade_level === 'K' ? 'Grade K' : `Grade ${child.grade_level}`}</div>
+                </button>
+              );
+            })}
+            <button
+              type="button"
+              className="child-avatar-btn child-avatar-add"
+              onClick={() => setShowAdd(true)}
+              aria-label="Add a child"
+            >
+              <div className="child-avatar-circle">
+                <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+              </div>
+              <div className="child-avatar-name">Add</div>
+              <div className="child-avatar-grade">new learner</div>
             </button>
           </div>
 
-          {familyInsight && (
-            <div className="edu-dash-insight" id="children">
-              <div className="edu-dash-insight-label">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                Ei-Core Family Insight
+          {/* 3. Ei-Core morning insight */}
+          {!insightDismissed && (
+            <div className="morning-insight edu-fade edu-fade-3">
+              <div className="morning-insight-head">
+                <div className="morning-insight-label">Ei-Core Insight</div>
+                <button
+                  className="morning-insight-dismiss"
+                  onClick={() => setInsightDismissed(true)}
+                  aria-label="Dismiss insight"
+                >
+                  Dismiss
+                </button>
               </div>
-              <p className="edu-dash-insight-summary">{familyInsight.summary}</p>
-              <ul className="edu-dash-insight-list">
-                {(Array.isArray(familyInsight.recommendations) ? familyInsight.recommendations : []).map((rec, i) => (
-                  <li key={i}>{rec}</li>
-                ))}
-              </ul>
+              <p className="morning-insight-text">{insightCopy}</p>
             </div>
           )}
 
-          {loading ? (
-            <div className="edu-dash-empty">
-              <div className="edu-dash-empty-title" style={{ marginBottom: 0 }}>Loading family…</div>
-            </div>
-          ) : children.length === 0 ? (
-            <div className="edu-dash-empty">
-              <div className="edu-dash-empty-icon">
-                <svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.3}>
+          {/* 4. Today's plan */}
+          <section className="plan-section edu-fade edu-fade-4">
+            {loading ? (
+              <div className="plan-empty">
+                <div className="plan-empty-title" style={{ marginBottom: 0 }}>Loading family…</div>
+              </div>
+            ) : children.length === 0 ? (
+              <div className="plan-empty">
+                <svg className="plan-empty-icon" width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.4}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
-              </div>
-              <div className="edu-dash-empty-title">Add your first learner.</div>
-              <p className="edu-dash-empty-sub">
-                Ei-Core will personalize curriculum recommendations and pacing for each child.
-              </p>
-              <button className="edu-dash-add-btn" onClick={() => setShowAdd(true)}>
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                </svg>
-                Add Child
-              </button>
-            </div>
-          ) : (
-            <div className="edu-dash-grid">
-              {(Array.isArray(children) ? children : []).map(child => (
-                <div
-                  key={child.id}
-                  className="edu-dash-child"
-                  onClick={() => navigate(`/education/students/${child.id}`)}
-                >
-                  <div className="edu-dash-child-header">
-                    <div className="edu-dash-child-avatar">
-                      {child.first_name[0]}{child.last_name?.[0] ?? ''}
-                    </div>
-                    <div>
-                      <div className="edu-dash-child-name">{child.first_name} {child.last_name}</div>
-                      <div className="edu-dash-child-meta">
-                        <span>Grade {child.grade_level} · Age {child.age}</span>
-                        {child.has_iep && <span className="edu-dash-iep-pill">IEP</span>}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="edu-dash-child-body">
-                    <div className="edu-dash-child-row">
-                      <span className="edu-dash-child-row-label">Curriculum</span>
-                      <span className="edu-dash-child-curriculum">{child.curriculum_type}</span>
-                    </div>
-
-                    <div>
-                      <div className="edu-dash-child-progress-row">
-                        <span>Overall Progress</span>
-                        <span className="edu-dash-child-progress-val">{child.overall_progress}%</span>
-                      </div>
-                      <div className="edu-dash-progress-track">
-                        <div
-                          className={`edu-dash-progress-fill ${progressClass(child.overall_progress)}`}
-                          style={{ width: `${child.overall_progress}%` }}
-                        />
-                      </div>
-                    </div>
-
-                    <p className="edu-dash-child-desc">
-                      {CURRICULUM_DESCRIPTIONS[child.curriculum_type as CurriculumType] ?? ''}
-                    </p>
-
-                    {child.strengths?.length > 0 && (
-                      <div className="edu-dash-strengths">
-                        {child.strengths.slice(0, 3).map((s, i) => (
-                          <span key={i} className="edu-dash-strength-pill">{s}</span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {eduProfile?.curriculumType && (
-            <div className="edu-dash-guidance">
-              <div className="edu-dash-guidance-head">
-                <div className="edu-dash-guidance-icon">
-                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.7}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                <h2 className="plan-empty-title">Add your first learner.</h2>
+                <p className="plan-empty-sub">
+                  Ei-Core will personalize curriculum recommendations and pacing for each child.
+                </p>
+                <button className="plan-empty-btn" onClick={() => setShowAdd(true)}>
+                  <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                   </svg>
-                </div>
-                <div>
-                  <div className="edu-dash-guidance-title">{eduProfile.curriculumType} approach — Ei-Core guidance</div>
-                  <div className="edu-dash-guidance-sub">Based on your selected curriculum style</div>
-                </div>
+                  Add Child
+                </button>
               </div>
-              <p className="edu-dash-guidance-text">
-                {CURRICULUM_DESCRIPTIONS[eduProfile.curriculumType as CurriculumType]}
-              </p>
-              <Link to="/education/advisor" className="edu-dash-guidance-link">
-                Get {eduProfile.curriculumType} recommendations
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
+            ) : (
+              visibleChildren.map((child, visibleIdx) => {
+                const fullIdx = children.findIndex(c => c.id === child.id);
+                const color = colorFor(fullIdx);
+                const plan = getMockPlan(fullIdx);
+                return (
+                  <div key={child.id}>
+                    {visibleIdx > 0 && <div className="plan-divider" />}
+                    <div className="plan-child-head">
+                      <span className="plan-child-dot" style={{ background: color }} />
+                      <h2 className="plan-child-name">{child.first_name}</h2>
+                    </div>
+                    <div className="plan-blocks">
+                      {plan.map((lesson, lessonIdx) => {
+                        const key = `${child.id}-${lessonIdx}`;
+                        const done = !!completed[key];
+                        return (
+                          <div key={key} className="plan-block">
+                            <span className="plan-block-stripe" style={{ background: color }} />
+                            <div className="plan-block-body">
+                              <p className="plan-block-title">{lesson.subject} — {lesson.title}</p>
+                              <p className="plan-block-desc">{lesson.desc}</p>
+                            </div>
+                            <div className="plan-block-meta">
+                              {child.has_iep && (
+                                <span className="plan-pill plan-pill-focus">Focus Mode</span>
+                              )}
+                              <span className="plan-pill plan-pill-duration">{lesson.duration} min</span>
+                              <button
+                                type="button"
+                                className={`plan-check${done ? ' is-done' : ''}`}
+                                onClick={() => toggleComplete(key)}
+                                aria-pressed={done}
+                                aria-label={done ? 'Mark incomplete' : 'Mark complete'}
+                              >
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </section>
+
+          {/* 5. Quick stats */}
+          {children.length > 0 && (
+            <div className="quick-stats edu-fade edu-fade-5">
+              <div className="quick-stat">
+                <div className="quick-stat-value">{standardsMastered}</div>
+                <div className="quick-stat-label">Standards mastered · across all children</div>
+              </div>
+              <div className="quick-stat">
+                <div className="quick-stat-value">{totalLessons}</div>
+                <div className="quick-stat-label">Lessons this week</div>
+              </div>
+              <div className="quick-stat">
+                <div className="quick-stat-value">
+                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.6}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.24 17 6.5c1.5 2 1 4 .5 5 .393-.5 1.5-1 2.5.5 1 1.5 1.5 5-2.343 6.657z" />
+                  </svg>
+                  4 days
+                </div>
+                <div className="quick-stat-label">Streak</div>
+              </div>
             </div>
           )}
         </div>
