@@ -1,975 +1,940 @@
-// src/pages/education/EduLanding.tsx
-// VeloxSync for Education — Brightwheel-inspired warm, colorful, teacher-friendly design
+import { useEffect, useState } from 'react';
 
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+const CALENDLY_URL = 'https://calendly.com/hello-merakislove/new-meeting';
 
-const FEATURES = [
-  {
-    emoji: '🧠',
-    bg: 'bg-teal-50',
-    border: 'border-teal-100',
-    iconColor: 'text-teal-600',
-    label: 'Ei-Core AI Advisor',
-    desc: 'Personalized curriculum recommendations powered by AI for every learner.',
-  },
-  {
-    emoji: '📐',
-    bg: 'bg-amber-50',
-    border: 'border-amber-100',
-    iconColor: 'text-amber-600',
-    label: 'Standards Alignment',
-    desc: 'CCSS, TEKS, NGSSS and 40+ state frameworks mapped automatically.',
-  },
-  {
-    emoji: '📝',
-    bg: 'bg-rose-50',
-    border: 'border-rose-100',
-    iconColor: 'text-rose-500',
-    label: 'AI Assignment Generator',
-    desc: 'Tell Ei-Core the grade, subject, state, and learning style. Get a complete, printable, standards-aligned assignment in seconds.',
-  },
-  {
-    emoji: '🚩',
-    bg: 'bg-purple-50',
-    border: 'border-purple-100',
-    iconColor: 'text-purple-600',
-    label: 'Interventions Tracker',
-    desc: 'Flag at-risk students early and document support strategies in one place.',
-  },
-  {
-    emoji: '👥',
-    bg: 'bg-sky-50',
-    border: 'border-sky-100',
-    iconColor: 'text-sky-600',
-    label: 'Differentiation Groups',
-    desc: 'Auto-sort students by mastery and generate targeted activity plans.',
-  },
-  {
-    emoji: '📅',
-    bg: 'bg-emerald-50',
-    border: 'border-emerald-100',
-    iconColor: 'text-emerald-600',
-    label: 'Pacing Guide',
-    desc: "See who's on track, who's ahead, and who needs a boost — week by week.",
-  },
-  {
-    emoji: '🔗',
-    bg: 'bg-indigo-50',
-    border: 'border-indigo-100',
-    iconColor: 'text-indigo-600',
-    label: 'SIS & LMS Integrations',
-    desc: 'Connect Google Classroom, Canvas, Clever, PowerSchool and more.',
-  },
-];
+const EDU_LANDING_CSS = `
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
 
-const PLANS = [
-  {
-    id: 'teacher_pro',
-    name: 'Teacher Pro',
-    price: '$9',
-    period: '/month',
-    description: 'For individual classroom teachers who want AI-powered insight without the complexity.',
-    cta: 'Start Free — No Card Required',
-    ctaLink: '/education/checkout?plan=teacher_pro',
-    highlight: false,
-    badge: null,
-    accentColor: 'teal',
-    headerBg: 'bg-teal-600',
-    badgeBg: 'bg-teal-600',
-    borderColor: 'border-teal-200',
-    ctaBg: 'bg-teal-600 hover:bg-teal-700',
-    trialColor: 'text-teal-600',
-    checkColor: 'text-teal-500',
-    features: [
-      'Up to 35 students',
-      'Ei-Core AI curriculum advisor',
-      'Standards library (all 50 states)',
-      'Intervention tracker',
-      'Differentiation groups',
-      'Pacing guide',
-      'CSV progress reports',
-      'Email support',
-    ],
-  },
-  {
-    id: 'homeschool_family',
-    name: 'Homeschool Family',
-    price: '$12',
-    period: '/month',
-    description: 'Built for homeschool parents managing multiple children across different curricula.',
-    cta: 'Start Free — No Card Required',
-    ctaLink: '/education/checkout?plan=homeschool_family',
-    highlight: true,
-    badge: 'Most Popular',
-    accentColor: 'amber',
-    headerBg: 'bg-amber-500',
-    badgeBg: 'bg-amber-500',
-    borderColor: 'border-amber-300',
-    ctaBg: 'bg-amber-500 hover:bg-amber-600',
-    trialColor: 'text-amber-600',
-    checkColor: 'text-amber-500',
-    features: [
-      'Up to 8 children',
-      'Multi-curriculum support (Classical, CM, Eclectic…)',
-      'Per-child pacing & progress tracking',
-      'Family Ei-Core insights',
-      'IEP & accommodation tracking',
-      'Printable lesson plans',
-      'Standards alignment (optional)',
-      'Priority email support',
-    ],
-  },
-  {
-    id: 'school_license',
-    name: 'School License',
-    price: '$199',
-    period: '/year',
-    description: 'District-ready licensing for schools and admin teams with centralized management.',
-    cta: 'Contact Us',
-    ctaLink: 'mailto:education@veloxsync.com?subject=School License Inquiry',
-    highlight: false,
-    badge: null,
-    isContact: true,
-    accentColor: 'rose',
-    headerBg: 'bg-rose-500',
-    badgeBg: 'bg-rose-500',
-    borderColor: 'border-rose-200',
-    ctaBg: 'bg-rose-500 hover:bg-rose-600',
-    trialColor: 'text-rose-500',
-    checkColor: 'text-rose-400',
-    features: [
-      'Unlimited teachers & students',
-      'Admin dashboard & reporting',
-      'School-wide intervention tracking',
-      'SIS / LMS integrations (Clever, PowerSchool…)',
-      'FERPA-compliant data handling',
-      'Custom onboarding & training',
-      'Dedicated account manager',
-      'SLA-backed support',
-    ],
-  },
-];
-
-const FAQ_ITEMS = [
-  {
-    q: 'What is VeloxSync for Education?',
-    a: 'VeloxSync for Education is an AI-powered platform that helps teachers, homeschool parents, and school administrators turn student data into actionable next steps — intervention recommendations, differentiation groups, pacing guidance, and more.',
-  },
-  {
-    q: 'How does Ei-Core AI work for classrooms?',
-    a: 'Ei-Core analyzes student progress data against your state standards, detects learning gaps early, and surfaces specific recommendations — which students need help, how to group them by mastery level, and what to teach next. It generates accommodation-aware plans for IEP students automatically.',
-  },
-  {
-    q: 'Does it work for homeschool families?',
-    a: 'Yes. The Homeschool Family plan supports up to 8 children across different curricula — Classical, Charlotte Mason, Eclectic, and more. Each child gets their own pacing guide, progress tracking, and Ei-Core insights.',
-  },
-  {
-    q: 'Is student data safe and FERPA-compliant?',
-    a: 'Absolutely. VeloxSync never sells or shares student data. All data is encrypted at rest and in transit. The School License plan includes full FERPA-compliant data handling with audit logs and role-based access control.',
-  },
-  {
-    q: 'Which integrations are supported?',
-    a: 'VeloxSync connects with Google Classroom, Canvas LMS, Clever, PowerSchool, and more. Most setups take under 15 minutes with no IT involvement required.',
-  },
-];
-
-function scrollToId(id: string) {
-  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+:root {
+  --cream: #FAF7F2;
+  --cream-dark: #F3EDE3;
+  --cream-deeper: #EDE5D8;
+  --ink: #1C1812;
+  --ink-mid: #3D3528;
+  --ink-light: rgba(28,24,18,0.5);
+  --ink-faint: rgba(28,24,18,0.1);
+  --green: #3D6B4F;
+  --green-light: #5A8F6A;
+  --green-pale: #EBF2EC;
+  --green-dim: rgba(61,107,79,0.1);
+  --teal: #2A7F7F;
+  --teal-pale: #E8F4F4;
+  --teal-dim: rgba(42,127,127,0.1);
+  --purple: #5B4B8A;
+  --purple-pale: #F0EDF8;
+  --purple-dim: rgba(91,75,138,0.1);
+  --amber: #C4831A;
+  --amber-pale: #FDF4E7;
+  --stem-blue: #1D5FA6;
+  --stem-blue-pale: #E8F0FB;
+  --stem-blue-dim: rgba(29,95,166,0.1);
+  --white: #FFFFFF;
+  --border: rgba(28,24,18,0.1);
+  --shadow-soft: 0 4px 32px rgba(28,24,18,0.06);
+  --shadow-card: 0 2px 16px rgba(28,24,18,0.08);
+  --font-display: 'Cormorant Garamond', serif;
+  --font-body: 'Open Sans', sans-serif;
+  --font-code: Verdana, Geneva, sans-serif;
+  --radius: 16px;
+  --radius-sm: 8px;
 }
 
-const PrivacyBadge = () => (
-  <p className="text-xs text-slate-400 mt-2 flex items-center justify-center gap-1">
-    🔒 Encrypted & never used for AI training.
-  </p>
+.edu-landing {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-weight: 400;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+.edu-landing ::selection { background: var(--green); color: var(--white); }
+
+/* COOKIE BANNER */
+.edu-landing .cookie-banner {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 999;
+  background: var(--ink); padding: 16px 40px;
+  display: flex; align-items: center; justify-content: space-between; gap: 24px;
+  transform: translateY(0); transition: transform 0.4s ease;
+}
+.edu-landing .cookie-banner.hidden { transform: translateY(110%); }
+.edu-landing .cookie-text { font-size: 13px; color: rgba(255,255,255,0.65); line-height: 1.6; max-width: 600px; }
+.edu-landing .cookie-text a { color: #8FBF9F; text-decoration: underline; cursor: pointer; }
+.edu-landing .cookie-actions { display: flex; gap: 10px; flex-shrink: 0; }
+.edu-landing .cookie-accept { font-family: var(--font-body); font-size: 12px; font-weight: 600; color: var(--ink); background: #8FBF9F; border: none; cursor: pointer; padding: 8px 20px; border-radius: 100px; transition: background 0.2s; }
+.edu-landing .cookie-accept:hover { background: #a8d4b5; }
+.edu-landing .cookie-decline { font-family: var(--font-body); font-size: 12px; color: rgba(255,255,255,0.45); background: transparent; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; padding: 8px 16px; border-radius: 100px; }
+
+/* NAV */
+.edu-landing nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 48px; height: 68px;
+  background: rgba(250,247,242,0.94); backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+.edu-landing .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.edu-landing .nav-logo-mark { width: 32px; height: 32px; background: var(--green); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+.edu-landing .nav-logo-mark svg { width: 18px; height: 18px; }
+.edu-landing .nav-wordmark .name { font-family: var(--font-display); font-size: 18px; font-weight: 500; color: var(--ink); line-height: 1; letter-spacing: 0.01em; }
+.edu-landing .nav-wordmark .name span { color: var(--green); }
+.edu-landing .nav-wordmark .sub { font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--green); margin-top: 1px; display: block; }
+.edu-landing .nav-links { display: flex; align-items: center; gap: 28px; }
+.edu-landing .nav-links a { font-size: 13px; font-weight: 400; color: var(--ink-mid); text-decoration: none; transition: color 0.2s; }
+.edu-landing .nav-links a:hover { color: var(--green); }
+.edu-landing .nav-actions { display: flex; align-items: center; gap: 12px; }
+.edu-landing .btn-nav-ghost { font-family: var(--font-body); font-size: 13px; color: var(--ink-mid); background: none; border: none; cursor: pointer; }
+.edu-landing .btn-nav-primary { font-family: var(--font-body); font-size: 13px; font-weight: 600; color: var(--white); background: var(--green); border: none; cursor: pointer; padding: 10px 22px; border-radius: 100px; transition: background 0.2s; }
+.edu-landing .btn-nav-primary:hover { background: var(--green-light); }
+
+/* HERO */
+.edu-landing .hero { padding-top: 68px; min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr; overflow: hidden; }
+.edu-landing .hero-left { display: flex; flex-direction: column; justify-content: center; padding: 80px 64px 80px 80px; }
+.edu-landing .hero-eyebrow { display: inline-flex; align-items: center; gap: 8px; background: var(--green-dim); border: 1px solid rgba(61,107,79,0.2); border-radius: 100px; padding: 6px 14px; margin-bottom: 32px; width: fit-content; animation: fadeUp 0.7s ease both; }
+.edu-landing .hero-eyebrow-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2.5s infinite; }
+.edu-landing .hero-eyebrow span { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--green); }
+.edu-landing .hero-headline { font-family: var(--font-display); font-size: clamp(44px, 4.5vw, 68px); font-weight: 300; line-height: 1.1; letter-spacing: -0.01em; color: var(--ink); margin-bottom: 24px; animation: fadeUp 0.7s 0.1s ease both; }
+.edu-landing .hero-headline em { font-style: italic; color: var(--green); }
+.edu-landing .hero-headline .strike { text-decoration: line-through; color: var(--ink-light); }
+.edu-landing .hero-sub { font-size: 16px; font-weight: 300; line-height: 1.75; color: var(--ink-mid); max-width: 440px; margin-bottom: 16px; animation: fadeUp 0.7s 0.2s ease both; }
+.edu-landing .hero-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 36px; animation: fadeUp 0.7s 0.25s ease both; }
+.edu-landing .hero-tag { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 5px 12px; border-radius: 100px; }
+.edu-landing .hero-tag-green { color: var(--green); background: var(--green-pale); border: 1px solid rgba(61,107,79,0.2); }
+.edu-landing .hero-tag-purple { color: var(--purple); background: var(--purple-pale); border: 1px solid rgba(91,75,138,0.2); }
+.edu-landing .hero-tag-blue { color: var(--stem-blue); background: var(--stem-blue-pale); border: 1px solid rgba(29,95,166,0.2); }
+.edu-landing .hero-actions { display: flex; align-items: center; gap: 14px; margin-bottom: 40px; animation: fadeUp 0.7s 0.3s ease both; }
+.edu-landing .btn-primary { font-family: var(--font-body); font-size: 15px; font-weight: 600; color: var(--white); background: var(--green); border: none; cursor: pointer; padding: 14px 32px; border-radius: 100px; transition: background 0.2s, transform 0.15s; display: inline-block; text-decoration: none; }
+.edu-landing .btn-primary:hover { background: var(--green-light); transform: translateY(-1px); }
+.edu-landing .btn-secondary { font-family: var(--font-body); font-size: 15px; font-weight: 400; color: var(--ink-mid); background: transparent; border: 1.5px solid var(--border); cursor: pointer; padding: 13px 28px; border-radius: 100px; transition: border-color 0.2s, color 0.2s; }
+.edu-landing .btn-secondary:hover { border-color: var(--green); color: var(--green); }
+.edu-landing .hero-proof { display: flex; align-items: center; gap: 20px; animation: fadeUp 0.7s 0.4s ease both; flex-wrap: wrap; }
+.edu-landing .hero-proof-item { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--ink-light); }
+.edu-landing .hero-proof-check { width: 16px; height: 16px; border-radius: 50%; background: var(--green-pale); border: 1px solid rgba(61,107,79,0.25); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.edu-landing .hero-proof-check svg { width: 8px; height: 8px; }
+.edu-landing .hero-proof-divider { width: 1px; height: 14px; background: var(--border); }
+.edu-landing .hero-right { position: relative; overflow: hidden; }
+.edu-landing .hero-img { position: absolute; inset: 0; background: url('https://res.cloudinary.com/dhkuivp0s/image/upload/v1779387308/heroimage_tpjet2.jpg') center/cover no-repeat; }
+.edu-landing .hero-img-overlay { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(250,247,242,0.1) 0%, transparent 100%); }
+.edu-landing .hero-float { position: absolute; bottom: 48px; left: 32px; display: flex; flex-direction: column; gap: 10px; z-index: 3; animation: fadeIn 1s 0.8s ease both; opacity: 0; }
+.edu-landing .hero-float-card { background: rgba(250,247,242,0.96); backdrop-filter: blur(12px); border: 1px solid rgba(61,107,79,0.2); border-radius: var(--radius-sm); padding: 12px 16px; box-shadow: var(--shadow-card); min-width: 210px; }
+.edu-landing .hfc-label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--green); margin-bottom: 3px; }
+.edu-landing .hfc-val { font-family: var(--font-display); font-size: 24px; font-weight: 500; color: var(--ink); line-height: 1; }
+.edu-landing .hfc-sub { font-size: 11px; color: var(--ink-light); margin-top: 2px; }
+
+/* TRUST STRIP */
+.edu-landing .trust-strip { padding: 24px 80px; background: var(--white); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: center; gap: 40px; flex-wrap: wrap; }
+.edu-landing .trust-item { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 400; color: var(--ink-light); }
+.edu-landing .trust-icon { width: 16px; height: 16px; color: var(--green); flex-shrink: 0; }
+.edu-landing .trust-divider { width: 1px; height: 18px; background: var(--border); }
+
+/* PAIN SECTION */
+.edu-landing .pain-section { padding: 96px 80px; background: var(--cream-dark); text-align: center; }
+.edu-landing .pain-headline { font-family: var(--font-display); font-size: clamp(36px, 4vw, 56px); font-weight: 300; line-height: 1.15; color: var(--ink); max-width: 720px; margin: 0 auto 20px; }
+.edu-landing .pain-headline em { font-style: italic; color: var(--green); }
+.edu-landing .pain-sub { font-size: 16px; font-weight: 300; color: var(--ink-mid); max-width: 500px; margin: 0 auto 56px; line-height: 1.75; }
+.edu-landing .pain-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 1000px; margin: 0 auto; }
+.edu-landing .pain-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px 28px; text-align: left; transition: box-shadow 0.3s, transform 0.3s; }
+.edu-landing .pain-card:hover { box-shadow: var(--shadow-soft); transform: translateY(-3px); }
+.edu-landing .pain-card-num { font-family: var(--font-display); font-size: 48px; font-weight: 300; color: var(--green-pale); line-height: 1; margin-bottom: 16px; }
+.edu-landing .pain-card h3 { font-family: var(--font-display); font-size: 22px; font-weight: 500; color: var(--ink); margin-bottom: 10px; line-height: 1.2; }
+.edu-landing .pain-card p { font-size: 13px; font-weight: 300; color: var(--ink-mid); line-height: 1.7; }
+
+/* SECTION COMMON */
+.edu-landing .section-label { font-size: 11px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--green); display: block; margin-bottom: 14px; }
+.edu-landing .section-headline { font-family: var(--font-display); font-size: clamp(36px, 3.5vw, 54px); font-weight: 400; line-height: 1.1; color: var(--ink); }
+.edu-landing .section-headline em { font-style: italic; color: var(--green); }
+.edu-landing .section-sub { font-size: 15px; font-weight: 300; line-height: 1.75; color: var(--ink-mid); max-width: 480px; margin-top: 14px; }
+
+/* FEATURE BLOCKS */
+.edu-landing .feature-block { display: grid; grid-template-columns: 1fr 1fr; min-height: 540px; border-bottom: 1px solid var(--border); }
+.edu-landing .feature-block.reverse { direction: rtl; }
+.edu-landing .feature-block.reverse > * { direction: ltr; }
+.edu-landing .feature-img { position: relative; overflow: hidden; }
+.edu-landing .feature-img img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.8s ease; }
+.edu-landing .feature-block:hover .feature-img img { transform: scale(1.03); }
+.edu-landing .feature-text { padding: 72px 64px; display: flex; flex-direction: column; justify-content: center; background: var(--white); }
+.edu-landing .feature-block.reverse .feature-text { background: var(--cream); }
+.edu-landing .feature-num { font-family: var(--font-display); font-size: 72px; font-weight: 300; color: var(--green-pale); line-height: 0.9; margin-bottom: 20px; }
+.edu-landing .feature-headline { font-family: var(--font-display); font-size: clamp(30px, 3vw, 46px); font-weight: 400; line-height: 1.1; color: var(--ink); margin-bottom: 16px; }
+.edu-landing .feature-headline em { font-style: italic; color: var(--green); }
+.edu-landing .feature-sub { font-size: 14px; font-weight: 300; line-height: 1.75; color: var(--ink-mid); margin-bottom: 24px; max-width: 400px; }
+.edu-landing .feature-points { list-style: none; display: flex; flex-direction: column; gap: 11px; }
+.edu-landing .feature-points li { display: flex; align-items: flex-start; gap: 11px; font-size: 13px; font-weight: 300; color: var(--ink-mid); line-height: 1.6; }
+.edu-landing .fp-dot { width: 18px; height: 18px; border-radius: 50%; background: var(--green-pale); border: 1px solid rgba(61,107,79,0.25); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.edu-landing .fp-dot svg { width: 8px; height: 8px; }
+
+/* ADHD SECTION */
+.edu-landing .adhd-section { padding: 96px 80px; background: var(--purple-pale); border-top: 1px solid rgba(91,75,138,0.12); border-bottom: 1px solid rgba(91,75,138,0.12); }
+.edu-landing .adhd-inner { max-width: 1100px; margin: 0 auto; }
+.edu-landing .adhd-header { text-align: center; margin-bottom: 56px; }
+.edu-landing .adhd-header .section-label { color: var(--purple); }
+.edu-landing .adhd-header .section-headline em { color: var(--purple); }
+.edu-landing .adhd-header .section-sub { margin: 14px auto 0; text-align: center; }
+.edu-landing .adhd-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.edu-landing .adhd-card { background: var(--white); border: 1px solid rgba(91,75,138,0.15); border-radius: var(--radius); padding: 32px 28px; transition: box-shadow 0.3s, transform 0.3s; }
+.edu-landing .adhd-card:hover { box-shadow: 0 8px 40px rgba(91,75,138,0.1); transform: translateY(-3px); }
+.edu-landing .adhd-card-icon { width: 48px; height: 48px; border-radius: 12px; background: var(--purple-dim); border: 1px solid rgba(91,75,138,0.2); display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+.edu-landing .adhd-card-icon svg { width: 24px; height: 24px; color: var(--purple); }
+.edu-landing .adhd-card h3 { font-family: var(--font-display); font-size: 22px; font-weight: 500; color: var(--ink); margin-bottom: 10px; line-height: 1.2; }
+.edu-landing .adhd-card p { font-size: 13px; font-weight: 300; color: var(--ink-mid); line-height: 1.7; margin-bottom: 16px; }
+.edu-landing .adhd-card-features { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.edu-landing .adhd-card-features li { font-size: 12px; font-weight: 400; color: var(--purple); display: flex; align-items: center; gap: 8px; }
+.edu-landing .adhd-card-features li::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--purple); flex-shrink: 0; }
+.edu-landing .adhd-bottom { margin-top: 40px; background: var(--white); border: 1px solid rgba(91,75,138,0.15); border-radius: var(--radius); padding: 32px 40px; display: flex; align-items: center; justify-content: space-between; gap: 32px; }
+.edu-landing .adhd-bottom-text h3 { font-family: var(--font-display); font-size: 28px; font-weight: 500; color: var(--ink); margin-bottom: 8px; }
+.edu-landing .adhd-bottom-text p { font-size: 14px; font-weight: 300; color: var(--ink-mid); line-height: 1.65; max-width: 500px; }
+.edu-landing .btn-purple { font-family: var(--font-body); font-size: 14px; font-weight: 600; color: var(--white); background: var(--purple); border: none; cursor: pointer; padding: 13px 28px; border-radius: 100px; white-space: nowrap; transition: opacity 0.2s; }
+.edu-landing .btn-purple:hover { opacity: 0.88; }
+
+/* STEM SECTION */
+.edu-landing .stem-section { padding: 96px 80px; background: var(--ink); position: relative; overflow: hidden; }
+.edu-landing .stem-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 70% 60% at 70% 50%, rgba(29,95,166,0.15) 0%, transparent 70%); pointer-events: none; }
+.edu-landing .stem-inner { max-width: 1100px; margin: 0 auto; position: relative; z-index: 1; }
+.edu-landing .stem-header { text-align: center; margin-bottom: 56px; }
+.edu-landing .stem-header .section-label { color: #6BA3E8; }
+.edu-landing .stem-headline { font-family: var(--font-display); font-size: clamp(40px, 4vw, 62px); font-weight: 300; line-height: 1.1; color: var(--white); margin-bottom: 16px; }
+.edu-landing .stem-headline em { font-style: italic; color: #6BA3E8; }
+.edu-landing .stem-sub { font-size: 16px; font-weight: 300; color: rgba(255,255,255,0.6); max-width: 560px; margin: 0 auto; line-height: 1.75; }
+.edu-landing .stem-tracks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 40px; }
+.edu-landing .stem-track { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius); padding: 28px 24px; transition: background 0.3s, border-color 0.3s; }
+.edu-landing .stem-track:hover { background: rgba(255,255,255,0.08); border-color: rgba(29,95,166,0.4); }
+.edu-landing .stem-track-age { font-family: var(--font-code); font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #6BA3E8; margin-bottom: 12px; }
+.edu-landing .stem-track h3 { font-family: var(--font-display); font-size: 24px; font-weight: 500; color: var(--white); margin-bottom: 10px; }
+.edu-landing .stem-track p { font-size: 13px; font-weight: 300; color: rgba(255,255,255,0.55); line-height: 1.65; margin-bottom: 16px; }
+.edu-landing .stem-track-skills { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+.edu-landing .stem-track-skills li { font-family: var(--font-code); font-size: 11px; color: rgba(255,255,255,0.45); display: flex; align-items: center; gap: 8px; }
+.edu-landing .stem-track-skills li::before { content: '>'; color: #6BA3E8; font-family: var(--font-code); font-size: 11px; }
+.edu-landing .stem-code-preview { background: rgba(0,0,0,0.4); border: 1px solid rgba(29,95,166,0.3); border-radius: var(--radius); padding: 28px 32px; }
+.edu-landing .stem-code-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.edu-landing .stem-code-dot { width: 6px; height: 6px; border-radius: 50%; background: #6BA3E8; animation: pulse 2s infinite; }
+.edu-landing .stem-code-title { font-family: var(--font-code); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #6BA3E8; }
+.edu-landing .stem-code-badge { margin-left: auto; font-family: var(--font-code); font-size: 9px; color: #6BA3E8; background: rgba(29,95,166,0.15); border: 1px solid rgba(29,95,166,0.3); padding: 3px 10px; border-radius: 100px; letter-spacing: 0.08em; text-transform: uppercase; }
+.edu-landing .code-block { font-family: var(--font-code); font-size: 13px; line-height: 1.8; color: rgba(255,255,255,0.75); }
+.edu-landing .code-comment { color: rgba(255,255,255,0.3); }
+.edu-landing .code-keyword { color: #6BA3E8; }
+.edu-landing .code-string { color: #8FBF9F; }
+.edu-landing .code-func { color: #E8A87C; }
+.edu-landing .stem-project-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 16px; }
+.edu-landing .stem-project { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 16px; }
+.edu-landing .stem-project-grade { font-family: var(--font-code); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: #6BA3E8; margin-bottom: 6px; }
+.edu-landing .stem-project-name { font-size: 12px; font-weight: 600; color: var(--white); margin-bottom: 4px; }
+.edu-landing .stem-project-desc { font-family: var(--font-code); font-size: 10px; color: rgba(255,255,255,0.35); line-height: 1.5; }
+
+/* EI-CORE SECTION */
+.edu-landing .eicore-section { padding: 96px 80px; background: var(--green); position: relative; overflow: hidden; }
+.edu-landing .eicore-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 60% 70% at 60% 50%, rgba(255,255,255,0.08) 0%, transparent 70%); pointer-events: none; }
+.edu-landing .eicore-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; }
+.edu-landing .eicore-text .section-label { color: rgba(255,255,255,0.65); }
+.edu-landing .eicore-headline { font-family: var(--font-display); font-size: clamp(38px, 4vw, 58px); font-weight: 300; line-height: 1.1; color: var(--white); margin: 14px 0; }
+.edu-landing .eicore-headline em { font-style: italic; color: rgba(255,255,255,0.7); }
+.edu-landing .eicore-sub { font-size: 15px; font-weight: 300; color: rgba(255,255,255,0.7); line-height: 1.75; max-width: 400px; margin-bottom: 32px; }
+.edu-landing .btn-white { font-family: var(--font-body); font-size: 14px; font-weight: 600; color: var(--green); background: var(--white); border: none; cursor: pointer; padding: 13px 28px; border-radius: 100px; transition: opacity 0.2s; }
+.edu-landing .btn-white:hover { opacity: 0.92; }
+.edu-landing .eicore-card { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: var(--radius); padding: 28px; backdrop-filter: blur(8px); }
+.edu-landing .eicore-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.12); }
+.edu-landing .eicore-card-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.8); animation: pulse 2s infinite; }
+.edu-landing .eicore-card-title { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.8); }
+.edu-landing .eicore-card-badge { margin-left: auto; font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.8); background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); padding: 3px 10px; border-radius: 100px; }
+.edu-landing .eicore-insight { background: rgba(255,255,255,0.1); border-left: 3px solid rgba(255,255,255,0.5); border-radius: 0 8px 8px 0; padding: 14px 16px; margin-bottom: 14px; font-size: 13px; color: rgba(255,255,255,0.9); line-height: 1.65; }
+.edu-landing .eicore-insight-label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.7); margin-bottom: 5px; }
+.edu-landing .eicore-actions { display: flex; flex-direction: column; gap: 8px; }
+.edu-landing .eicore-action { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; }
+.edu-landing .eicore-action-num { font-family: var(--font-display); font-size: 18px; font-weight: 500; color: rgba(255,255,255,0.7); width: 20px; flex-shrink: 0; }
+.edu-landing .eicore-action-text { font-size: 12px; color: rgba(255,255,255,0.75); flex: 1; }
+.edu-landing .eicore-action-check { width: 18px; height: 18px; border-radius: 50%; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.edu-landing .eicore-action-check svg { width: 9px; height: 9px; }
+
+/* PRICING */
+.edu-landing .pricing-section { padding: 96px 80px; background: var(--white); text-align: center; }
+.edu-landing .pricing-toggle { display: inline-flex; align-items: center; background: var(--cream-dark); border: 1px solid var(--border); border-radius: 100px; padding: 4px; margin: 28px auto; }
+.edu-landing .pricing-toggle button { font-family: var(--font-body); font-size: 13px; font-weight: 400; color: var(--ink-mid); background: transparent; border: none; cursor: pointer; padding: 9px 22px; border-radius: 100px; transition: all 0.2s; }
+.edu-landing .pricing-toggle button.active { background: var(--white); color: var(--green); font-weight: 600; box-shadow: var(--shadow-card); }
+.edu-landing .pricing-save { font-size: 10px; font-weight: 600; color: var(--white); background: var(--amber); padding: 2px 8px; border-radius: 100px; margin-left: 6px; }
+.edu-landing .pricing-card-single { background: var(--cream); border: 1.5px solid rgba(61,107,79,0.25); border-radius: 24px; padding: 48px 40px; max-width: 540px; margin: 0 auto; position: relative; box-shadow: var(--shadow-soft); }
+.edu-landing .pricing-card-single::before { content: 'Most loved by families'; position: absolute; top: -13px; left: 50%; transform: translateX(-50%); background: var(--green); color: var(--white); font-size: 11px; font-weight: 600; padding: 4px 16px; border-radius: 100px; white-space: nowrap; letter-spacing: 0.04em; }
+.edu-landing .pricing-plan-name { font-family: var(--font-display); font-size: 32px; font-weight: 400; color: var(--ink); margin-bottom: 8px; }
+.edu-landing .pricing-price { font-family: var(--font-display); font-size: 72px; font-weight: 300; color: var(--ink); line-height: 1; margin-bottom: 8px; }
+.edu-landing .pricing-price sup { font-size: 30px; vertical-align: super; color: var(--green); font-weight: 400; }
+.edu-landing .pricing-price sub { font-size: 18px; color: var(--ink-light); font-family: var(--font-body); font-weight: 300; }
+.edu-landing .pricing-desc { font-size: 14px; font-weight: 300; color: var(--ink-mid); margin-bottom: 32px; line-height: 1.65; }
+.edu-landing .pricing-divider { height: 1px; background: var(--border); margin-bottom: 28px; }
+.edu-landing .pricing-features { list-style: none; display: flex; flex-direction: column; gap: 13px; margin-bottom: 32px; text-align: left; }
+.edu-landing .pricing-features li { display: flex; align-items: center; gap: 11px; font-size: 14px; font-weight: 300; color: var(--ink-mid); }
+.edu-landing .pricing-check { width: 20px; height: 20px; border-radius: 50%; background: var(--green-pale); border: 1px solid rgba(61,107,79,0.25); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.edu-landing .pricing-check svg { width: 9px; height: 9px; }
+.edu-landing .pricing-btn { display: block; width: 100%; font-family: var(--font-body); font-size: 15px; font-weight: 600; color: var(--white); background: var(--green); border: none; cursor: pointer; padding: 15px; border-radius: 100px; transition: background 0.2s; margin-bottom: 12px; }
+.edu-landing .pricing-btn:hover { background: var(--green-light); }
+.edu-landing .pricing-note { font-size: 12px; color: var(--ink-light); }
+
+/* FAQ */
+.edu-landing .faq-section { padding: 96px 80px; background: var(--cream-dark); }
+.edu-landing .faq-inner { max-width: 720px; margin: 0 auto; }
+.edu-landing .faq-header { text-align: center; margin-bottom: 48px; }
+.edu-landing details.faq-item { border-bottom: 1px solid var(--border); }
+.edu-landing .faq-question { display: flex; align-items: center; justify-content: space-between; padding: 20px 0; cursor: pointer; font-size: 15px; font-weight: 400; color: var(--ink); gap: 16px; list-style: none; }
+.edu-landing .faq-question::-webkit-details-marker { display: none; }
+.edu-landing .faq-icon { width: 24px; height: 24px; border-radius: 50%; background: var(--green-pale); border: 1px solid rgba(61,107,79,0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform 0.25s, background 0.2s; color: var(--green); font-size: 18px; line-height: 1; }
+.edu-landing details[open] .faq-icon { transform: rotate(45deg); background: var(--green); color: var(--white); }
+.edu-landing .faq-answer { font-size: 14px; font-weight: 300; color: var(--ink-mid); line-height: 1.75; padding-bottom: 20px; }
+
+/* CTA */
+.edu-landing .cta-section { padding: 120px 80px; background: var(--green); text-align: center; position: relative; overflow: hidden; }
+.edu-landing .cta-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 60% 80% at 50% 50%, rgba(255,255,255,0.07) 0%, transparent 70%); pointer-events: none; }
+.edu-landing .cta-inner { position: relative; z-index: 1; }
+.edu-landing .cta-headline { font-family: var(--font-display); font-size: clamp(44px, 5vw, 70px); font-weight: 300; line-height: 1.1; color: var(--white); margin-bottom: 20px; }
+.edu-landing .cta-headline em { font-style: italic; color: rgba(255,255,255,0.65); }
+.edu-landing .cta-sub { font-size: 16px; font-weight: 300; color: rgba(255,255,255,0.72); max-width: 420px; margin: 0 auto 40px; line-height: 1.75; }
+.edu-landing .cta-actions { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+.edu-landing .btn-cta-primary { font-family: var(--font-body); font-size: 15px; font-weight: 600; color: var(--green); background: var(--white); border: none; cursor: pointer; padding: 15px 40px; border-radius: 100px; transition: opacity 0.2s; }
+.edu-landing .btn-cta-primary:hover { opacity: 0.92; }
+.edu-landing .btn-cta-ghost { font-family: var(--font-body); font-size: 15px; font-weight: 400; color: rgba(255,255,255,0.8); background: transparent; border: 1.5px solid rgba(255,255,255,0.4); cursor: pointer; padding: 14px 36px; border-radius: 100px; transition: border-color 0.2s; text-decoration: none; display: inline-block; }
+.edu-landing .btn-cta-ghost:hover { border-color: rgba(255,255,255,0.8); }
+.edu-landing .cta-note { font-size: 12px; color: rgba(255,255,255,0.45); margin-top: 20px; }
+
+/* FOOTER */
+.edu-landing footer { background: var(--ink); padding: 56px 80px 32px; }
+.edu-landing .footer-top { display: grid; grid-template-columns: 260px 1fr 1fr 1fr; gap: 48px; margin-bottom: 48px; }
+.edu-landing .footer-brand p { font-size: 12px; font-weight: 300; color: rgba(255,255,255,0.38); line-height: 1.7; margin-top: 14px; max-width: 210px; }
+.edu-landing .footer-col h4 { font-size: 10px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.28); margin-bottom: 18px; }
+.edu-landing .footer-col a { display: block; font-size: 13px; font-weight: 300; color: rgba(255,255,255,0.48); text-decoration: none; margin-bottom: 11px; transition: color 0.2s; }
+.edu-landing .footer-col a:hover { color: #8FBF9F; }
+.edu-landing .footer-bottom { display: flex; align-items: center; justify-content: space-between; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.08); }
+.edu-landing .footer-copy { font-size: 11px; color: rgba(255,255,255,0.18); }
+.edu-landing .footer-legal { display: flex; gap: 20px; }
+.edu-landing .footer-legal a { font-size: 11px; color: rgba(255,255,255,0.18); text-decoration: none; }
+.edu-landing .footer-legal a:hover { color: rgba(255,255,255,0.4); }
+
+/* ANIMATIONS */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+.edu-landing .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.edu-landing .reveal.visible { opacity: 1; transform: translateY(0); }
+.edu-landing .reveal-delay-1 { transition-delay: 0.1s; }
+.edu-landing .reveal-delay-2 { transition-delay: 0.2s; }
+.edu-landing .reveal-delay-3 { transition-delay: 0.3s; }
+`;
+
+const CheckSvg = () => (
+  <svg viewBox="0 0 8 8" fill="none">
+    <path d="M1.5 4L3.5 6L6.5 2" stroke="#3D6B4F" strokeWidth="1.3" strokeLinecap="round" />
+  </svg>
+);
+
+const CheckSvgWhite = () => (
+  <svg viewBox="0 0 8 8" fill="none">
+    <path d="M1.5 4L3.5 6L6.5 2" stroke="white" strokeWidth="1.3" strokeLinecap="round" />
+  </svg>
 );
 
 export default function EduLanding() {
-  const [scrolled, setScrolled] = useState(false);
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [billing, setBilling] = useState<'monthly' | 'annual'>('monthly');
+  const [cookieHidden, setCookieHidden] = useState(false);
+  const [heroFloatVisible, setHeroFloatVisible] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 480);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
-    script.text = JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "Person",
-      "name": "Adam McClarin",
-      "jobTitle": "Principal Architect",
-      "url": "https://adammcclarin.com",
-      "worksFor": {
-        "@type": "Organization",
-        "name": "Meraki Is Love",
-        "url": "https://merakislove.com",
-        "logo": "https://merakislove.com/logo.png"
-      },
-      "brand": [
-        {
-          "@type": "Brand",
-          "name": "VeloxSync Platform",
-          "url": "https://veloxsync.app",
-          "description": "The Sovereign Business Operating System powered by Ei-Core AI."
-        },
-        {
-          "@type": "Brand",
-          "name": "AuraFit Intelligence",
-          "url": "https://aurafit.ai",
-          "description": "Tonally-matched AI fitness assistants built on VeloxSync architecture."
-        }
-      ],
-      "knowsAbout": [
-        "Sovereign Architecture",
-        "Private AI Ecosystems",
-        "CISSP Security Standards",
-        "Systems Harmonization",
-        "VeloxSync Platform Architecture"
-      ],
-      "sameAs": [
-        "https://www.linkedin.com/in/adam-mcclarin",
-        "https://medium.com/@adammcclarin",
-        "https://adammcclarin1.substack.com",
-        "https://dribbble.com/adammcclarin",
-        "https://veloxsync.app",
-        "https://www.veloxsync.app/education-home"
-      ],
-      "subjectOf": {
-        "@type": "CreativeWork",
-        "name": "Velox Academy: Sovereign Systems Education",
-        "url": "https://www.veloxsync.app/education-home"
-      }
-    });
-    document.head.appendChild(script);
-
-    const eduScript = document.createElement('script');
-    eduScript.type = 'application/ld+json';
-    eduScript.text = JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "VeloxSync for Education",
-      "alternateName": "Classroom Intelligence Layer",
-      "operatingSystem": "Web",
-      "applicationCategory": "EducationalApplication",
-      "description": "A Classroom Intelligence Layer powered by the Ei-Core engine. Automatically aligns student learning signals to Texas TEKS, Common Core standards, and IEP requirements.",
-      "author": {
-        "@type": "Person",
-        "name": "Adam McClarin",
-        "url": "https://adammcclarin.com"
-      },
-      "offers": {
-        "@type": "Offer",
-        "price": "9.00",
-        "priceCurrency": "USD",
-        "description": "Teacher Pro Tier"
-      },
-      "featureList": [
-        "Native Texas TEKS Alignment",
-        "Real-time IEP & 504 Compliance Monitoring",
-        "Automated Small Group Instruction Grouping",
-        "Cognitive Overload Signal Detection",
-        "Cross-Vertical Ei-Core AI Integration"
-      ],
-      "educationalCredentialAwarded": "Texas TEKS Compliance Framework",
-      "keywords": "TEKS alignment AI, IEP automation for teachers, Texas classroom data, Ei-Core education AI, student learning signals, FERPA compliant AI, SOPPA student privacy, homeschool curriculum AI, Charlotte Mason AI, Common Core alignment"
-    });
-    document.head.appendChild(eduScript);
-
+    const styleEl = document.createElement('style');
+    styleEl.setAttribute('data-edu-landing', 'true');
+    styleEl.textContent = EDU_LANDING_CSS;
+    document.head.appendChild(styleEl);
     return () => {
-      document.head.removeChild(script);
-      document.head.removeChild(eduScript);
+      document.head.removeChild(styleEl);
     };
   }, []);
 
-  return (
-    <div className="min-h-screen bg-white text-slate-900">
+  useEffect(() => {
+    if (localStorage.getItem('vs_edu_cookies')) {
+      setCookieHidden(true);
+    }
+  }, []);
 
-      {/* ── Sticky Nav ── */}
-      <div className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
-      } bg-white border-b border-slate-100 shadow-md`}>
-        <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">🎓</span>
-            <span className="text-sm font-black text-slate-900">VeloxSync Education</span>
-          </div>
-          <div className="hidden md:flex items-center gap-6">
-            {[
-              { label: 'Features', id: 'features' },
-              { label: 'How It Works', id: 'how-it-works' },
-              { label: 'Pricing', id: 'pricing' },
-              { label: 'FAQ', id: 'faq' },
-            ].map(({ label, id }) => (
-              <button
-                key={id}
-                onClick={() => scrollToId(id)}
-                className="text-sm font-bold text-slate-600 hover:text-teal-700 transition-colors"
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-          <Link
-            to="/education/checkout"
-            className="px-5 py-2 rounded-full bg-teal-600 text-white text-sm font-black hover:bg-teal-700 transition-colors shadow-sm"
-          >
-            Start Free Trial
-          </Link>
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.08 },
+    );
+    document.querySelectorAll('.edu-landing .reveal').forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setHeroFloatVisible(true), 900);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const acceptCookies = () => {
+    localStorage.setItem('vs_edu_cookies', 'accepted');
+    setCookieHidden(true);
+  };
+
+  const declineCookies = () => {
+    localStorage.setItem('vs_edu_cookies', 'declined');
+    setCookieHidden(true);
+  };
+
+  return (
+    <div className="edu-landing">
+      {/* COOKIE BANNER */}
+      <div className={`cookie-banner${cookieHidden ? ' hidden' : ''}`} id="cookieBanner">
+        <div className="cookie-text">
+          We use cookies to improve your experience. FERPA-compliant. We never share or sell student data.{' '}
+          <a onClick={(e) => e.preventDefault()}>Privacy Policy</a>
+        </div>
+        <div className="cookie-actions">
+          <button className="cookie-decline" onClick={declineCookies}>Decline</button>
+          <button className="cookie-accept" onClick={acceptCookies}>Accept</button>
         </div>
       </div>
 
-      {/* ── Static Nav ── */}
-      <nav className="border-b border-slate-100 bg-white px-6 py-4 shadow-sm">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="text-3xl">🎓</span>
-            <div>
-              <span className="font-black text-slate-900 text-base">VeloxSync</span>
-              <span className="ml-2 text-[10px] font-black text-teal-700 uppercase tracking-widest border border-teal-300 px-1.5 py-0.5 rounded-full bg-teal-50">Education</span>
-            </div>
+      {/* NAV */}
+      <nav>
+        <a href="#" className="nav-logo">
+          <div className="nav-logo-mark">
+            <svg viewBox="0 0 48 48" fill="none">
+              <line x1="11" y1="10" x2="24" y2="35" stroke="white" strokeWidth="4" strokeLinecap="round" />
+              <line x1="37" y1="10" x2="24" y2="35" stroke="white" strokeWidth="4" strokeLinecap="round" />
+              <circle cx="24" cy="35" r="3" fill="#8FBF9F" />
+              <path d="M 18,41 A 6.5,6.5 0 0,1 30,41" stroke="#8FBF9F" strokeWidth="2" fill="none" strokeLinecap="round" />
+            </svg>
           </div>
-          <div className="flex items-center gap-3">
-            <Link to="/login" className="text-sm font-bold text-slate-700 hover:text-teal-700 transition-colors border-2 border-slate-200 px-4 py-2 rounded-full hover:border-teal-300">
-              Sign In
-            </Link>
-            <Link to="/education/checkout" className="px-5 py-2 rounded-full bg-teal-600 text-white text-sm font-black hover:bg-teal-700 transition-colors shadow-sm">
-              Start Free — No Card Required
-            </Link>
+          <div className="nav-wordmark">
+            <div className="name">Velox<span>Sync</span></div>
+            <div className="sub">For Education</div>
           </div>
+        </a>
+        <div className="nav-links">
+          <a href="#features">How it works</a>
+          <a href="#adhd">ADHD Support</a>
+          <a href="#stem">STEM &amp; Coding</a>
+          <a href="#pricing">Pricing</a>
+          <a href="#faq">FAQ</a>
+        </div>
+        <div className="nav-actions">
+          <button className="btn-nav-ghost">Sign in</button>
+          <button className="btn-nav-primary">Start free trial</button>
         </div>
       </nav>
 
-      {/* ── Hero ── */}
-      <section className="relative overflow-hidden px-6 py-24 text-center" style={{ background: 'linear-gradient(135deg, #0F766E 0%, #0891B2 60%, #38BDF8 100%)' }}>
-        {/* Decorative blobs */}
-        <div className="absolute -top-20 -left-20 w-96 h-96 rounded-full opacity-20" style={{ background: 'radial-gradient(circle, #F59E0B, transparent 70%)' }} />
-        <div className="absolute -bottom-20 -right-20 w-80 h-80 rounded-full opacity-20" style={{ background: 'radial-gradient(circle, #F87171, transparent 70%)' }} />
-        <div className="relative max-w-4xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 border border-white/30 text-white text-xs font-black uppercase tracking-wider mb-8 backdrop-blur-sm">
-            <span>✨</span>
-            Powered by Ei-Core AI
+      {/* HERO */}
+      <section className="hero">
+        <div className="hero-left">
+          <div className="hero-eyebrow">
+            <div className="hero-eyebrow-dot"></div>
+            <span>Powered by Ei-Core&trade; AI</span>
           </div>
-          <h1 className="text-5xl md:text-6xl font-black text-white leading-tight mb-6 drop-shadow-sm">
-            Every student learns differently.<br />
-            <span className="text-yellow-300">Teachers don't have time to figure it out.</span>
+          <h1 className="hero-headline">
+            Your child is not<br />
+            <span className="strike">behind.</span><br />
+            They just learn <em>differently.</em>
           </h1>
-          <p className="text-xl text-white/90 leading-relaxed mb-10 max-w-2xl mx-auto font-medium">
-            VeloxSync turns student data into exact next steps — who needs help, how to group them, what to teach next, and generates the assignments to make it happen.
+          <p className="hero-sub">
+            Ei-Core watches your child's progress, finds the exact gap, and tells you what to teach tomorrow. Built for every learning style — including ADHD and cognitive differences.
           </p>
-          <p className="text-sm text-white/70 font-medium mb-8">14-day free trial · No credit card required · Cancel anytime</p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a href="/education/checkout" className="inline-block bg-yellow-400 text-slate-900 font-black text-lg px-10 py-4 rounded-full hover:bg-yellow-300 transition-colors shadow-xl hover:shadow-2xl hover:-translate-y-0.5 transform">
-              Start Now — Free for 14 Days 🚀
-            </a>
-            <button onClick={() => scrollToId('how-it-works')} className="inline-flex items-center gap-2 px-6 py-4 rounded-full border-2 border-white/40 text-white font-bold text-sm hover:bg-white/10 transition-colors">
-              See how it works ↓
-            </button>
+          <div className="hero-tags">
+            <span className="hero-tag hero-tag-green">AI Curriculum</span>
+            <span className="hero-tag hero-tag-purple">ADHD Support</span>
+            <span className="hero-tag hero-tag-blue">K-12 STEM &amp; Coding</span>
           </div>
-          <PrivacyBadge />
+          <div className="hero-actions">
+            <button className="btn-primary">Start free — 14 days</button>
+            <button className="btn-secondary">See how it works</button>
+          </div>
+          <div className="hero-proof">
+            <div className="hero-proof-item">
+              <div className="hero-proof-check"><CheckSvg /></div>
+              No credit card
+            </div>
+            <div className="hero-proof-divider"></div>
+            <div className="hero-proof-item">
+              <div className="hero-proof-check"><CheckSvg /></div>
+              FERPA compliant
+            </div>
+            <div className="hero-proof-divider"></div>
+            <div className="hero-proof-item">
+              <div className="hero-proof-check"><CheckSvg /></div>
+              Up to 6 children
+            </div>
+            <div className="hero-proof-divider"></div>
+            <div className="hero-proof-item">
+              <div className="hero-proof-check"><CheckSvg /></div>
+              ADHD-friendly
+            </div>
+          </div>
         </div>
-      </section>
-
-      {/* ── Path Chooser ── */}
-      <section className="bg-white px-6 py-16 border-b border-slate-100">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-10">
-            <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Choose Your Path</p>
-            <h2 className="text-3xl font-black text-slate-900">Who are you teaching?</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-            {/* Teacher / Admin path */}
-            <Link
-              to="/k12"
-              className="group rounded-3xl border-2 border-teal-200 bg-gradient-to-br from-teal-50 to-teal-100 p-8 flex items-center gap-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all transform"
-            >
-              <div className="w-16 h-16 rounded-2xl bg-teal-600 flex items-center justify-center text-3xl flex-shrink-0 shadow-md group-hover:scale-105 transition-transform">
-                🏫
-              </div>
-              <div className="flex-1">
-                <p className="text-[10px] font-black text-teal-700 uppercase tracking-widest mb-1">Teachers & Administrators</p>
-                <h3 className="font-black text-slate-900 text-xl mb-1">I'm a Teacher or Administrator</h3>
-                <p className="text-sm text-slate-600">TEKS alignment, IEP/504 Shield, district compliance.</p>
-              </div>
-              <svg className="w-5 h-5 text-teal-600 flex-shrink-0 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
-
-            {/* Homeschool parent path */}
-            <Link
-              to="/homeschool"
-              className="group rounded-3xl border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-amber-100 p-8 flex items-center gap-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all transform"
-            >
-              <div className="w-16 h-16 rounded-2xl bg-amber-500 flex items-center justify-center text-3xl flex-shrink-0 shadow-md group-hover:scale-105 transition-transform">
-                🏡
-              </div>
-              <div className="flex-1">
-                <p className="text-[10px] font-black text-amber-700 uppercase tracking-widest mb-1">Homeschool Families</p>
-                <h3 className="font-black text-slate-900 text-xl mb-1">I'm a Homeschool Parent</h3>
-                <p className="text-sm text-slate-600">Classical, Montessori, Charlotte Mason — your philosophy, our platform.</p>
-              </div>
-              <svg className="w-5 h-5 text-amber-600 flex-shrink-0 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
-
+        <div className="hero-right">
+          <div className="hero-img"></div>
+          <div className="hero-img-overlay"></div>
+          <div className="hero-float" style={{ opacity: heroFloatVisible ? 1 : 0 }}>
+            <div className="hero-float-card">
+              <div className="hfc-label">Ei-Core found it</div>
+              <div className="hfc-val">Gap detected.</div>
+              <div className="hfc-sub">Elijah needs 2 sessions on fractions before moving forward</div>
+            </div>
+            <div className="hero-float-card">
+              <div className="hfc-label">Today's plan ready</div>
+              <div className="hfc-val">3 lessons</div>
+              <div className="hfc-sub">Personalized for each child — including ADHD focus mode</div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── Dual Entry Path ── */}
-      <section className="bg-white px-6 py-20">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-black text-slate-900 mb-3">Who are you teaching?</h2>
-            <p className="text-slate-500 text-lg">We built two dedicated experiences — pick yours.</p>
+      {/* TRUST STRIP */}
+      <div className="trust-strip">
+        <div className="trust-item">
+          <svg className="trust-icon" viewBox="0 0 18 18" fill="none">
+            <path d="M9 2L2 5V9c0 3.5 2.8 6.5 7 7 4.2-.5 7-3.5 7-7V5L9 2z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+          </svg>
+          FERPA Compliant
+        </div>
+        <div className="trust-divider"></div>
+        <div className="trust-item">
+          <svg className="trust-icon" viewBox="0 0 18 18" fill="none">
+            <path d="M9 1l2.5 5 5.5.8-4 3.9.9 5.5L9 13.5l-4.9 2.7.9-5.5L1 6.8l5.5-.8L9 1z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+          </svg>
+          112 State Standards
+        </div>
+        <div className="trust-divider"></div>
+        <div className="trust-item">
+          <svg className="trust-icon" viewBox="0 0 18 18" fill="none">
+            <circle cx="9" cy="9" r="7" stroke="currentColor" strokeWidth="1.5" />
+            <path d="M6 9l2 2 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+          ADHD &amp; IEP Support
+        </div>
+        <div className="trust-divider"></div>
+        <div className="trust-item">
+          <svg className="trust-icon" viewBox="0 0 18 18" fill="none">
+            <rect x="2" y="4" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.5" />
+            <path d="M6 8h2M6 11h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+          K-12 STEM &amp; Coding
+        </div>
+        <div className="trust-divider"></div>
+        <div className="trust-item">
+          <svg className="trust-icon" viewBox="0 0 18 18" fill="none">
+            <path d="M3 9l4 4 8-8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          Zero Data Retention
+        </div>
+      </div>
+
+      {/* PAIN SECTION */}
+      <div className="pain-section">
+        <span className="section-label" style={{ display: 'block', textAlign: 'center' }}>Why families find us</span>
+        <h2 className="pain-headline">Every homeschool parent has <em>that moment.</em></h2>
+        <p className="pain-sub">
+          You realize your child is not where they should be. You do not know why. The curriculum does not adapt. And if your child has ADHD or learns differently, you feel even more alone.
+        </p>
+        <div className="pain-cards">
+          <div className="pain-card reveal">
+            <div className="pain-card-num">01</div>
+            <h3>You cannot find the gap</h3>
+            <p>Curriculum moves forward whether your child is ready or not. By the time you notice something is wrong, weeks of gaps have compounded into months.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="pain-card reveal reveal-delay-1">
+            <div className="pain-card-num">02</div>
+            <h3>ADHD makes everything harder</h3>
+            <p>Standard lesson plans were not designed for how ADHD brains work. Sitting still, long reading passages, rigid schedules — these fight against your child, not with them.</p>
+          </div>
+          <div className="pain-card reveal reveal-delay-2">
+            <div className="pain-card-num">03</div>
+            <h3>STEM feels overwhelming to teach</h3>
+            <p>You want your child to learn coding and science but you are not sure where to start or how to progress. Most curriculum stops at worksheets. Your child needs to build things.</p>
+          </div>
+        </div>
+      </div>
 
-            {/* Left Card — Classroom Teachers */}
-            <div className="rounded-3xl border-2 border-teal-200 bg-gradient-to-br from-teal-50 via-white to-sky-50 p-10 flex flex-col shadow-md hover:shadow-xl transition-shadow hover:-translate-y-1 transform">
-              <div className="text-5xl mb-5">🏫</div>
-              <span className="inline-block text-[10px] font-black text-teal-700 uppercase tracking-widest border border-teal-300 px-3 py-1 rounded-full bg-teal-100 mb-5 w-fit">
-                For Classroom Teachers
-              </span>
-              <h2 className="text-3xl font-black text-slate-900 mb-3 leading-tight">
-                Scale Your Impact.<br />Not Your Workload.
-              </h2>
-              <p className="text-base text-slate-600 leading-relaxed mb-6">
-                Built for teachers managing 25+ distinct learning signals simultaneously.
-              </p>
-              <ul className="space-y-3.5 mb-10 flex-1">
-                {[
-                  'Automated TEKS & IEP Alignment',
-                  'One-Click Small Group Generation',
-                  'District-Level Data Rigor',
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-3 text-base text-slate-700 font-medium">
-                    <span className="text-teal-500 text-lg flex-shrink-0">✓</span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                to="/k12"
-                className="block w-full text-center bg-teal-600 text-white font-black text-base px-6 py-4 rounded-full hover:bg-teal-700 transition-colors shadow-md hover:shadow-lg"
-              >
-                Launch Classroom Portal →
-              </Link>
-            </div>
-
-            {/* Right Card — Homeschool Families */}
-            <div className="rounded-3xl border-2 border-amber-200 bg-gradient-to-br from-amber-50 via-white to-rose-50 p-10 flex flex-col shadow-md hover:shadow-xl transition-shadow hover:-translate-y-1 transform">
-              <div className="text-5xl mb-5">🏡</div>
-              <span className="inline-block text-[10px] font-black text-amber-700 uppercase tracking-widest border border-amber-300 px-3 py-1 rounded-full bg-amber-100 mb-5 w-fit">
-                For Homeschool Families
-              </span>
-              <h2 className="text-3xl font-black text-slate-900 mb-3 leading-tight">
-                Personalized Pace.<br />Sovereign Progress.
-              </h2>
-              <p className="text-base text-slate-600 leading-relaxed mb-6">
-                Reclaim the joy of teaching by removing the administrative fog of homeschooling.
-              </p>
-              <ul className="space-y-3.5 mb-10 flex-1">
-                {[
-                  'Flexible Curriculum Mapping (Classical, Charlotte Mason, Montessori)',
-                  'Holistic Family Progress Tracking',
-                  'Stress-Free Portfolio Generation',
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-3 text-base text-slate-700 font-medium">
-                    <span className="text-amber-500 text-lg flex-shrink-0">✓</span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                to="/homeschool"
-                className="block w-full text-center bg-amber-500 text-white font-black text-base px-6 py-4 rounded-full hover:bg-amber-600 transition-colors shadow-md hover:shadow-lg"
-              >
-                Launch Homeschool Portal →
-              </Link>
-            </div>
-
+      {/* FEATURES */}
+      <section id="features">
+        <div className="feature-block">
+          <div className="feature-img">
+            <img src="https://res.cloudinary.com/dhkuivp0s/image/upload/v1779387308/gapfinder_zym5rf.jpg" alt="Child studying" loading="lazy" />
+          </div>
+          <div className="feature-text">
+            <div className="feature-num">01</div>
+            <span className="section-label">Gap Finder</span>
+            <h2 className="feature-headline">We find <em>exactly</em> where they fell behind.</h2>
+            <p className="feature-sub">Ei-Core maps your child's progress against state standards and finds the precise concept where the gap began. Not a grade level. The exact moment.</p>
+            <ul className="feature-points">
+              <li><div className="fp-dot"><CheckSvg /></div>Continuous progress monitoring across all subjects</li>
+              <li><div className="fp-dot"><CheckSvg /></div>Root cause analysis — not just what, but why</li>
+              <li><div className="fp-dot"><CheckSvg /></div>Clear remediation path so you know what to teach first</li>
+            </ul>
+          </div>
+        </div>
+        <div className="feature-block reverse">
+          <div className="feature-img">
+            <img src="https://res.cloudinary.com/dhkuivp0s/image/upload/v1779387308/dailyplan_lxc56h.jpg" alt="Parent planning" loading="lazy" />
+          </div>
+          <div className="feature-text">
+            <div className="feature-num">02</div>
+            <span className="section-label">Daily Plan</span>
+            <h2 className="feature-headline">Wake up knowing <em>exactly</em> what to teach.</h2>
+            <p className="feature-sub">Every morning Ei-Core generates a personalized lesson plan for each child based on where they are right now — not where the curriculum says they should be.</p>
+            <ul className="feature-points">
+              <li><div className="fp-dot"><CheckSvg /></div>Daily plans generated fresh every morning per child</li>
+              <li><div className="fp-dot"><CheckSvg /></div>Adapts automatically when mastery is detected</li>
+              <li><div className="fp-dot"><CheckSvg /></div>Works for multiple children at different levels simultaneously</li>
+            </ul>
+          </div>
+        </div>
+        <div className="feature-block">
+          <div className="feature-img">
+            <img src="https://res.cloudinary.com/dhkuivp0s/image/upload/v1779387309/progress_wmy0xy.jpg" alt="Child progress" loading="lazy" />
+          </div>
+          <div className="feature-text">
+            <div className="feature-num">03</div>
+            <span className="section-label">Progress Tracker</span>
+            <h2 className="feature-headline">Watch them <em>catch up</em> in real time.</h2>
+            <p className="feature-sub">A visual mastery map shows exactly where each child stands against state standards. Portfolio-ready reports for co-ops, records, and accountability.</p>
+            <ul className="feature-points">
+              <li><div className="fp-dot"><CheckSvg /></div>Standards mastery map across all subjects and grades</li>
+              <li><div className="fp-dot"><CheckSvg /></div>Portfolio-ready progress reports for co-ops and records</li>
+              <li><div className="fp-dot"><CheckSvg /></div>Ei-Core celebrates milestones and tells you when to move on</li>
+            </ul>
           </div>
         </div>
       </section>
 
-      {/* ── Standards & Compliance Authority ── */}
-      <section className="px-6 py-20" style={{ background: '#F0FDFA' }}>
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-14">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-teal-100 text-teal-700 text-xs font-black uppercase tracking-wider mb-4">
-              📚 Standards Intelligence
-            </div>
-            <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-3">Built on every framework<br />your state requires</h2>
-            <p className="text-slate-500 text-lg max-w-xl mx-auto">Ei-Core is natively trained on every major state framework — so you never have to map it yourself.</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-
-            <div className="bg-white rounded-3xl border-2 border-teal-200 p-8 shadow-sm hover:shadow-md transition-shadow flex flex-col">
-              <div className="text-4xl mb-5">⭐</div>
-              <h3 className="font-black text-slate-900 text-xl mb-3">Texas TEKS Intelligence</h3>
-              <p className="text-sm text-slate-500 leading-relaxed mb-3 flex-1">
-                <span className="font-bold text-slate-700 block mb-1">The Problem:</span>
-                Texas educators spend 10+ hours/week manually mapping student performance to TEKS frameworks.
-              </p>
-              <p className="text-sm text-slate-600 leading-relaxed mb-5">
-                <span className="font-bold text-slate-700 block mb-1">The Solution:</span>
-                Ei-Core auto-maps every classroom signal to required TEKS standards in real time.
-              </p>
-              <div className="bg-teal-50 border border-teal-200 rounded-2xl px-4 py-3 mb-4">
-                <p className="text-sm font-black text-teal-700">✅ Real-time small group grouping aligned to state-mandated milestones</p>
-              </div>
-              <Link to="/education/texas-teks" className="text-sm font-black text-teal-600 hover:text-teal-800 transition-colors">
-                Learn more about Texas TEKS →
-              </Link>
-            </div>
-
-            <div className="bg-white rounded-3xl border-2 border-blue-200 p-8 shadow-sm hover:shadow-md transition-shadow flex flex-col">
-              <div className="text-4xl mb-5">🌍</div>
-              <h3 className="font-black text-slate-900 text-xl mb-3">Common Core Standards</h3>
-              <p className="text-sm text-slate-500 leading-relaxed mb-3 flex-1">
-                <span className="font-bold text-slate-700 block mb-1">The Problem:</span>
-                40+ states require CCSS alignment across ELA and Math — tracking it manually is unsustainable.
-              </p>
-              <p className="text-sm text-slate-600 leading-relaxed mb-5">
-                <span className="font-bold text-slate-700 block mb-1">The Solution:</span>
-                Ei-Core reads student progress against CCSS clusters, surfacing mastery gaps before they compound.
-              </p>
-              <div className="bg-blue-50 border border-blue-200 rounded-2xl px-4 py-3 mb-4">
-                <p className="text-sm font-black text-blue-700">🗺️ Automatic standard mapping across 40+ states</p>
-              </div>
-              <Link to="/education/common-core" className="text-sm font-black text-blue-600 hover:text-blue-800 transition-colors">
-                Learn more about Common Core →
-              </Link>
-            </div>
-
-            <div className="bg-white rounded-3xl border-2 border-amber-200 p-8 shadow-sm hover:shadow-md transition-shadow flex flex-col">
-              <div className="text-4xl mb-5">🛡️</div>
-              <h3 className="font-black text-slate-900 text-xl mb-3">Proactive IEP & 504</h3>
-              <p className="text-sm text-slate-500 leading-relaxed mb-3 flex-1">
-                <span className="font-bold text-slate-700 block mb-1">The Problem:</span>
-                IEP compliance is reactive. Teachers struggle to prove accommodations were met in every lesson.
-              </p>
-              <p className="text-sm text-slate-600 leading-relaxed mb-5">
-                <span className="font-bold text-slate-700 block mb-1">The Solution:</span>
-                VeloxSync treats IEP requirements as Primary Signals — flagging gaps before they become compliance issues.
-              </p>
-              <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 mb-4">
-                <p className="text-sm font-black text-amber-700">📋 Differentiation as a verified data point, not a goal</p>
-              </div>
-              <Link to="/education/iep-compliance" className="text-sm font-black text-amber-600 hover:text-amber-800 transition-colors">
-                Learn more about IEP & 504 →
-              </Link>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* ── Positioning Anchor ── */}
-      <section className="bg-white py-20 px-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <p className="text-2xl md:text-3xl font-black text-slate-400 mb-3">Other edtech tools collect data.</p>
-          <p className="text-4xl md:text-6xl font-black text-slate-900 leading-tight">VeloxSync builds<br /><span className="text-teal-600">your assignments.</span></p>
-        </div>
-      </section>
-
-      {/* ── Signal Cards / Painful Moments ── */}
-      <section id="how-it-works" className="px-6 py-20" style={{ background: '#FFFBEB' }}>
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-14">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 text-amber-700 text-xs font-black uppercase tracking-wider mb-4">
-              💡 Real Classroom Moments
-            </div>
-            <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">Built for the moments<br />that overwhelm you</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-
-            <div className="rounded-3xl p-8 flex flex-col shadow-sm hover:shadow-md transition-shadow" style={{ background: '#FEF2F2' }}>
-              <div className="w-14 h-14 rounded-2xl bg-red-100 flex items-center justify-center mb-5 text-3xl">😰</div>
-              <h3 className="font-black text-red-800 text-xl mb-3">"This student is falling behind"</h3>
-              <p className="text-base text-red-700/80 leading-relaxed">Ei-Core detects learning gaps against your state standards before a student is too far behind to catch up. You get the intervention recommendation, not just the data.</p>
-            </div>
-
-            <div className="rounded-3xl p-8 flex flex-col shadow-sm hover:shadow-md transition-shadow" style={{ background: '#FFFBEB' }}>
-              <div className="w-14 h-14 rounded-2xl bg-amber-100 flex items-center justify-center mb-5 text-3xl">🤹</div>
-              <h3 className="font-black text-amber-800 text-xl mb-3">"Your class is split into 5 different levels"</h3>
-              <p className="text-base text-amber-700/80 leading-relaxed">Stop teaching to the middle. VeloxSync auto-groups students by mastery and gives you differentiation strategies for each group.</p>
-            </div>
-
-            <div className="rounded-3xl p-8 flex flex-col shadow-sm hover:shadow-md transition-shadow" style={{ background: '#FAF5FF' }}>
-              <div className="w-14 h-14 rounded-2xl bg-purple-100 flex items-center justify-center mb-5 text-3xl">📋</div>
-              <h3 className="font-black text-purple-800 text-xl mb-3">"You have 3 IEP students and 22 others"</h3>
-              <p className="text-base text-purple-700/80 leading-relaxed">Ei-Core generates accommodation-aware recommendations for every IEP student while keeping the whole class moving forward.</p>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* ── Features Grid ── */}
-      <section id="features" className="bg-white px-6 py-20">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-14">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-teal-100 text-teal-700 text-xs font-black uppercase tracking-wider mb-4">
-              🛠️ Everything In One Place
-            </div>
-            <h2 className="text-4xl font-black text-slate-900 mb-3">Everything you need in one classroom OS</h2>
-            <p className="text-slate-500 text-lg">Built for teachers, homeschool parents, and school administrators.</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {FEATURES.map((f) => (
-              <div key={f.label} className={`${f.bg} border-2 ${f.border} rounded-3xl p-7 hover:shadow-lg transition-all hover:-translate-y-1 transform`}>
-                <div className="text-4xl mb-5">{f.emoji}</div>
-                <h3 className="font-black text-slate-900 text-lg mb-2">{f.label}</h3>
-                <p className="text-sm text-slate-600 leading-relaxed">{f.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── How It Works Steps ── */}
-      <section className="px-6 py-20" style={{ background: '#F0FDFA' }}>
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-teal-200 text-teal-800 text-xs font-black uppercase tracking-wider mb-4">
-              ⚡ From Standard to Assignment
-            </div>
-            <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-4">Three steps. That's it.</h2>
-            <p className="text-slate-500 text-lg max-w-xl mx-auto">Ei-Core handles the rest.</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
-            {/* Connecting lines */}
-            <div className="hidden md:block absolute top-10 left-[36%] right-[36%] h-1 rounded-full" style={{ background: 'linear-gradient(90deg, #0F766E, #F59E0B)' }} />
-            {[
-              {
-                step: '1',
-                color: '#0F766E',
-                bg: 'bg-teal-600',
-                shadow: 'shadow-teal-300',
-                emoji: '🎯',
-                title: 'Pick your standard',
-                desc: 'Select grade, state, subject, and learning style. Ei-Core knows every state framework from TEKS to Common Core to Florida B.E.S.T.',
-              },
-              {
-                step: '2',
-                color: '#F59E0B',
-                bg: 'bg-amber-500',
-                shadow: 'shadow-amber-300',
-                emoji: '✨',
-                title: 'Ei-Core builds it',
-                desc: 'A complete assignment appears instantly — theme, activities, rubric, differentiation options, and teacher notes all included.',
-              },
-              {
-                step: '3',
-                color: '#F87171',
-                bg: 'bg-rose-400',
-                shadow: 'shadow-rose-300',
-                emoji: '🖨️',
-                title: 'Download and teach',
-                desc: "Print it, save it, or share it. Every assignment is ready to use the moment it's generated.",
-              },
-            ].map((item) => (
-              <div key={item.step} className="flex flex-col items-center text-center relative">
-                <div className={`w-24 h-24 rounded-full ${item.bg} flex flex-col items-center justify-center mb-6 shadow-xl ${item.shadow} relative z-10`}>
-                  <span className="text-3xl">{item.emoji}</span>
-                  <span className="text-xs font-black text-white/80 mt-0.5">STEP {item.step}</span>
-                </div>
-                <h3 className="font-black text-slate-900 text-xl mb-3">{item.title}</h3>
-                <p className="text-base text-slate-600 leading-relaxed max-w-xs">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-          <div className="text-center mt-14">
-            <Link
-              to="/education/checkout"
-              className="inline-block px-10 py-4 rounded-full bg-teal-600 text-white font-black text-base hover:bg-teal-700 transition-colors shadow-lg hover:shadow-xl hover:-translate-y-0.5 transform"
-            >
-              Try It Free — No Card Required 🚀
-            </Link>
-            <PrivacyBadge />
-          </div>
-        </div>
-      </section>
-
-      {/* ── Differentiation Line ── */}
-      <section className="border-y border-slate-100 bg-white py-16 px-6">
-        <div className="max-w-3xl mx-auto text-center">
-          <p className="text-xl md:text-2xl font-bold text-slate-400 mb-2">
-            PowerSchool stores records. Canvas tracks assignments.
-          </p>
-          <p className="text-3xl md:text-5xl font-black text-slate-900">VeloxSync tells you <span className="text-teal-600">what to teach next.</span></p>
-        </div>
-      </section>
-
-      {/* ── Pricing ── */}
-      <section id="pricing" className="px-6 py-20" style={{ background: '#FAF5FF' }}>
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-14">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-100 text-purple-700 text-xs font-black uppercase tracking-wider mb-4">
-              💳 Transparent Pricing
-            </div>
-            <h2 className="text-4xl font-black text-slate-900 mb-3">Simple, transparent pricing</h2>
-            <p className="text-slate-500 text-lg mb-3">Choose the plan that fits your classroom.</p>
-            <p className="text-sm font-bold text-teal-600">
-              ✅ All plans include a 14-day free trial. No credit card required to start.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {PLANS.map((plan) => (
-              <div
-                key={plan.id}
-                className={`relative rounded-3xl overflow-hidden flex flex-col bg-white shadow-md hover:shadow-xl transition-shadow ${
-                  plan.highlight ? 'ring-4 ring-amber-400 ring-offset-2' : ''
-                }`}
-              >
-                {/* Colored header strip */}
-                <div className={`${plan.headerBg} px-8 pt-8 pb-6 text-white`}>
-                  {plan.badge && (
-                    <span className="inline-block px-3 py-1 rounded-full bg-white/30 text-white text-[10px] font-black uppercase tracking-wider mb-3">
-                      🌟 {plan.badge}
-                    </span>
-                  )}
-                  <h3 className="text-2xl font-black mb-1">{plan.name}</h3>
-                  <p className="text-white/80 text-sm leading-relaxed mb-4">{plan.description}</p>
-                  <div className="flex items-end gap-1">
-                    <span className="text-5xl font-black">{plan.price}</span>
-                    <span className="text-white/70 text-base mb-1.5">{plan.period}</span>
-                  </div>
-                  <p className="text-white/70 text-xs font-bold mt-1 uppercase tracking-wider">14-day free trial included</p>
-                </div>
-
-                {/* Features */}
-                <div className="px-8 py-6 flex-1">
-                  <ul className="space-y-3">
-                    {plan.features.map((f) => (
-                      <li key={f} className="flex items-start gap-3 text-sm text-slate-700 font-medium">
-                        <span className={`${plan.checkColor} text-lg flex-shrink-0 leading-none`}>✓</span>
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* CTA */}
-                <div className="px-8 pb-8">
-                  {plan.isContact ? (
-                    <a
-                      href={plan.ctaLink}
-                      className={`${plan.ctaBg} text-white font-black px-8 py-4 rounded-full w-full text-center text-sm block transition-colors shadow-md`}
-                    >
-                      {plan.cta}
-                    </a>
-                  ) : (
-                    <Link
-                      to={plan.ctaLink}
-                      className={`${plan.ctaBg} text-white font-black px-8 py-4 rounded-full w-full text-center text-sm block transition-colors shadow-md`}
-                    >
-                      {plan.cta}
-                    </Link>
-                  )}
-                  <PrivacyBadge />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <p className="text-center text-base font-bold text-slate-500 mt-10">No credit card required. Cancel anytime.</p>
-        </div>
-      </section>
-
-      {/* ── Sovereign Privacy Shield ── */}
-      <section className="bg-slate-900 text-white px-6 py-24">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-14">
-            <div className="text-6xl mb-6">🛡️</div>
-            <h2 className="text-4xl md:text-5xl font-black text-white mb-5 leading-tight">
-              Your Data is Sacred.<br /><span className="text-yellow-300">Not a Training Set.</span>
+      {/* ADHD SECTION */}
+      <section className="adhd-section" id="adhd">
+        <div className="adhd-inner">
+          <div className="adhd-header">
+            <span className="section-label" style={{ color: 'var(--purple)', display: 'block', textAlign: 'center' }}>Built for every brain</span>
+            <h2 className="section-headline" style={{ textAlign: 'center' }}>
+              ADHD and cognitive support <em style={{ color: 'var(--purple)' }}>built in.</em>
             </h2>
-            <p className="text-slate-300 text-lg max-w-2xl mx-auto leading-relaxed">
-              While other platforms rent your data to train corporate algorithms, we build a Sovereign Perimeter around your classroom.
+            <p className="section-sub" style={{ textAlign: 'center', margin: '14px auto 0' }}>
+              Not an add-on. Not an afterthought. Every feature in VeloxSync was designed with neurodivergent learners in mind from the start.
             </p>
           </div>
+          <div className="adhd-grid">
+            <div className="adhd-card reveal">
+              <div className="adhd-card-icon">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5" />
+                  <path d="M12 7v5l3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+              </div>
+              <h3>Sensory-Friendly Focus Mode</h3>
+              <p>Reduces visual noise, increases text size, and activates focus timers that match ADHD attention spans. Your child sees only what they need right now.</p>
+              <ul className="adhd-card-features">
+                <li>Adjustable reading mode with Open Sans large text</li>
+                <li>Pomodoro-style focus timers (5, 10, 15, 25 min)</li>
+                <li>Distraction-free lesson view</li>
+                <li>High-contrast and low-stimulation themes</li>
+              </ul>
+            </div>
+            <div className="adhd-card reveal reveal-delay-1">
+              <div className="adhd-card-icon">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" stroke="currentColor" strokeWidth="1.5" />
+                </svg>
+              </div>
+              <h3>Cognitive Load Tracking</h3>
+              <p>Ei-Core monitors how much mental effort each child is expending across sessions. When overload is detected, it automatically lightens the plan before frustration sets in.</p>
+              <ul className="adhd-card-features">
+                <li>Real-time cognitive load indicators per child</li>
+                <li>Automatic lesson simplification when overloaded</li>
+                <li>Parent alerts when a child needs a break</li>
+                <li>Weekly cognitive load reports</li>
+              </ul>
+            </div>
+            <div className="adhd-card reveal reveal-delay-2">
+              <div className="adhd-card-icon">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M4 6h16M4 10h16M4 14h10M4 18h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+              </div>
+              <h3>Differentiated Pacing</h3>
+              <p>Lessons automatically slow down, break into smaller chunks, and add more movement-based activities when ADHD patterns are detected in session data.</p>
+              <ul className="adhd-card-features">
+                <li>Lessons chunked into 10-15 min micro-sessions</li>
+                <li>Movement and kinesthetic activity suggestions</li>
+                <li>IEP accommodation tracking and reminders</li>
+                <li>Multiple modality lesson delivery (visual, audio, hands-on)</li>
+              </ul>
+            </div>
+          </div>
+          <div className="adhd-bottom reveal">
+            <div className="adhd-bottom-text">
+              <h3>Every child learns at their own frequency.</h3>
+              <p>Whether your child has ADHD, dyslexia, sensory processing differences, or simply learns better with shorter sessions and hands-on projects — Ei-Core adapts to them. No diagnosis required. No labels. Just a plan that actually fits.</p>
+            </div>
+            <button className="btn-purple">Learn about ADHD support</button>
+          </div>
+        </div>
+      </section>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-14">
-            {[
-              {
-                title: 'Zero-Retention Intelligence',
-                body: 'Student names, IEP details, and academic performance are processed in real-time but never used to train the Ei-Core model.',
-                icon: '🔒',
-                accent: 'border-teal-500/40 bg-teal-500/5',
-                titleColor: 'text-teal-300',
-              },
-              {
-                title: 'Private Instance Architecture',
-                body: 'Your classroom data lives in an isolated environment. What happens in your lessons stays in your lessons.',
-                icon: '🏛️',
-                accent: 'border-yellow-500/40 bg-yellow-500/5',
-                titleColor: 'text-yellow-300',
-              },
-              {
-                title: 'CISSP-Certified Oversight',
-                body: 'Security protocols designed by a Certified Information Systems Security Professional. Enterprise-level encryption for the elementary classroom.',
-                icon: '🎖️',
-                accent: 'border-purple-500/40 bg-purple-500/5',
-                titleColor: 'text-purple-300',
-              },
-              {
-                title: 'FERPA & COPPA+ Compliance',
-                body: 'We exceed 2026 federal requirements. No third-party vendor ever has access to identifiable student metadata.',
-                icon: '📋',
-                accent: 'border-emerald-500/40 bg-emerald-500/5',
-                titleColor: 'text-emerald-300',
-              },
-            ].map((pillar) => (
-              <div key={pillar.title} className={`border-2 ${pillar.accent} rounded-3xl p-7 flex gap-5`}>
-                <span className="text-3xl flex-shrink-0">{pillar.icon}</span>
-                <div>
-                  <h3 className={`font-black ${pillar.titleColor} text-base mb-2`}>{pillar.title}</h3>
-                  <p className="text-sm text-slate-400 leading-relaxed">{pillar.body}</p>
+      {/* STEM SECTION */}
+      <section className="stem-section" id="stem">
+        <div className="stem-bg"></div>
+        <div className="stem-inner">
+          <div className="stem-header">
+            <span className="section-label" style={{ color: '#6BA3E8', display: 'block', textAlign: 'center' }}>K-12 STEM &amp; Coding</span>
+            <h2 className="stem-headline">From blocks to <em>real code.</em><br />Every age. Every level.</h2>
+            <p className="stem-sub">A complete STEM and coding curriculum built into your Family Plan. Age-appropriate tracks that grow with your child from visual block coding all the way to Python, robotics, and real project builds.</p>
+          </div>
+          <div className="stem-tracks">
+            <div className="stem-track reveal">
+              <div className="stem-track-age">Ages 5-10 &nbsp;·&nbsp; Grades K-5</div>
+              <h3>Explorer Track</h3>
+              <p>Visual block coding, science experiments, math through building. Everything designed to spark curiosity without overwhelming young learners.</p>
+              <ul className="stem-track-skills">
+                <li>Scratch &amp; block-based visual coding</li>
+                <li>Simple robotics with household materials</li>
+                <li>Science experiments with guided discovery</li>
+                <li>Math through real-world building projects</li>
+                <li>Logic puzzles and computational thinking</li>
+              </ul>
+            </div>
+            <div className="stem-track reveal reveal-delay-1">
+              <div className="stem-track-age">Ages 11-14 &nbsp;·&nbsp; Grades 6-8</div>
+              <h3>Builder Track</h3>
+              <p>Introduction to real programming languages, project-based science, and engineering challenges that produce things your child can show off.</p>
+              <ul className="stem-track-skills">
+                <li>Python fundamentals with real projects</li>
+                <li>HTML &amp; CSS — build your first website</li>
+                <li>Arduino and basic electronics</li>
+                <li>Physics and chemistry labs at home</li>
+                <li>App prototyping and UI/UX basics</li>
+              </ul>
+            </div>
+            <div className="stem-track reveal reveal-delay-2">
+              <div className="stem-track-age">Ages 15-18 &nbsp;·&nbsp; Grades 9-12</div>
+              <h3>Creator Track</h3>
+              <p>Production-level coding skills, advanced STEM projects, and portfolio-building work that colleges and employers actually want to see.</p>
+              <ul className="stem-track-skills">
+                <li>Python, JavaScript, or Java — student chooses</li>
+                <li>Web development: HTML, CSS, React basics</li>
+                <li>Data science and AI fundamentals</li>
+                <li>Capstone projects for college portfolio</li>
+                <li>AP Computer Science preparation</li>
+              </ul>
+            </div>
+          </div>
+          <div className="stem-code-preview reveal">
+            <div className="stem-code-header">
+              <div className="stem-code-dot"></div>
+              <div className="stem-code-title">Ei-Core // Today's Coding Lesson — Zara, Grade 8</div>
+              <div className="stem-code-badge">Python · Builder Track</div>
+            </div>
+            <div className="code-block">
+              <span className="code-comment"># Lesson: Build a simple quiz game — Zara's first real Python project</span>
+              <br /><br />
+              <span className="code-keyword">def</span> <span className="code-func">ask_question</span>(question, correct_answer):
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;answer = <span className="code-func">input</span>(<span className="code-string">{'f"\\n{question}\\nYour answer: "'}</span>)
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;<span className="code-keyword">if</span> answer.lower() == correct_answer.lower():
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="code-func">print</span>(<span className="code-string">"✓ Correct! Great work Zara."</span>)
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="code-keyword">return</span> <span className="code-string">True</span>
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;<span className="code-keyword">else</span>:
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="code-func">print</span>(<span className="code-string">{'f"Not quite — the answer was {correct_answer}"'}</span>)
+              <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="code-keyword">return</span> <span className="code-string">False</span>
+            </div>
+            <div className="stem-project-cards" style={{ marginTop: 20 }}>
+              <div className="stem-project"><div className="stem-project-grade">Grade 3</div><div className="stem-project-name">Scratch Story</div><div className="stem-project-desc">Animate a character you draw</div></div>
+              <div className="stem-project"><div className="stem-project-grade">Grade 6</div><div className="stem-project-name">Weather App</div><div className="stem-project-desc">Python + live weather API</div></div>
+              <div className="stem-project"><div className="stem-project-grade">Grade 8</div><div className="stem-project-name">Quiz Game</div><div className="stem-project-desc">Full Python application</div></div>
+              <div className="stem-project"><div className="stem-project-grade">Grade 11</div><div className="stem-project-name">Portfolio Site</div><div className="stem-project-desc">React — college-ready</div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* EI-CORE */}
+      <section className="eicore-section" id="eicore">
+        <div className="eicore-bg"></div>
+        <div className="eicore-inner">
+          <div className="eicore-text">
+            <span className="section-label">Ei-Core&trade; for Education</span>
+            <h2 className="eicore-headline">The AI that thinks like a <em>specialist.</em><br />Costs like an app.</h2>
+            <p className="eicore-sub">Ei-Core is not a chatbot. It is a continuous intelligence engine that monitors every child, supports ADHD and cognitive differences, guides your STEM path, and gives you specific actions — not advice.</p>
+            <button className="btn-white">See Ei-Core in action</button>
+          </div>
+          <div className="eicore-card">
+            <div className="eicore-card-header">
+              <div className="eicore-card-dot"></div>
+              <div className="eicore-card-title">Ei-Core Intelligence Feed</div>
+              <div className="eicore-card-badge">● Live</div>
+            </div>
+            <div className="eicore-insight">
+              <div className="eicore-insight-label">ADHD Alert — Elijah, Grade 6</div>
+              Cognitive load is elevated this morning. Elijah has been on-task for 47 minutes without a break. Recommend a 10-minute movement break before starting the fractions lesson. Switching to a hands-on manipulative activity rather than worksheets today.
+            </div>
+            <div className="eicore-actions">
+              <div className="eicore-action">
+                <div className="eicore-action-num">01</div>
+                <div className="eicore-action-text">Take a 10-min movement break — jumping jacks or short walk</div>
+                <div className="eicore-action-check"><CheckSvgWhite /></div>
+              </div>
+              <div className="eicore-action">
+                <div className="eicore-action-num">02</div>
+                <div className="eicore-action-text">Fractions lesson using fraction tiles (physical manipulatives)</div>
+                <div className="eicore-action-check"><CheckSvgWhite /></div>
+              </div>
+              <div className="eicore-action">
+                <div className="eicore-action-num">03</div>
+                <div className="eicore-action-text">Zara: Python lesson ready — 15 min focused session</div>
+                <div style={{ width: 18, height: 18, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.2)', flexShrink: 0 }}></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* PRICING */}
+      <section className="pricing-section" id="pricing">
+        <span className="section-label" style={{ display: 'block', textAlign: 'center' }}>Simple pricing</span>
+        <h2 className="section-headline" style={{ textAlign: 'center' }}>One plan. <em>Everything included.</em></h2>
+        <p className="section-sub" style={{ textAlign: 'center', margin: '14px auto 0' }}>
+          AI curriculum, ADHD support, and a full K-12 STEM and coding platform. Less than one workbook a month.
+        </p>
+        <div className="pricing-toggle">
+          <button className={billing === 'monthly' ? 'active' : ''} onClick={() => setBilling('monthly')}>Monthly</button>
+          <button className={billing === 'annual' ? 'active' : ''} onClick={() => setBilling('annual')}>
+            Annual <span className="pricing-save">Save 34%</span>
+          </button>
+        </div>
+        <div className="pricing-card-single">
+          <div className="pricing-plan-name">Family Plan</div>
+          <div className="pricing-price">
+            <sup>$</sup>{billing === 'monthly' ? '19' : '149'}<sub>{billing === 'monthly' ? '/month' : '/year'}</sub>
+          </div>
+          <div className="pricing-desc">
+            Everything Ei-Core can do for up to 6 children. AI curriculum, ADHD support, K-12 STEM and coding, daily plans, gap detection, and progress tracking — all included from day one.
+          </div>
+          <div className="pricing-divider"></div>
+          <ul className="pricing-features">
+            <li><div className="pricing-check"><CheckSvg /></div>Up to 6 children, all grade levels K-12</li>
+            <li><div className="pricing-check"><CheckSvg /></div>Unlimited Ei-Core AI lesson and curriculum generation</li>
+            <li><div className="pricing-check"><CheckSvg /></div>Full ADHD support — focus mode, cognitive load, differentiated pacing</li>
+            <li><div className="pricing-check"><CheckSvg /></div>Complete K-12 STEM and coding platform (Explorer, Builder, Creator tracks)</li>
+            <li><div className="pricing-check"><CheckSvg /></div>112 state standards pre-loaded, all subjects</li>
+            <li><div className="pricing-check"><CheckSvg /></div>Daily personalized plans for every child every morning</li>
+            <li><div className="pricing-check"><CheckSvg /></div>Portfolio-ready progress reports, FERPA compliant</li>
+            <li><div className="pricing-check"><CheckSvg /></div>IEP accommodation tracking and support</li>
+          </ul>
+          <button className="pricing-btn">Start your 14-day free trial</button>
+          <div className="pricing-note">No credit card required. Cancel any time.</div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="faq-section" id="faq">
+        <div className="faq-inner">
+          <div className="faq-header">
+            <span className="section-label" style={{ display: 'block', textAlign: 'center' }}>Questions</span>
+            <h2 className="section-headline" style={{ textAlign: 'center' }}>Things parents ask <em>first.</em></h2>
+          </div>
+          <details className="faq-item">
+            <summary className="faq-question">Does VeloxSync work for children with ADHD?<div className="faq-icon">+</div></summary>
+            <p className="faq-answer">Yes, and it was designed with ADHD learners in mind from the start. Focus timers, shorter lesson chunks, cognitive load monitoring, differentiated pacing, and movement break suggestions are all built into every plan. No diagnosis required. Ei-Core detects patterns that suggest a child needs a different approach and adapts automatically.</p>
+          </details>
+          <details className="faq-item">
+            <summary className="faq-question">What does the STEM and coding platform include?<div className="faq-icon">+</div></summary>
+            <p className="faq-answer">A full K-12 curriculum across three age-appropriate tracks. The Explorer Track (K-5) covers visual block coding, science experiments, and math through building. The Builder Track (6-8) introduces Python, HTML/CSS, Arduino, and project-based science. The Creator Track (9-12) covers production-level coding, web development, data science, and college portfolio projects. All included in the Family Plan.</p>
+          </details>
+          <details className="faq-item">
+            <summary className="faq-question">Do I need to already have a curriculum?<div className="faq-icon">+</div></summary>
+            <p className="faq-answer">No. VeloxSync works as your primary planning tool or alongside your existing curriculum. Ei-Core generates lessons and assignments from scratch, or it supplements what you are already using. You stay in control of what gets taught and when.</p>
+          </details>
+          <details className="faq-item">
+            <summary className="faq-question">Which state standards are included?<div className="faq-icon">+</div></summary>
+            <p className="faq-answer">112 state standards are pre-loaded including Common Core Math, Common Core ELA, TEKS (Texas), NGSS, and standards for all major U.S. states across all grade levels and subjects. Standards are updated annually.</p>
+          </details>
+          <details className="faq-item">
+            <summary className="faq-question">Is my child's data safe?<div className="faq-icon">+</div></summary>
+            <p className="faq-answer">Yes. VeloxSync is FERPA compliant and built on a zero-retention model. Ei-Core processes your child's data in real time and discards it immediately. Your family's data is never sold, never shared, and never used to train AI models. You own everything.</p>
+          </details>
+          <details className="faq-item">
+            <summary className="faq-question">Can I track IEP accommodations?<div className="faq-icon">+</div></summary>
+            <p className="faq-answer">Yes. VeloxSync includes IEP accommodation tracking. You enter your child's specific accommodations and Ei-Core applies them automatically to every lesson plan it generates. The system also sends reminders when accommodation check-ins are due and generates documentation for your records.</p>
+          </details>
+          <details className="faq-item">
+            <summary className="faq-question">Does this work for non-traditional schedules?<div className="faq-icon">+</div></summary>
+            <p className="faq-answer">Completely. Year-round learning, seasonal breaks, mixed-grade households, unit studies, project-based approaches — Ei-Core adapts to how your family actually works, not the other way around.</p>
+          </details>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="cta-section">
+        <div className="cta-bg"></div>
+        <div className="cta-inner">
+          <span className="section-label" style={{ color: 'rgba(255,255,255,0.6)', display: 'block', textAlign: 'center', marginBottom: 14 }}>Start today</span>
+          <h2 className="cta-headline">Your child is ready<br />to <em>catch up.</em></h2>
+          <p className="cta-sub">14 days free. No credit card. ADHD support and a full coding platform included on day one.</p>
+          <div className="cta-actions">
+            <button className="btn-cta-primary">Start free trial</button>
+            <a href={CALENDLY_URL} className="btn-cta-ghost" target="_blank" rel="noopener noreferrer">Book a call</a>
+          </div>
+          <p className="cta-note">// 14-day free trial — no credit card — FERPA compliant — cancel any time</p>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer>
+        <div className="footer-top">
+          <div className="footer-brand">
+            <a href="#" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
+              <div className="nav-logo-mark">
+                <svg viewBox="0 0 48 48" fill="none">
+                  <line x1="11" y1="10" x2="24" y2="35" stroke="white" strokeWidth="4" strokeLinecap="round" />
+                  <line x1="37" y1="10" x2="24" y2="35" stroke="white" strokeWidth="4" strokeLinecap="round" />
+                  <circle cx="24" cy="35" r="3" fill="#8FBF9F" />
+                </svg>
+              </div>
+              <div>
+                <div className="nav-wordmark">
+                  <div className="name" style={{ color: 'white' }}>Velox<span>Sync</span></div>
+                  <div className="sub">For Education</div>
                 </div>
               </div>
-            ))}
-          </div>
-
-          <div className="text-center mb-10">
-            <p className="text-yellow-300 italic text-base max-w-xl mx-auto leading-relaxed mb-8 font-medium">
-              "You own the signals. We just provide the lens. Export your data and classroom logic at any time."
-            </p>
-            <a
-              href="/VeloxSync_Principal_OneSheet.pdf"
-              download
-              className="inline-flex items-center gap-3 px-8 py-4 bg-white text-slate-900 font-black text-sm rounded-full border border-white/20 hover:bg-slate-100 transition-colors shadow-lg"
-            >
-              <svg className="w-4 h-4 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              Download Security Briefing
             </a>
+            <p>K-12 intelligence powered by Ei-Core. Built for the families who chose to do this themselves.</p>
           </div>
-
-          {/* Colorful trust badges */}
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <div className="flex items-center gap-2 bg-teal-500/10 border border-teal-500/30 rounded-full px-4 py-2">
-              <span>🛡️</span>
-              <span className="text-xs font-black text-teal-300 uppercase tracking-wider">Sovereign Secure</span>
-            </div>
-            <div className="flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/30 rounded-full px-4 py-2">
-              <span>📋</span>
-              <span className="text-xs font-black text-yellow-300 uppercase tracking-wider">FERPA Compliant</span>
-            </div>
-            <div className="flex items-center gap-2 bg-purple-500/10 border border-purple-500/30 rounded-full px-4 py-2">
-              <span>👶</span>
-              <span className="text-xs font-black text-purple-300 uppercase tracking-wider">COPPA+ Certified</span>
-            </div>
-            <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 rounded-full px-4 py-2">
-              <span>🎖️</span>
-              <span className="text-xs font-black text-emerald-300 uppercase tracking-wider">CISSP Oversight</span>
-            </div>
+          <div className="footer-col">
+            <h4>Platform</h4>
+            <a href="#">How it works</a>
+            <a href="#">Ei-Core AI</a>
+            <a href="#">ADHD Support</a>
+            <a href="#">STEM &amp; Coding</a>
+            <a href="#">Pricing</a>
           </div>
-        </div>
-      </section>
-
-      {/* ── FAQ ── */}
-      <section id="faq" className="bg-white px-6 py-20">
-        <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-100 text-slate-600 text-xs font-black uppercase tracking-wider mb-4">
-              ❓ Common Questions
-            </div>
-            <h2 className="text-4xl font-black text-slate-900 mb-3">Frequently Asked Questions</h2>
-            <p className="text-slate-500 text-lg">Everything you need to know before starting your free trial.</p>
+          <div className="footer-col">
+            <h4>Resources</h4>
+            <a href="#">State Standards Library</a>
+            <a href="#">Help Center</a>
+            <a href="#">FERPA Policy</a>
+            <a href="#">Blog</a>
+            <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer">Book a call</a>
           </div>
-          <div className="space-y-4">
-            {FAQ_ITEMS.map((item, i) => (
-              <div key={i} className={`border-2 rounded-3xl overflow-hidden transition-all ${openFaq === i ? 'border-teal-300 shadow-md' : 'border-slate-200'}`}>
-                <button
-                  className="w-full flex items-center justify-between px-7 py-5 text-left hover:bg-slate-50 transition-colors"
-                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                >
-                  <span className="text-base font-black text-slate-800 pr-4">{item.q}</span>
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${openFaq === i ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-500'}`}>
-                    <svg
-                      className={`w-4 h-4 transition-transform ${openFaq === i ? 'rotate-180' : ''}`}
-                      fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
-                </button>
-                {openFaq === i && (
-                  <div className="px-7 pb-6 border-t border-teal-100 bg-teal-50/30">
-                    <p className="text-base text-slate-600 leading-relaxed pt-5">{item.a}</p>
-                  </div>
-                )}
-              </div>
-            ))}
+          <div className="footer-col">
+            <h4>Company</h4>
+            <a href="#">About Meraki is Love</a>
+            <a href="#">Contact</a>
+            <a href="https://veloxsync.app">VeloxSync HR</a>
           </div>
         </div>
-      </section>
-
-      {/* ── Final CTA ── */}
-      <section className="px-6 py-24 text-center" style={{ background: 'linear-gradient(135deg, #0F766E 0%, #0891B2 100%)' }}>
-        <div className="max-w-2xl mx-auto">
-          <div className="text-5xl mb-6">🚀</div>
-          <h2 className="text-4xl md:text-5xl font-black text-white mb-5 leading-tight">
-            Ready to teach smarter?
-          </h2>
-          <p className="text-white/80 text-xl mb-10 font-medium">
-            Join thousands of teachers and homeschool families who spend less time sorting data and more time teaching.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link to="/education/checkout" className="inline-block bg-yellow-400 text-slate-900 font-black text-lg px-12 py-5 rounded-full hover:bg-yellow-300 transition-colors shadow-xl hover:-translate-y-0.5 transform">
-              Start Free — 14 Days On Us 🎉
-            </Link>
-            <a href="mailto:education@veloxsync.com" className="inline-block border-2 border-white/40 text-white font-bold text-base px-8 py-5 rounded-full hover:bg-white/10 transition-colors">
-              Talk to a human →
-            </a>
+        <div className="footer-bottom">
+          <div className="footer-copy">&copy; 2026 Meraki is Love, LLC. VeloxSync and Ei-Core are trademarks of Meraki is Love, LLC.</div>
+          <div className="footer-legal">
+            <a href="#">Privacy</a>
+            <a href="#">Terms</a>
+            <a href="#">FERPA</a>
+            <a href="#">Cookies</a>
           </div>
-          <PrivacyBadge />
-        </div>
-      </section>
-
-      {/* ── Footer ── */}
-      <footer className="border-t border-slate-200 bg-white px-6 py-10">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">🎓</span>
-            <span className="text-sm font-black text-slate-900">VeloxSync Education</span>
-          </div>
-          <div className="flex items-center gap-6 text-xs text-slate-400">
-            <Link to="/privacy" className="hover:text-slate-700 transition-colors">Privacy Policy</Link>
-            <Link to="/terms" className="hover:text-slate-700 transition-colors">Terms of Service</Link>
-            <a href="mailto:education@veloxsync.com" className="hover:text-slate-700 transition-colors">Contact</a>
-          </div>
-          <p className="text-xs text-slate-400">© {new Date().getFullYear()} VeloxSync. All rights reserved.</p>
-        </div>
-        <div className="max-w-6xl mx-auto mt-5 text-center">
-          <p className="text-xs text-slate-400">
-            For organizational leaders:{' '}
-            <Link to="/sovereign-audit" className="text-violet-500 hover:text-violet-400 transition-colors font-bold">
-              Take the Sovereign Audit →
-            </Link>
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-slate-500 mt-6 pt-5 border-t border-slate-100">
-          <span>🛡️ SOVEREIGN SECURE</span>
-          <span>·</span>
-          <span>📋 FERPA Compliant</span>
-          <span>·</span>
-          <span>👶 COPPA+ Certified</span>
-          <span>·</span>
-          <span>🎖️ CISSP Oversight</span>
-          <span>·</span>
-          <span>🔒 Zero Student Data Retention</span>
         </div>
       </footer>
     </div>
