@@ -46,7 +46,12 @@ const greetingForHour = (h: number) =>
   h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
 
 const DASHBOARD_CSS = `
-.edu-dash { display: flex; min-height: 100vh; background: #FAF7F2; font-family: 'Open Sans', sans-serif; color: #1C1812; }
+.edu-dash {
+  display: flex; min-height: 100vh; background: #FAF7F2;
+  background-image: radial-gradient(circle, rgba(28,24,18,0.03) 1px, transparent 1px);
+  background-size: 24px 24px;
+  font-family: 'Open Sans', sans-serif; color: #1C1812;
+}
 .edu-dash-main { flex: 1; overflow-y: auto; min-width: 0; }
 
 .edu-dash-mobile-bar { display: none; }
@@ -74,25 +79,48 @@ const DASHBOARD_CSS = `
   0%, 100% { opacity: 1;   transform: scale(1); }
   50%      { opacity: 0.4; transform: scale(0.7); }
 }
+@keyframes eduSparklePulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.15); }
+}
+@keyframes eduHeartPulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.08); }
+}
+@keyframes eduCheckBounce {
+  0%   { transform: scale(0.8); }
+  60%  { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
 .edu-fade { opacity: 0; animation: eduFadeUp 0.6s ease-out forwards; }
 .edu-fade-1 { animation-delay: 0s; }
-.edu-fade-2 { animation-delay: 0.1s; }
-.edu-fade-3 { animation-delay: 0.2s; }
-.edu-fade-4 { animation-delay: 0.3s; }
-.edu-fade-5 { animation-delay: 0.4s; }
+.edu-fade-2 { animation-delay: 0.15s; }
+.edu-fade-3 { animation-delay: 0.30s; }
+.edu-fade-4 { animation-delay: 0.45s; }
+.edu-fade-5 { animation-delay: 0.60s; }
 
 /* — 1. Greeting header — */
 .morning-head {
   display: flex; flex-direction: column; gap: 16px;
   margin-bottom: 32px;
+  background: linear-gradient(135deg, #EBF2EC 0%, #FAF7F2 50%, #F0EDF8 100%);
+  border: 1px solid rgba(61,107,79,0.1);
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 4px 24px rgba(61,107,79,0.06);
 }
 @media (min-width: 768px) {
   .morning-head { flex-direction: row; align-items: flex-end; justify-content: space-between; gap: 24px; }
 }
 .morning-date {
+  display: inline-flex; align-items: center; align-self: flex-start;
+  background: #3D6B4F; color: #FFFFFF;
   font-family: 'Open Sans', sans-serif;
-  font-size: 13px; font-weight: 500; color: rgba(28,24,18,0.4);
-  letter-spacing: 0.02em; margin-bottom: 10px;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 6px 12px; border-radius: 100px;
+  margin-bottom: 14px;
+  box-shadow: 0 4px 12px rgba(61,107,79,0.18);
 }
 .morning-greeting {
   font-family: 'Cormorant Garamond', serif;
@@ -129,13 +157,15 @@ const DASHBOARD_CSS = `
 .children-row::-webkit-scrollbar-thumb { background: rgba(28,24,18,0.12); border-radius: 100px; }
 .child-avatar-btn {
   display: flex; flex-direction: column; align-items: center; gap: 6px;
-  background: none; border: none; cursor: pointer; padding: 6px 4px 10px;
-  border-bottom: 2px solid transparent;
-  transition: border-color 0.2s, transform 0.2s;
+  border: 2px solid transparent;
+  cursor: pointer; padding: 12px;
+  border-radius: 12px;
+  background: transparent;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
   flex-shrink: 0;
 }
 .child-avatar-btn:hover { transform: translateY(-2px); }
-.child-avatar-btn.is-active { border-bottom-color: #3D6B4F; }
+.child-avatar-btn.is-active { border-color: #3D6B4F; }
 .child-avatar-circle {
   width: 56px; height: 56px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
@@ -157,26 +187,36 @@ const DASHBOARD_CSS = `
   color: #3D6B4F;
 }
 .child-avatar-add .child-avatar-circle {
-  background: #FFFFFF; border: 1px dashed rgba(61,107,79,0.4);
+  background: #FFFFFF; border: 2px dashed rgba(61,107,79,0.5);
   color: #3D6B4F; font-weight: 300;
+}
+.child-avatar-add:hover .child-avatar-circle {
+  border-color: #3D6B4F; background: rgba(61,107,79,0.04);
 }
 
 /* — 3. Ei-Core morning insight — */
 .morning-insight {
-  background: #FFFFFF;
-  border: 1px solid rgba(28,24,18,0.1);
+  background: linear-gradient(135deg, rgba(61,107,79,0.06) 0%, rgba(61,107,79,0.02) 100%);
+  border: 1px solid rgba(61,107,79,0.18);
   border-left: 3px solid #3D6B4F;
   border-radius: 16px;
   padding: 22px 26px;
   margin-bottom: 36px;
-  box-shadow: 0 2px 16px rgba(28,24,18,0.05);
+  box-shadow: 0 2px 16px rgba(61,107,79,0.06);
 }
 .morning-insight-head {
   display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;
 }
 .morning-insight-label {
-  font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
   text-transform: uppercase; color: #3D6B4F;
+}
+.morning-insight-sparkle {
+  display: inline-block;
+  animation: eduSparklePulse 1.8s ease-in-out infinite;
+  transform-origin: center;
+  color: #3D6B4F;
 }
 .morning-insight-dismiss {
   background: none; border: none; cursor: pointer;
@@ -208,26 +248,39 @@ const DASHBOARD_CSS = `
   font-size: 24px; font-weight: 400; font-style: normal;
   color: #1C1812; line-height: 1;
 }
-.plan-blocks { display: flex; flex-direction: column; gap: 12px; }
+.plan-blocks { display: flex; flex-direction: column; gap: 14px; position: relative; }
 .plan-block {
   position: relative;
   background: #FFFFFF;
   border: 1px solid rgba(28,24,18,0.1);
   border-radius: 16px;
-  padding: 18px 22px 18px 28px;
+  padding: 18px 22px 18px 30px;
   display: flex; align-items: center; gap: 18px;
   box-shadow: 0 2px 14px rgba(28,24,18,0.04);
   transition: box-shadow 0.2s, transform 0.2s;
   overflow: hidden;
 }
 .plan-block:hover { box-shadow: 0 8px 24px rgba(28,24,18,0.07); }
-.plan-block-stripe {
-  position: absolute; top: 0; left: 0; bottom: 0; width: 4px;
+.plan-block + .plan-block::before {
+  content: '';
+  position: absolute;
+  top: -14px; left: 18px;
+  width: 0; height: 14px;
+  border-left: 1px dashed rgba(28,24,18,0.18);
 }
-.plan-block-body { flex: 1; min-width: 0; }
+.plan-block-stripe {
+  position: absolute; top: 0; left: 0; bottom: 0; width: 6px;
+}
+.plan-block-body { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; }
+.plan-block-icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; color: #3D6B4F;
+}
+.plan-block-text { flex: 1; min-width: 0; }
 .plan-block-title {
   font-family: 'Open Sans', sans-serif;
-  font-size: 13px; font-weight: 700; color: #1C1812;
+  font-size: 15px; font-weight: 600; color: #1C1812;
   margin: 0 0 4px;
 }
 .plan-block-desc {
@@ -244,13 +297,13 @@ const DASHBOARD_CSS = `
   padding: 4px 10px; border-radius: 100px;
 }
 .plan-pill-duration {
-  background: #F3EDE3; color: rgba(28,24,18,0.65);
+  color: rgba(28,24,18,0.72);
 }
 .plan-pill-focus {
   background: #EDE6F6; color: #6B4F8F;
 }
 .plan-check {
-  width: 26px; height: 26px; border-radius: 50%;
+  width: 24px; height: 24px; border-radius: 50%;
   border: 1.5px solid rgba(28,24,18,0.18);
   background: #FFFFFF; cursor: pointer; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
@@ -260,17 +313,31 @@ const DASHBOARD_CSS = `
 .plan-check:hover { border-color: #3D6B4F; }
 .plan-check.is-done {
   background: #3D6B4F; border-color: #3D6B4F;
+  animation: eduCheckBounce 0.25s ease-out;
 }
 .plan-check.is-done svg { color: #FFFFFF; opacity: 1; }
 .plan-check svg { color: #FFFFFF; opacity: 0; transition: opacity 0.2s; width: 14px; height: 14px; }
 
 /* — Empty state for plan — */
 .plan-empty {
+  position: relative;
   background: #FFFFFF; border: 1px dashed rgba(28,24,18,0.15);
   border-radius: 16px; padding: 72px 24px;
   text-align: center;
+  overflow: hidden;
 }
-.plan-empty-icon { color: #3D6B4F; margin: 0 auto 18px; display: block; }
+.plan-empty-halo {
+  position: absolute; top: 24px; left: 50%; transform: translateX(-50%);
+  width: 200px; height: 200px; pointer-events: none;
+  background: radial-gradient(circle, rgba(61,107,79,0.08) 0%, transparent 70%);
+  z-index: 0;
+}
+.plan-empty > * { position: relative; z-index: 1; }
+.plan-empty-icon {
+  color: #3D6B4F; margin: 0 auto 18px; display: block;
+  animation: eduHeartPulse 2s ease-in-out infinite;
+  transform-origin: center;
+}
 .plan-empty-title {
   font-family: 'Cormorant Garamond', serif;
   font-size: 28px; font-weight: 400; color: #1C1812; margin: 0 0 10px;
@@ -304,15 +371,20 @@ const DASHBOARD_CSS = `
   padding: 22px 22px 20px;
   box-shadow: 0 2px 14px rgba(28,24,18,0.04);
 }
+.quick-stat-sage   { background: #EBF2EC; border-bottom: 3px solid #3D6B4F; }
+.quick-stat-lavender { background: #EDE6F6; border-bottom: 3px solid #6B4F8F; }
+.quick-stat-peach  { background: #F8E8DC; border-bottom: 3px solid #B8794A; }
 .quick-stat-value {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 36px; font-weight: 400; color: #1C1812;
+  font-size: 42px; font-weight: 400; color: #1C1812;
   line-height: 1.05; display: flex; align-items: center; gap: 8px;
 }
-.quick-stat-value svg { color: #3D6B4F; width: 22px; height: 22px; }
+.quick-stat-value svg { color: #3D6B4F; width: 24px; height: 24px; }
+.quick-stat-lavender .quick-stat-value svg { color: #6B4F8F; }
+.quick-stat-peach .quick-stat-value svg { color: #B8794A; }
 .quick-stat-label {
   font-family: 'Open Sans', sans-serif;
-  font-size: 10px; color: rgba(28,24,18,0.5);
+  font-size: 10px; color: rgba(28,24,18,0.6);
   letter-spacing: 0.08em; text-transform: uppercase;
   margin-top: 8px;
 }
@@ -348,7 +420,15 @@ const DASHBOARD_CSS = `
   width: 100%; max-width: 460px; max-height: 90vh; overflow-y: auto;
   box-shadow: 0 24px 60px rgba(28,24,18,0.18);
 }
-.edu-dash-modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+.edu-dash-modal-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin: -28px -28px 22px;
+  padding: 22px 28px;
+  background: linear-gradient(135deg, #EBF2EC 0%, #FAF7F2 100%);
+  border-bottom: 1px solid rgba(61,107,79,0.12);
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+}
 .edu-dash-modal-title {
   font-family: 'Cormorant Garamond', serif;
   font-size: 26px; font-weight: 400; font-style: normal; color: #1C1812;
@@ -372,7 +452,10 @@ const DASHBOARD_CSS = `
   transition: border-color 0.2s;
 }
 .edu-dash-modal-input:focus,
-.edu-dash-modal-select:focus { outline: none; border-color: #3D6B4F; }
+.edu-dash-modal-select:focus {
+  outline: none; border-color: #3D6B4F;
+  box-shadow: 0 0 0 3px rgba(61,107,79,0.15);
+}
 .edu-dash-modal-curr { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .edu-dash-modal-curr button {
   font-family: 'Open Sans', sans-serif;
@@ -413,6 +496,71 @@ const DASHBOARD_CSS = `
 .edu-dash-modal-btn-primary:hover { background: #5A8F6A; }
 .edu-dash-modal-btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
 `;
+
+// — Subject icon helper —
+function subjectIcon(subject: string) {
+  const s = subject.toLowerCase();
+  const common = { width: 18, height: 18, fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', strokeWidth: 1.7 } as const;
+  if (s.includes('math')) {
+    return (
+      <svg {...common}>
+        <rect x="4" y="3" width="16" height="18" rx="2" />
+        <path strokeLinecap="round" d="M7 7h10M8 11h2m3 0h3M8 14h2m3 0h3M8 17h2m3 0h3" />
+      </svg>
+    );
+  }
+  if (s.includes('read')) {
+    return (
+      <svg {...common}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.5C10 4.5 7 4 4 4.5v14c3-.5 6 0 8 2 2-2 5-2.5 8-2v-14c-3-.5-6 0-8 2zM12 6.5v14" />
+      </svg>
+    );
+  }
+  if (s.includes('science') || s.includes('nature')) {
+    return (
+      <svg {...common}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M10 3v6.5L4 19a2 2 0 001.7 3h12.6a2 2 0 001.7-3L14 9.5V3M9 3h6" />
+      </svg>
+    );
+  }
+  if (s.includes('cod') || s.includes('python')) {
+    return (
+      <svg {...common}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 8l-5 4 5 4M15 8l5 4-5 4M14 6l-4 12" />
+      </svg>
+    );
+  }
+  if (s.includes('writ')) {
+    return (
+      <svg {...common}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15.5 4.5l4 4L8 20H4v-4L15.5 4.5z" />
+      </svg>
+    );
+  }
+  if (s.includes('history')) {
+    return (
+      <svg {...common}>
+        <circle cx="12" cy="12" r="9" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 7v5l3 2" />
+      </svg>
+    );
+  }
+  if (s.includes('art')) {
+    return (
+      <svg {...common}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9 9 0 110-18c5 0 9 3.6 9 8 0 2.5-2 4-4 4h-2a2 2 0 00-2 2c0 1.1.4 2 .6 2.6.3.8-.3 1.4-1.6 1.4z" />
+        <circle cx="7.5" cy="11" r="1" /><circle cx="11" cy="7.5" r="1" /><circle cx="16.5" cy="9.5" r="1" />
+      </svg>
+    );
+  }
+  // default: notebook
+  return (
+    <svg {...common}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M5 4h11l3 3v13H5z" />
+      <path strokeLinecap="round" d="M9 9h6M9 13h6M9 17h4" />
+    </svg>
+  );
+}
 
 let dashStylesInjected = false;
 function ensureDashStyles() {
@@ -786,7 +934,14 @@ export default function HomeschoolDashboard() {
           {!insightDismissed && (
             <div className="morning-insight edu-fade edu-fade-3">
               <div className="morning-insight-head">
-                <div className="morning-insight-label">Ei-Core Insight</div>
+                <div className="morning-insight-label">
+                  <span className="morning-insight-sparkle" aria-hidden="true">
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 3l1.7 4.6L18 9l-4.3 1.4L12 15l-1.7-4.6L6 9l4.3-1.4L12 3zM18 14l.9 2.3L21 17l-2.1.7L18 20l-.9-2.3L15 17l2.1-.7L18 14z" />
+                    </svg>
+                  </span>
+                  Ei-Core Insight
+                </div>
                 <button
                   className="morning-insight-dismiss"
                   onClick={() => setInsightDismissed(true)}
@@ -807,7 +962,8 @@ export default function HomeschoolDashboard() {
               </div>
             ) : children.length === 0 ? (
               <div className="plan-empty">
-                <svg className="plan-empty-icon" width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.4}>
+                <span className="plan-empty-halo" aria-hidden="true" />
+                <svg className="plan-empty-icon" width="56" height="56" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.4}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
                 <h2 className="plan-empty-title">Add your first learner.</h2>
@@ -838,17 +994,22 @@ export default function HomeschoolDashboard() {
                         const key = `${child.id}-${lessonIdx}`;
                         const done = !!completed[key];
                         return (
-                          <div key={key} className="plan-block">
+                          <div key={key} className="plan-block" style={{ background: `${color}14` }}>
                             <span className="plan-block-stripe" style={{ background: color }} />
                             <div className="plan-block-body">
-                              <p className="plan-block-title">{lesson.subject} — {lesson.title}</p>
-                              <p className="plan-block-desc">{lesson.desc}</p>
+                              <span className="plan-block-icon" style={{ background: `${color}33` }}>
+                                {subjectIcon(lesson.subject)}
+                              </span>
+                              <div className="plan-block-text">
+                                <p className="plan-block-title">{lesson.subject} — {lesson.title}</p>
+                                <p className="plan-block-desc">{lesson.desc}</p>
+                              </div>
                             </div>
                             <div className="plan-block-meta">
                               {child.has_iep && (
                                 <span className="plan-pill plan-pill-focus">Focus Mode</span>
                               )}
-                              <span className="plan-pill plan-pill-duration">{lesson.duration} min</span>
+                              <span className="plan-pill plan-pill-duration" style={{ background: color }}>{lesson.duration} min</span>
                               <button
                                 type="button"
                                 className={`plan-check${done ? ' is-done' : ''}`}
@@ -874,15 +1035,15 @@ export default function HomeschoolDashboard() {
           {/* 5. Quick stats */}
           {children.length > 0 && (
             <div className="quick-stats edu-fade edu-fade-5">
-              <div className="quick-stat">
+              <div className="quick-stat quick-stat-sage">
                 <div className="quick-stat-value">{standardsMastered}</div>
                 <div className="quick-stat-label">Standards mastered · across all children</div>
               </div>
-              <div className="quick-stat">
+              <div className="quick-stat quick-stat-lavender">
                 <div className="quick-stat-value">{totalLessons}</div>
                 <div className="quick-stat-label">Lessons this week</div>
               </div>
-              <div className="quick-stat">
+              <div className="quick-stat quick-stat-peach">
                 <div className="quick-stat-value">
                   <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.6}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.24 17 6.5c1.5 2 1 4 .5 5 .393-.5 1.5-1 2.5.5 1 1.5 1.5 5-2.343 6.657z" />

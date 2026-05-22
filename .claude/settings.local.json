@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "Bash(git add *)",
+      "Bash(git commit)",
+      "Bash(git push *)",
+      "Bash(Remove-Item -Path \"src/pages/education/TeacherDashboard.tsx\",\"src/pages/education/StudentRoster.tsx\",\"src/pages/education/DifferentiationGroups.tsx\",\"src/pages/education/EduIntegrations.tsx\",\"src/pages/education/TexasTeks.tsx\",\"src/pages/education/IepCompliance.tsx\",\"src/pages/education/CommonCore.tsx\",\"src/pages/education/HomeschoolLanding.tsx\",\"src/pages/education/K12Landing.tsx\",\"src/pages/dashboards/EducationDashboard.tsx\")",
+      "PowerShell(Remove-Item *)",
+      "Bash(git commit *)"
+    ]
+  }
+}
