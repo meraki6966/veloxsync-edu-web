@@ -142,25 +142,30 @@ const PACING_CSS = `
 }
 .pacing-title {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 36px; font-weight: 400; line-height: 1.1; color: #1C1812; margin: 0;
+  font-size: 36px; font-weight: 400; font-style: normal; line-height: 1.1; color: #1C1812; margin: 0;
 }
-.pacing-title em { font-style: italic; color: #3D6B4F; }
-.pacing-sub { font-size: 14px; color: rgba(28,24,18,0.5); margin-top: 8px; line-height: 1.55; }
+.pacing-title em { font-style: normal; color: #1C1812; }
+.pacing-sub { font-size: 14px; color: rgba(28,24,18,0.8); margin-top: 8px; line-height: 1.55; }
 
-.pacing-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.pacing-controls { display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+.pacing-field { display: flex; flex-direction: column; gap: 6px; }
+.pacing-field-label {
+  font-family: 'Open Sans', sans-serif; font-size: 12px; font-weight: 600;
+  text-transform: uppercase; color: #3D6B4F; letter-spacing: 0.1em;
+}
 .pacing-select {
-  background: #FFFFFF; border: 1px solid rgba(28,24,18,0.1); border-radius: 100px;
-  padding: 11px 18px; font-family: 'Open Sans', sans-serif; font-size: 13px; color: #1C1812;
-  min-width: 200px; transition: border-color 0.2s;
+  background: #FFFFFF; border: 1px solid rgba(28,24,18,0.15); border-radius: 8px;
+  padding: 11px 16px; font-family: 'Open Sans', sans-serif; font-size: 14px; color: #1C1812;
+  min-width: 220px; min-height: 44px; transition: border-color 0.2s;
 }
 .pacing-select:focus { outline: none; border-color: #3D6B4F; box-shadow: 0 0 0 3px rgba(61,107,79,0.15); }
 .pacing-btn {
-  display: inline-flex; align-items: center; gap: 8px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   font-family: 'Open Sans', sans-serif; font-size: 14px; font-weight: 600;
   color: #FFFFFF; background: #3D6B4F; border: none; cursor: pointer;
-  padding: 12px 24px; border-radius: 100px; transition: background 0.2s;
+  padding: 0 24px; min-height: 44px; border-radius: 8px; transition: background-color 0.2s;
 }
-.pacing-btn:hover { background: #5A8F6A; }
+.pacing-btn:hover { background: #2D5A3F; }
 .pacing-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
 /* Child context badge */
@@ -171,7 +176,7 @@ const PACING_CSS = `
   color: #3D6B4F; background: #EBF2EC; border: 1px solid rgba(61,107,79,0.25);
   padding: 6px 14px; border-radius: 100px;
 }
-.pacing-context-meta { font-size: 12px; color: rgba(28,24,18,0.5); }
+.pacing-context-meta { font-size: 13px; color: rgba(28,24,18,0.8); }
 
 /* Section */
 .pacing-section { margin-bottom: 32px; }
@@ -183,16 +188,16 @@ const PACING_CSS = `
 
 .pacing-blocks { display: flex; flex-direction: column; gap: 12px; }
 .pacing-block {
-  position: relative; background: #FFFFFF; border: 1px solid rgba(28,24,18,0.1);
-  border-radius: 16px; padding: 16px 20px 16px 28px;
+  position: relative; background: #FFFFFF; border: 1px solid rgba(28,24,18,0.08);
+  border-radius: 12px; padding: 16px 20px 16px 28px;
   display: flex; align-items: center; gap: 16px;
-  box-shadow: 0 2px 14px rgba(28,24,18,0.04);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
   transition: box-shadow 0.2s; overflow: hidden;
 }
-.pacing-block:hover { box-shadow: 0 8px 24px rgba(28,24,18,0.07); }
-.pacing-block-stripe { position: absolute; top: 0; left: 0; bottom: 0; width: 6px; }
+.pacing-block:hover { box-shadow: 0 4px 12px rgba(28,24,18,0.06); }
+.pacing-block-stripe { position: absolute; top: 0; left: 0; bottom: 0; width: 4px; }
 .pacing-block-icon {
-  width: 34px; height: 34px; border-radius: 8px; flex-shrink: 0;
+  width: 28px; height: 28px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center; color: #3D6B4F;
 }
 .pacing-block-text { flex: 1; min-width: 0; }
@@ -204,7 +209,7 @@ const PACING_CSS = `
 .pacing-pill {
   font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 100px; white-space: nowrap;
 }
-.pacing-pill-duration { color: rgba(28,24,18,0.72); }
+.pacing-pill-duration { color: rgba(28,24,18,0.8); background: rgba(28,24,18,0.05); }
 .pacing-pill-focus { color: #6B4F8F; background: #EDE6F6; }
 .pacing-check {
   width: 24px; height: 24px; border-radius: 50%;
@@ -219,19 +224,19 @@ const PACING_CSS = `
 
 /* Empty state */
 .pacing-empty {
-  background: #FFFFFF; border: 1px dashed rgba(28,24,18,0.15); border-radius: 16px;
+  background: #FFFFFF; border: 1px dashed rgba(28,24,18,0.15); border-radius: 12px;
   padding: 72px 24px; text-align: center;
 }
 .pacing-empty-icon { color: #3D6B4F; margin: 0 auto 16px; display: block; }
-.pacing-empty-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 400; color: #1C1812; margin: 0 0 8px; }
-.pacing-empty-sub { font-size: 13px; color: rgba(28,24,18,0.55); line-height: 1.6; margin: 0; }
+.pacing-empty-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 400; font-style: normal; color: #1C1812; margin: 0 0 8px; }
+.pacing-empty-sub { font-size: 14px; color: rgba(28,24,18,0.8); line-height: 1.6; margin: 0; }
 .pacing-empty-btn {
-  display: inline-flex; align-items: center; gap: 8px; margin-top: 18px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; margin-top: 18px;
   font-family: 'Open Sans', sans-serif; font-size: 14px; font-weight: 600; color: #FFFFFF;
-  background: #3D6B4F; border: none; cursor: pointer; padding: 12px 24px; border-radius: 100px;
-  transition: background 0.2s;
+  background: #3D6B4F; border: none; cursor: pointer; padding: 0 24px; min-height: 44px; border-radius: 8px;
+  transition: background-color 0.2s;
 }
-.pacing-empty-btn:hover { background: #5A8F6A; }
+.pacing-empty-btn:hover { background: #2D5A3F; }
 `;
 
 let pacingStylesInjected = false;
@@ -253,7 +258,7 @@ function ensurePacingStyles() {
 
 function subjectIcon(subject: string) {
   const s = subject.toLowerCase();
-  const common = { width: 18, height: 18, fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', strokeWidth: 1.7 } as const;
+  const common = { width: 20, height: 20, fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', strokeWidth: 1.5 } as const;
   if (s.includes('math')) {
     return (
       <svg {...common}>
@@ -390,22 +395,26 @@ export default function PacingGuide() {
           {/* Header */}
           <div className="pacing-head">
             <div>
-              <h1 className="pacing-title">Daily <em>Plan</em></h1>
+              <h1 className="pacing-title">Daily Plan</h1>
               <p className="pacing-sub">Your family's learning schedule</p>
             </div>
 
             <div className="pacing-controls">
-              <select
-                className="pacing-select"
-                value={selectedId}
-                onChange={e => { setSelectedId(e.target.value); setPlan(null); setCompleted({}); }}
-                disabled={children.length === 0}
-              >
-                <option value="">Select a child…</option>
-                {children.map(c => (
-                  <option key={c.id} value={c.id}>{`${c.first_name} ${c.last_name}`.trim()}</option>
-                ))}
-              </select>
+              <div className="pacing-field">
+                <label className="pacing-field-label" htmlFor="pacing-child-select">Child</label>
+                <select
+                  id="pacing-child-select"
+                  className="pacing-select"
+                  value={selectedId}
+                  onChange={e => { setSelectedId(e.target.value); setPlan(null); setCompleted({}); }}
+                  disabled={children.length === 0}
+                >
+                  <option value="">Select a child…</option>
+                  {children.map(c => (
+                    <option key={c.id} value={c.id}>{`${c.first_name} ${c.last_name}`.trim()}</option>
+                  ))}
+                </select>
+              </div>
               <button className="pacing-btn" onClick={handleGenerate} disabled={!selectedId || generating}>
                 {generating ? (
                   <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} style={{ animation: 'eduSpin 0.8s linear infinite' }}>
@@ -465,9 +474,9 @@ export default function PacingGuide() {
                   const color = LESSON_COLORS[i % LESSON_COLORS.length];
                   const done = !!completed[lesson.id];
                   return (
-                    <div key={lesson.id} className="pacing-block" style={{ background: `${color}12` }}>
+                    <div key={lesson.id} className="pacing-block">
                       <span className="pacing-block-stripe" style={{ background: color }} />
-                      <span className="pacing-block-icon" style={{ background: `${color}26`, color }}>
+                      <span className="pacing-block-icon" style={{ color }}>
                         {subjectIcon(lesson.subject)}
                       </span>
                       <div className="pacing-block-text">
@@ -478,7 +487,7 @@ export default function PacingGuide() {
                         {plan.hasIep && (
                           <span className="pacing-pill pacing-pill-focus">Focus Mode</span>
                         )}
-                        <span className="pacing-pill pacing-pill-duration" style={{ background: color }}>{lesson.duration} min</span>
+                        <span className="pacing-pill pacing-pill-duration">{lesson.duration} min</span>
                         <button
                           type="button"
                           className={`pacing-check${done ? ' is-done' : ''}`}

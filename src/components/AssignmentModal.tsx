@@ -108,11 +108,7 @@ function buildMockAssignment(cfg: AssignmentConfig): GeneratedAssignment {
   const subj = cfg.subject;
   const dur = parseInt(g, 10) <= 3 ? '30–40 minutes' : parseInt(g, 10) <= 6 ? '45–55 minutes' : '50–65 minutes';
 
-  const EMOJI: Record<string, string> = {
-    Math: '🔢', ELA: '📖', Science: '🔬', 'Social Studies': '🌍',
-    Writing: '✍️', Reading: '📚', Arts: '🎨', STEM: '🚀', 'Foreign Language': '🌐',
-  };
-  const emoji = EMOJI[subj] || '📝';
+  const emoji = '';
   const standardCode = cfg.specificStandard || `${subj.replace(/\s/g, '').slice(0, 3).toUpperCase()}.G${g === 'K' ? 'K' : g}.01`;
 
   // subject-aware content banks
@@ -451,17 +447,17 @@ function triggerPrint(assignment: GeneratedAssignment, cfg: AssignmentConfig) {
     return '';
   }).join('');
 
-  win.document.write(`<!DOCTYPE html><html><head><title>${assignment.emoji} ${assignment.title}</title><style>body{font-family:Georgia,serif;max-width:800px;margin:0 auto;padding:30px;color:#1a1a1a}h1{font-size:22px;margin-bottom:6px}h2{font-size:16px;color:#374151;margin:18px 0 6px}h3{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:#6b7280;margin:16px 0 8px}.meta{display:flex;gap:16px;margin-bottom:16px;font-size:13px;color:#6b7280}.teal{background:#f0fdfa;border:1px solid #99f6e4;border-radius:8px;padding:12px;margin:12px 0}.chip{display:inline-block;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;padding:2px 8px;font-size:12px;margin:2px}table{width:100%;border-collapse:collapse}th{background:#f1f5f9;text-align:left;padding:8px;font-size:12px;border:1px solid #e2e8f0}td{padding:8px;border:1px solid #e2e8f0;font-size:12px;vertical-align:top}.diff{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:8px}.diff-col{border:1px solid #e2e8f0;border-radius:8px;padding:12px;font-size:12px}.notes{background:#fafafa;border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-top:16px;font-size:12px}@media print{body{padding:20px}}</style></head><body>
-<h1>${assignment.emoji} ${assignment.title}</h1>
-<div class="meta"><span>Grade ${cfg.gradeLevel}</span><span>${cfg.subject}</span>${cfg.state ? `<span>${cfg.state}</span>` : ''}<span>⏱ ${assignment.duration}</span></div>
+  win.document.write(`<!DOCTYPE html><html><head><title>${assignment.title}</title><style>body{font-family:Georgia,serif;max-width:800px;margin:0 auto;padding:30px;color:#1a1a1a}h1{font-size:22px;margin-bottom:6px}h2{font-size:16px;color:#374151;margin:18px 0 6px}h3{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:#6b7280;margin:16px 0 8px}.meta{display:flex;gap:16px;margin-bottom:16px;font-size:13px;color:#6b7280}.teal{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px;margin:12px 0}.chip{display:inline-block;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;padding:2px 8px;font-size:12px;margin:2px}table{width:100%;border-collapse:collapse}th{background:#f1f5f9;text-align:left;padding:8px;font-size:12px;border:1px solid #e2e8f0}td{padding:8px;border:1px solid #e2e8f0;font-size:12px;vertical-align:top}.diff{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:8px}.diff-col{border:1px solid #e2e8f0;border-radius:8px;padding:12px;font-size:12px}.notes{background:#fafafa;border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-top:16px;font-size:12px}@media print{body{padding:20px}}</style></head><body>
+<h1>${assignment.title}</h1>
+<div class="meta"><span>Grade ${cfg.gradeLevel}</span><span>${cfg.subject}</span>${cfg.state ? `<span>${cfg.state}</span>` : ''}<span>${assignment.duration}</span></div>
 <div class="teal"><strong>${assignment.standardCode}</strong> — ${assignment.iCanStatement}</div>
 <h3>Materials</h3><div>${assignment.materials.map(m => `<span class="chip">${m}</span>`).join('')}</div>
 ${sectionHTML}
 <h2>Differentiation</h2>
 <div class="diff">
-  <div class="diff-col"><strong>👁 Visual</strong><ul>${assignment.differentiation.visual.map(v => `<li>${v}</li>`).join('')}</ul></div>
-  <div class="diff-col"><strong>👂 Auditory</strong><ul>${assignment.differentiation.auditory.map(v => `<li>${v}</li>`).join('')}</ul></div>
-  <div class="diff-col"><strong>✋ Kinesthetic</strong><ul>${assignment.differentiation.kinesthetic.map(v => `<li>${v}</li>`).join('')}</ul></div>
+  <div class="diff-col"><strong>Visual</strong><ul>${assignment.differentiation.visual.map(v => `<li>${v}</li>`).join('')}</ul></div>
+  <div class="diff-col"><strong>Auditory</strong><ul>${assignment.differentiation.auditory.map(v => `<li>${v}</li>`).join('')}</ul></div>
+  <div class="diff-col"><strong>Kinesthetic</strong><ul>${assignment.differentiation.kinesthetic.map(v => `<li>${v}</li>`).join('')}</ul></div>
 </div>
 <h2>Rubric</h2>
 <table><tr><th>Criterion</th><th>Distinguished</th><th>Proficient</th><th>Apprentice</th><th>Novice</th></tr>
@@ -475,7 +471,7 @@ ${assignment.rubric.map(r => `<tr><td><strong>${r.criterion}</strong></td><td>${
 
 function copyAssignmentText(assignment: GeneratedAssignment, cfg: AssignmentConfig): string {
   const lines: string[] = [
-    `${assignment.emoji} ${assignment.title}`,
+    `${assignment.title}`,
     `Grade ${cfg.gradeLevel} | ${cfg.subject}${cfg.state ? ` | ${cfg.state}` : ''} | ${assignment.duration}`,
     '',
     `Standard: ${assignment.standardCode}`,
@@ -533,14 +529,14 @@ function AssignmentPreview({
         {/* Title */}
         <div>
           <h2 className="text-xl font-black text-slate-900 leading-tight">
-            {assignment.emoji} {assignment.title}
+            {assignment.title}
           </h2>
           <div className="flex items-center gap-3 mt-2 flex-wrap">
             <span className="text-xs text-slate-500">Grade {cfg.gradeLevel}</span>
             <span className="text-xs text-slate-500">·</span>
             <span className="text-xs text-slate-500">{cfg.subject}</span>
             {cfg.state && <><span className="text-xs text-slate-500">·</span><span className="text-xs text-slate-500">{cfg.state}</span></>}
-            <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-slate-100 border border-slate-200 text-slate-500">⏱ {assignment.duration}</span>
+            <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-slate-100 border border-slate-200 text-slate-500">{assignment.duration}</span>
           </div>
         </div>
 
@@ -578,12 +574,12 @@ function AssignmentPreview({
           <p className="text-xs font-black text-slate-500 uppercase tracking-wider mb-3">Differentiation</p>
           <div className="grid grid-cols-3 gap-3">
             {[
-              { icon: '👁', label: 'Visual', items: assignment.differentiation.visual },
-              { icon: '👂', label: 'Auditory', items: assignment.differentiation.auditory },
-              { icon: '✋', label: 'Kinesthetic', items: assignment.differentiation.kinesthetic },
+              { label: 'Visual', items: assignment.differentiation.visual },
+              { label: 'Auditory', items: assignment.differentiation.auditory },
+              { label: 'Kinesthetic', items: assignment.differentiation.kinesthetic },
             ].map(col => (
               <div key={col.label} className="border border-slate-200 rounded-xl p-3 bg-slate-50">
-                <p className="text-xs font-black text-slate-700 mb-2">{col.icon} {col.label}</p>
+                <p className="text-xs font-black text-slate-700 mb-2">{col.label}</p>
                 <ul className="space-y-1.5">
                   {col.items.map((item, j) => (
                     <li key={j} className="text-xs text-slate-600 leading-relaxed">{item}</li>
@@ -640,35 +636,32 @@ function AssignmentPreview({
       <div className="sticky bottom-0 border-t border-slate-200 px-6 py-3 flex gap-2 flex-shrink-0 bg-white z-10">
         <button
           onClick={onDownload}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black transition-colors"
-          style={{ background: '#FFFFFF', border: '1px solid rgba(28,24,18,0.15)', color: 'rgba(28,24,18,0.75)' }}
+          className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#3D6B4F] px-6 text-white transition-colors hover:bg-[#2D5A3F]"
+          style={{ minHeight: 44, fontFamily: "'Open Sans', sans-serif", fontSize: 14, fontWeight: 600 }}
         >
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg width={20} height={20} fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
-          Download as PDF
+          Print to PDF
         </button>
         <button
           onClick={onSave}
           disabled={saving || saved}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black transition-colors text-white disabled:opacity-60"
-          style={{ background: saved ? '#5B8C6E' : '#3D6B4F' }}
+          className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#3D6B4F] px-6 text-white transition-colors hover:bg-[#2D5A3F] disabled:opacity-60"
+          style={{ minHeight: 44, fontFamily: "'Open Sans', sans-serif", fontSize: 14, fontWeight: 600 }}
         >
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d={saved ? 'M5 13l4 4L19 7' : 'M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z'} />
+          <svg width={20} height={20} fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d={saved ? 'M20 6 9 17l-5-5' : 'M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z'} />
           </svg>
           {saved ? 'Saved!' : saving ? 'Saving...' : 'Save to Child'}
         </button>
         <button
           onClick={onCopy}
-          className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black transition-colors border ${
-            copied
-              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-              : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
-          }`}
+          className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#3D6B4F] px-6 text-white transition-colors hover:bg-[#2D5A3F]"
+          style={{ minHeight: 44, fontFamily: "'Open Sans', sans-serif", fontSize: 14, fontWeight: 600 }}
         >
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d={copied ? 'M5 13l4 4L19 7' : 'M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z'} />
+          <svg width={20} height={20} fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d={copied ? 'M20 6 9 17l-5-5' : 'M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z'} />
           </svg>
           {copied ? 'Copied!' : 'Copy to Clipboard'}
         </button>
@@ -783,20 +776,21 @@ export default function AssignmentModal({ isOpen, onClose, prefill = {} }: Assig
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 flex-shrink-0" style={{ borderBottom: '1px solid rgba(28,24,18,0.1)', background: '#FFFFFF' }}>
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: '#3D6B4F' }}>
-              <span className="text-sm">📝</span>
-            </div>
+            <svg width={20} height={20} fill="none" stroke="#3D6B4F" strokeWidth={1.5} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+            </svg>
             <div>
               <h2 className="text-lg font-normal" style={{ fontFamily: "'Cormorant Garamond', serif", color: '#1C1812' }}>Assignment Builder</h2>
-              <p className="text-xs" style={{ color: 'rgba(28,24,18,0.55)' }}>Ei-Core builds a complete, printable assignment in seconds</p>
+              <p className="text-xs" style={{ color: 'rgba(28,24,18,0.8)' }}>Ei-Core builds a complete, printable assignment in seconds</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-xl flex items-center justify-center transition-colors"
-            style={{ background: 'rgba(28,24,18,0.05)', color: 'rgba(28,24,18,0.6)' }}
+            className="inline-flex items-center justify-center rounded-lg border bg-white transition-colors hover:bg-[rgba(28,24,18,0.03)]"
+            style={{ width: 44, height: 44, borderColor: 'rgba(28,24,18,0.15)', color: '#1C1812' }}
+            aria-label="Close"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg width={20} height={20} fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -901,20 +895,20 @@ export default function AssignmentModal({ isOpen, onClose, prefill = {} }: Assig
             <button
               onClick={handleGenerate}
               disabled={!subject || !gradeLevel || generating}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-full text-white font-semibold text-sm transition-opacity disabled:opacity-40"
-              style={{ background: '#3D6B4F' }}
+              className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-[#3D6B4F] px-6 text-white transition-colors hover:bg-[#2D5A3F] disabled:opacity-40"
+              style={{ minHeight: 44, fontFamily: "'Open Sans', sans-serif", fontSize: 14, fontWeight: 600 }}
             >
               {generating ? (
                 <>
-                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <svg width={20} height={20} className="animate-spin" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
                   Ei-Core is building...
                 </>
               ) : (
                 <>
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  <svg width={20} height={20} fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-2 9h-4m2-2v4" />
                   </svg>
                   Generate Assignment
                 </>
@@ -927,9 +921,11 @@ export default function AssignmentModal({ isOpen, onClose, prefill = {} }: Assig
             {!assignment && !generating ? (
               <div className="h-full flex items-center justify-center p-8" style={{ background: '#FFFFFF' }}>
                 <div className="text-center max-w-sm">
-                  <div className="text-5xl mb-4">📝</div>
+                  <svg width={48} height={48} fill="none" stroke="#3D6B4F" strokeWidth={1.5} viewBox="0 0 24 24" className="mx-auto mb-4">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                  </svg>
                   <h3 className="text-xl font-normal mb-2" style={{ fontFamily: "'Cormorant Garamond', serif", color: '#1C1812' }}>Assignment Preview</h3>
-                  <p className="text-sm leading-relaxed" style={{ color: 'rgba(28,24,18,0.55)' }}>
+                  <p className="text-sm leading-relaxed" style={{ color: 'rgba(28,24,18,0.8)' }}>
                     Fill in the configuration on the left and click "Generate Assignment" to see a complete, printable assignment with rubric, differentiation options, and parent notes.
                   </p>
                 </div>
@@ -937,13 +933,11 @@ export default function AssignmentModal({ isOpen, onClose, prefill = {} }: Assig
             ) : generating ? (
               <div className="h-full flex items-center justify-center p-8" style={{ background: '#FFFFFF' }}>
                 <div className="text-center">
-                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 animate-pulse" style={{ background: '#3D6B4F' }}>
-                    <svg className="w-8 h-8 text-white animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                  </div>
+                  <svg width={40} height={40} className="mx-auto mb-4 animate-spin" fill="none" stroke="#3D6B4F" strokeWidth={1.5} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
                   <p className="font-semibold text-base" style={{ color: '#1C1812' }}>Ei-Core is building your assignment...</p>
-                  <p className="text-sm mt-1" style={{ color: 'rgba(28,24,18,0.55)' }}>Standards · Rubric · Activities · Differentiation</p>
+                  <p className="text-sm mt-1" style={{ color: 'rgba(28,24,18,0.8)' }}>Standards · Rubric · Activities · Differentiation</p>
                 </div>
               </div>
             ) : assignment ? (

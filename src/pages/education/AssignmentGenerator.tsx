@@ -23,14 +23,14 @@ const SUBJECTS = ['Math', 'ELA', 'Science', 'Social Studies', 'Writing', 'Readin
 const GEN_CSS = `
 .edu-gen { display: flex; height: 100vh; overflow: hidden; background: #FAF7F2; font-family: 'Open Sans', sans-serif; color: #1C1812; }
 .edu-gen-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #3D6B4F; }
-.edu-gen-title { font-family: 'Cormorant Garamond', serif; font-size: 36px; font-weight: 400; line-height: 1.1; color: #1C1812; }
-.edu-gen-card { background: #FFFFFF; border: 1px solid rgba(28,24,18,0.1); border-radius: 16px; box-shadow: 0 2px 16px rgba(28,24,18,0.05); }
-.edu-gen-soft { background: #FFFFFF; border: 1px solid rgba(28,24,18,0.08); border-radius: 16px; }
-.edu-gen-label { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #3D6B4F; }
-.edu-gen-input { width: 100%; background: #FFFFFF; border: 1px solid rgba(28,24,18,0.15); border-radius: 12px; padding: 10px 12px; color: #1C1812; font-size: 14px; }
+.edu-gen-title { font-family: 'Cormorant Garamond', serif; font-size: 36px; font-weight: 400; font-style: normal; line-height: 1.1; color: #1C1812; }
+.edu-gen-card { background: #FFFFFF; border: 1px solid rgba(28,24,18,0.08); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.edu-gen-soft { background: #FFFFFF; border: 1px solid rgba(28,24,18,0.08); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.edu-gen-label { font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #3D6B4F; }
+.edu-gen-input { width: 100%; background: #FFFFFF; border: 1px solid rgba(28,24,18,0.15); border-radius: 8px; padding: 10px 12px; color: #1C1812; font-size: 14px; }
 .edu-gen-input:focus { outline: none; border-color: #3D6B4F; box-shadow: 0 0 0 3px rgba(61,107,79,0.15); }
-.edu-gen-btn { background: #3D6B4F; color: #fff; border-radius: 9999px; font-weight: 600; }
-.edu-gen-btn:hover { opacity: 0.92; }
+.edu-gen-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #3D6B4F; color: #fff; border-radius: 8px; font-family: 'Open Sans', sans-serif; font-size: 14px; font-weight: 600; min-height: 44px; transition: background-color 0.15s ease; }
+.edu-gen-btn:hover { background: #2D5A3F; }
 `;
 
 export default function AssignmentGenerator() {
@@ -88,10 +88,11 @@ export default function AssignmentGenerator() {
         {/* Page Header */}
         <div className="px-8 py-7 flex-shrink-0" style={{ borderBottom: '1px solid rgba(28,24,18,0.08)' }}>
           <div className="flex items-center gap-2 mb-2">
-            <span className="edu-gen-eyebrow">EI-CORE</span>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#3D6B4F', display: 'inline-block' }} />
+            <span style={{ fontFamily: "'Open Sans',sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', color: '#3D6B4F', letterSpacing: '0.08em' }}>EI-CORE</span>
           </div>
-          <h1 className="edu-gen-title mb-2">Build an assignment for your child</h1>
-          <p className="text-sm" style={{ color: 'rgba(28,24,18,0.6)', maxWidth: 620, lineHeight: 1.65 }}>
+          <h1 className="edu-gen-title mb-2" style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: 36, fontWeight: 400, color: '#1C1812', fontStyle: 'normal' }}>Build an assignment for your child</h1>
+          <p className="text-sm" style={{ color: 'rgba(28,24,18,0.8)', maxWidth: 620, lineHeight: 1.65 }}>
             Tell Ei-Core the grade, subject, state, and learning style. Get a complete, printable, standards-aligned assignment in seconds.
           </p>
         </div>
@@ -133,10 +134,12 @@ export default function AssignmentGenerator() {
               </div>
               <button
                 onClick={() => setShowModal(true)}
-                className="edu-gen-btn w-full flex items-center justify-center gap-2 py-3 text-sm transition-opacity"
+                className="edu-gen-btn w-full"
+                style={{ paddingLeft: 24, paddingRight: 24 }}
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                <svg width={20} height={20} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
                 Open Assignment Builder
               </button>
@@ -145,14 +148,45 @@ export default function AssignmentGenerator() {
             {/* Feature highlights */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
-                { emoji: '🎯', title: 'Standards-Aligned', desc: 'Every assignment maps to your state standards so your child stays on track wherever you live.' },
-                { emoji: '🎨', title: 'Differentiation Built In', desc: 'Visual, auditory, and kinesthetic variations generated automatically for how your child learns best.' },
-                { emoji: '🖨️', title: 'Print-Ready Instantly', desc: 'Download as PDF or copy to clipboard. Every assignment is ready to use the moment it\'s generated.' },
+                {
+                  title: 'Standards-Aligned',
+                  desc: 'Every assignment maps to your state standards so your child stays on track wherever you live.',
+                  icon: (
+                    <svg width={20} height={20} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <circle cx="12" cy="12" r="10" />
+                      <circle cx="12" cy="12" r="6" />
+                      <circle cx="12" cy="12" r="2" />
+                    </svg>
+                  ),
+                },
+                {
+                  title: 'Differentiation Built In',
+                  desc: 'Visual, auditory, and kinesthetic variations generated automatically for how your child learns best.',
+                  icon: (
+                    <svg width={20} height={20} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path d="M12 19l7-7 3 3-7 7-3-3z" />
+                      <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
+                      <line x1="2" y1="2" x2="9.586" y2="9.586" />
+                      <circle cx="11" cy="11" r="2" />
+                    </svg>
+                  ),
+                },
+                {
+                  title: 'Print-Ready Instantly',
+                  desc: 'Download as PDF or copy to clipboard. Every assignment is ready to use the moment it\'s generated.',
+                  icon: (
+                    <svg width={20} height={20} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <polyline points="6 9 6 2 18 2 18 9" />
+                      <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                      <rect x="6" y="14" width="12" height="8" />
+                    </svg>
+                  ),
+                },
               ].map(f => (
                 <div key={f.title} className="edu-gen-soft p-4">
-                  <div className="text-2xl mb-2">{f.emoji}</div>
+                  <div className="mb-2" style={{ color: '#3D6B4F' }}>{f.icon}</div>
                   <p className="text-sm font-semibold mb-1" style={{ color: '#1C1812' }}>{f.title}</p>
-                  <p className="text-xs leading-relaxed" style={{ color: 'rgba(28,24,18,0.6)' }}>{f.desc}</p>
+                  <p className="text-xs leading-relaxed" style={{ color: 'rgba(28,24,18,0.8)' }}>{f.desc}</p>
                 </div>
               ))}
             </div>
@@ -162,21 +196,23 @@ export default function AssignmentGenerator() {
               <p className="edu-gen-label mb-3">Every assignment includes</p>
               <div className="grid grid-cols-2 gap-2">
                 {[
-                  '📌 Standard code + I Can statement',
-                  '⏱ Estimated duration',
-                  '📦 Materials list',
-                  '🃏 Activity sections (cards, compare, sort)',
-                  '💬 Discussion question',
-                  '✍️ Narration / reflection prompt',
-                  '👁 Visual differentiation options',
-                  '👂 Auditory differentiation options',
-                  '✋ Kinesthetic differentiation options',
-                  '📊 Four-tier rubric (Distinguished → Novice)',
-                  '📝 Parent notes',
-                  '🔗 Bridge to next lesson',
+                  'Standard code + I Can statement',
+                  'Estimated duration',
+                  'Materials list',
+                  'Activity sections (cards, compare, sort)',
+                  'Discussion question',
+                  'Narration / reflection prompt',
+                  'Visual differentiation options',
+                  'Auditory differentiation options',
+                  'Kinesthetic differentiation options',
+                  'Four-tier rubric (Distinguished to Novice)',
+                  'Parent notes',
+                  'Bridge to next lesson',
                 ].map(item => (
-                  <div key={item} className="flex items-center gap-2 text-xs" style={{ color: 'rgba(28,24,18,0.75)' }}>
-                    <span style={{ color: '#3D6B4F' }}>✓</span>
+                  <div key={item} className="flex items-center gap-2 text-xs" style={{ color: 'rgba(28,24,18,0.8)' }}>
+                    <svg width={20} height={20} fill="none" viewBox="0 0 24 24" stroke="#3D6B4F" strokeWidth={1.5} className="flex-shrink-0">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
                     <span>{item}</span>
                   </div>
                 ))}

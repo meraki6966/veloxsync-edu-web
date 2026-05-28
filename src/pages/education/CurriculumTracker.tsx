@@ -16,12 +16,12 @@ const TRK_CSS = `
 .edu-trk { display: flex; height: 100vh; overflow: hidden; background: #FAF7F2; font-family: 'Open Sans', sans-serif; color: #1C1812; }
 .edu-trk-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #3D6B4F; }
 .edu-trk-title { font-family: 'Cormorant Garamond', serif; font-size: 36px; font-weight: 400; line-height: 1.1; color: #1C1812; }
-.edu-trk-card { background: #FFFFFF; border: 1px solid rgba(28,24,18,0.1); border-radius: 16px; box-shadow: 0 2px 12px rgba(28,24,18,0.04); }
-.edu-trk-input { width: 100%; background: #FFFFFF; border: 1px solid rgba(28,24,18,0.15); border-radius: 12px; color: #1C1812; font-size: 14px; }
+.edu-trk-card { background: #FFFFFF; border: 1px solid rgba(28,24,18,0.08); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.edu-trk-input { width: 100%; background: #FFFFFF; border: 1px solid rgba(28,24,18,0.15); border-radius: 8px; color: #1C1812; font-size: 14px; }
 .edu-trk-input:focus { outline: none; border-color: #3D6B4F; box-shadow: 0 0 0 3px rgba(61,107,79,0.15); }
 .edu-trk-label { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #3D6B4F; }
-.edu-trk-btn { background: #3D6B4F; color: #fff; border-radius: 9999px; font-weight: 600; }
-.edu-trk-btn:hover { opacity: 0.92; }
+.edu-trk-btn { background: #3D6B4F; color: #fff; border-radius: 8px; font-weight: 600; }
+.edu-trk-btn:hover { background: #2D5A3F; }
 `;
 
 interface StandardWithMastery extends StateStandard {
@@ -230,7 +230,10 @@ export default function CurriculumTracker() {
         <div className="p-8 max-w-6xl mx-auto">
           {/* Header */}
           <div className="mb-7">
-            <div className="edu-trk-eyebrow mb-2">EI-CORE</div>
+            <div className="flex items-center gap-2 mb-2">
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#3D6B4F', display: 'inline-block' }} />
+              <span style={{ fontFamily: "'Open Sans',sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', color: '#3D6B4F', letterSpacing: '0.08em' }}>Ei-Core</span>
+            </div>
             <h1 className="edu-trk-title">Standards Library</h1>
             <p className="text-sm mt-2" style={{ color: 'rgba(28,24,18,0.6)' }}>Browse state standards and track each child's mastery.</p>
           </div>
@@ -278,7 +281,7 @@ export default function CurriculumTracker() {
                   </span>
                   {gbCfg && (
                     <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold" style={{ background: 'rgba(61,107,79,0.08)', border: '1px solid rgba(61,107,79,0.2)', color: '#3D6B4F' }}>
-                      {gbCfg.icon} {gbCfg.label}
+                      {gbCfg.label}
                     </span>
                   )}
                 </div>
@@ -288,7 +291,8 @@ export default function CurriculumTracker() {
             <button
               onClick={handleSearch}
               disabled={loading}
-              className="edu-trk-btn flex items-center gap-2 px-6 py-2.5 text-sm transition-opacity disabled:opacity-60"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#3D6B4F] px-6 text-white transition-colors hover:bg-[#2D5A3F] disabled:opacity-60"
+              style={{ minHeight: 44, fontFamily: "'Open Sans', sans-serif", fontSize: 14, fontWeight: 600 }}
             >
               {loading ? (
                 <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -385,8 +389,8 @@ export default function CurriculumTracker() {
                   </div>
                   <button
                     onClick={downloadProgressReport}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-colors whitespace-nowrap"
-                    style={{ background: 'rgba(61,107,79,0.12)', border: '1px solid rgba(61,107,79,0.3)', color: '#2E5340' }}
+                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#3D6B4F] px-6 text-white transition-colors hover:bg-[#2D5A3F] whitespace-nowrap"
+                    style={{ minHeight: 44, fontFamily: "'Open Sans', sans-serif", fontSize: 14, fontWeight: 600 }}
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -485,10 +489,8 @@ export default function CurriculumTracker() {
                         <div>
                           {recommendations[standard.id] ? (
                             <div>
-                              <h4 className="edu-trk-label mb-2 flex items-center gap-1.5">
-                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                </svg>
+                              <h4 className="mb-2 flex items-center gap-2" style={{ fontFamily: "'Open Sans',sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', color: '#3D6B4F', letterSpacing: '0.08em' }}>
+                                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#3D6B4F', display: 'inline-block' }} />
                                 Ei-Core Recommendations
                               </h4>
                               <ul className="space-y-2">
@@ -504,8 +506,8 @@ export default function CurriculumTracker() {
                             <button
                               onClick={() => handleGetRecommendations(standard.id, standard.code)}
                               disabled={recLoading === standard.id}
-                              className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold transition-colors disabled:opacity-60"
-                              style={{ background: 'rgba(61,107,79,0.1)', border: '1px solid rgba(61,107,79,0.25)', color: '#3D6B4F' }}
+                              className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#3D6B4F] px-6 text-white transition-colors hover:bg-[#2D5A3F] disabled:opacity-60"
+                              style={{ minHeight: 44, fontFamily: "'Open Sans', sans-serif", fontSize: 14, fontWeight: 600 }}
                             >
                               {recLoading === standard.id ? (
                                 <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

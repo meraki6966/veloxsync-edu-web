@@ -75,18 +75,6 @@ const DASHBOARD_CSS = `
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-@keyframes eduPulseDot {
-  0%, 100% { opacity: 1;   transform: scale(1); }
-  50%      { opacity: 0.4; transform: scale(0.7); }
-}
-@keyframes eduSparklePulse {
-  0%, 100% { transform: scale(1); }
-  50%      { transform: scale(1.15); }
-}
-@keyframes eduHeartPulse {
-  0%, 100% { transform: scale(1); }
-  50%      { transform: scale(1.08); }
-}
 @keyframes eduCheckBounce {
   0%   { transform: scale(0.8); }
   60%  { transform: scale(1.1); }
@@ -103,11 +91,11 @@ const DASHBOARD_CSS = `
 .morning-head {
   display: flex; flex-direction: column; gap: 16px;
   margin-bottom: 32px;
-  background: linear-gradient(135deg, #EBF2EC 0%, #FAF7F2 50%, #F0EDF8 100%);
-  border: 1px solid rgba(61,107,79,0.1);
-  border-radius: 20px;
-  padding: 32px;
-  box-shadow: 0 4px 24px rgba(61,107,79,0.06);
+  background: #FFFFFF;
+  border: 1px solid rgba(28,24,18,0.08);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
 @media (min-width: 768px) {
   .morning-head { flex-direction: row; align-items: flex-end; justify-content: space-between; gap: 24px; }
@@ -130,21 +118,19 @@ const DASHBOARD_CSS = `
 }
 .morning-sub {
   font-family: 'Open Sans', sans-serif;
-  font-size: 15px; color: rgba(28,24,18,0.5);
+  font-size: 15px; color: rgba(28,24,18,0.8);
   margin-top: 10px; line-height: 1.55;
 }
 .morning-active-pill {
   display: inline-flex; align-items: center; gap: 8px;
-  background: #3D6B4F; color: #FFFFFF;
-  font-size: 11px; font-weight: 600; letter-spacing: 0.04em;
-  padding: 7px 14px; border-radius: 100px;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: #3D6B4F;
   white-space: nowrap; align-self: flex-start;
-  box-shadow: 0 6px 18px rgba(61,107,79,0.25);
 }
 .morning-active-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: #C2D9C4;
-  animation: eduPulseDot 1.6s ease-in-out infinite;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #3D6B4F; display: inline-block;
 }
 
 /* — 2. Children avatar row — */
@@ -180,7 +166,7 @@ const DASHBOARD_CSS = `
 }
 .child-avatar-grade {
   font-family: 'Open Sans', sans-serif;
-  font-size: 10px; color: rgba(28,24,18,0.5);
+  font-size: 10px; color: rgba(28,24,18,0.8);
 }
 .child-avatar-all .child-avatar-circle {
   background: #FFFFFF; border: 1px solid rgba(28,24,18,0.1);
@@ -196,38 +182,37 @@ const DASHBOARD_CSS = `
 
 /* — 3. Ei-Core morning insight — */
 .morning-insight {
-  background: linear-gradient(135deg, rgba(61,107,79,0.06) 0%, rgba(61,107,79,0.02) 100%);
-  border: 1px solid rgba(61,107,79,0.18);
+  background: #FFFFFF;
+  border: 1px solid rgba(28,24,18,0.08);
   border-left: 3px solid #3D6B4F;
-  border-radius: 16px;
-  padding: 22px 26px;
+  border-radius: 12px;
+  padding: 24px;
   margin-bottom: 36px;
-  box-shadow: 0 2px 16px rgba(61,107,79,0.06);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
 .morning-insight-head {
   display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;
 }
 .morning-insight-label {
   display: inline-flex; align-items: center; gap: 8px;
-  font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
   text-transform: uppercase; color: #3D6B4F;
 }
-.morning-insight-sparkle {
-  display: inline-block;
-  animation: eduSparklePulse 1.8s ease-in-out infinite;
-  transform-origin: center;
-  color: #3D6B4F;
+.morning-insight-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #3D6B4F; display: inline-block;
 }
 .morning-insight-dismiss {
   background: none; border: none; cursor: pointer;
   font-family: 'Open Sans', sans-serif;
-  font-size: 12px; color: rgba(28,24,18,0.45);
+  font-size: 12px; color: rgba(28,24,18,0.8);
   padding: 0;
 }
 .morning-insight-dismiss:hover { color: #1C1812; }
 .morning-insight-text {
   font-family: 'Open Sans', sans-serif;
-  font-size: 14px; color: #1C1812; line-height: 1.65; margin: 0;
+  font-size: 14px; color: rgba(28,24,18,0.8); line-height: 1.65; margin: 0;
 }
 
 /* — 4. Today's plan — */
@@ -252,11 +237,11 @@ const DASHBOARD_CSS = `
 .plan-block {
   position: relative;
   background: #FFFFFF;
-  border: 1px solid rgba(28,24,18,0.1);
-  border-radius: 16px;
+  border: 1px solid rgba(28,24,18,0.08);
+  border-radius: 12px;
   padding: 18px 22px 18px 30px;
   display: flex; align-items: center; gap: 18px;
-  box-shadow: 0 2px 14px rgba(28,24,18,0.04);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
   transition: box-shadow 0.2s, transform 0.2s;
   overflow: hidden;
 }
@@ -273,7 +258,7 @@ const DASHBOARD_CSS = `
 }
 .plan-block-body { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; }
 .plan-block-icon {
-  width: 32px; height: 32px; border-radius: 8px;
+  width: 32px; height: 32px;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; color: #3D6B4F;
 }
@@ -285,7 +270,7 @@ const DASHBOARD_CSS = `
 }
 .plan-block-desc {
   font-family: 'Open Sans', sans-serif;
-  font-size: 12px; color: rgba(28,24,18,0.55);
+  font-size: 12px; color: rgba(28,24,18,0.8);
   line-height: 1.55; margin: 0;
 }
 .plan-block-meta {
@@ -297,7 +282,7 @@ const DASHBOARD_CSS = `
   padding: 4px 10px; border-radius: 100px;
 }
 .plan-pill-duration {
-  color: rgba(28,24,18,0.72);
+  color: rgba(28,24,18,0.8);
 }
 .plan-pill-focus {
   background: #EDE6F6; color: #6B4F8F;
@@ -321,22 +306,15 @@ const DASHBOARD_CSS = `
 /* — Empty state for plan — */
 .plan-empty {
   position: relative;
-  background: #FFFFFF; border: 1px dashed rgba(28,24,18,0.15);
-  border-radius: 16px; padding: 72px 24px;
+  background: #FFFFFF; border: 1px solid rgba(28,24,18,0.08);
+  border-radius: 12px; padding: 72px 24px;
   text-align: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
   overflow: hidden;
-}
-.plan-empty-halo {
-  position: absolute; top: 24px; left: 50%; transform: translateX(-50%);
-  width: 200px; height: 200px; pointer-events: none;
-  background: radial-gradient(circle, rgba(61,107,79,0.08) 0%, transparent 70%);
-  z-index: 0;
 }
 .plan-empty > * { position: relative; z-index: 1; }
 .plan-empty-icon {
   color: #3D6B4F; margin: 0 auto 18px; display: block;
-  animation: eduHeartPulse 2s ease-in-out infinite;
-  transform-origin: center;
 }
 .plan-empty-title {
   font-family: 'Cormorant Garamond', serif;
@@ -344,18 +322,18 @@ const DASHBOARD_CSS = `
 }
 .plan-empty-sub {
   font-family: 'Open Sans', sans-serif;
-  font-size: 14px; color: rgba(28,24,18,0.55); line-height: 1.6;
+  font-size: 14px; color: rgba(28,24,18,0.8); line-height: 1.6;
   margin: 0 0 22px;
 }
 .plan-empty-btn {
-  display: inline-flex; align-items: center; gap: 8px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   font-family: 'Open Sans', sans-serif;
   font-size: 14px; font-weight: 600; color: #FFFFFF;
   background: #3D6B4F; border: none; cursor: pointer;
-  padding: 12px 24px; border-radius: 100px;
+  min-height: 44px; padding: 0 24px; border-radius: 8px;
   transition: background 0.2s;
 }
-.plan-empty-btn:hover { background: #5A8F6A; }
+.plan-empty-btn:hover { background: #2D5A3F; }
 
 /* — 5. Quick stats — */
 .quick-stats {
@@ -366,14 +344,14 @@ const DASHBOARD_CSS = `
 @media (min-width: 600px) { .quick-stats { grid-template-columns: repeat(3, 1fr); } }
 .quick-stat {
   background: #FFFFFF;
-  border: 1px solid rgba(28,24,18,0.1);
-  border-radius: 16px;
+  border: 1px solid rgba(28,24,18,0.08);
+  border-radius: 12px;
   padding: 22px 22px 20px;
-  box-shadow: 0 2px 14px rgba(28,24,18,0.04);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
-.quick-stat-sage   { background: #EBF2EC; border-bottom: 3px solid #3D6B4F; }
-.quick-stat-lavender { background: #EDE6F6; border-bottom: 3px solid #6B4F8F; }
-.quick-stat-peach  { background: #F8E8DC; border-bottom: 3px solid #B8794A; }
+.quick-stat-sage   { border-bottom: 3px solid #3D6B4F; }
+.quick-stat-lavender { border-bottom: 3px solid #6B4F8F; }
+.quick-stat-peach  { border-bottom: 3px solid #B8794A; }
 .quick-stat-value {
   font-family: 'Cormorant Garamond', serif;
   font-size: 42px; font-weight: 400; color: #1C1812;
@@ -384,7 +362,7 @@ const DASHBOARD_CSS = `
 .quick-stat-peach .quick-stat-value svg { color: #B8794A; }
 .quick-stat-label {
   font-family: 'Open Sans', sans-serif;
-  font-size: 10px; color: rgba(28,24,18,0.6);
+  font-size: 10px; color: rgba(28,24,18,0.8);
   letter-spacing: 0.08em; text-transform: uppercase;
   margin-top: 8px;
 }
@@ -402,7 +380,7 @@ const DASHBOARD_CSS = `
 .edu-dash-toast-icon { color: #3D6B4F; flex-shrink: 0; margin-top: 2px; }
 .edu-dash-toast-text { flex: 1; min-width: 0; }
 .edu-dash-toast-title { font-size: 13px; font-weight: 700; color: #3D6B4F; }
-.edu-dash-toast-sub { font-size: 12px; color: rgba(28,24,18,0.6); margin-top: 2px; }
+.edu-dash-toast-sub { font-size: 12px; color: rgba(28,24,18,0.8); margin-top: 2px; }
 .edu-dash-toast-close { background: none; border: none; cursor: pointer; color: rgba(28,24,18,0.4); padding: 0; flex-shrink: 0; }
 .edu-dash-toast-close:hover { color: #1C1812; }
 
@@ -415,8 +393,8 @@ const DASHBOARD_CSS = `
   font-family: 'Open Sans', sans-serif;
 }
 .edu-dash-modal {
-  background: #FFFFFF; border: 1px solid rgba(28,24,18,0.1);
-  border-radius: 16px; padding: 28px;
+  background: #FFFFFF; border: 1px solid rgba(28,24,18,0.08);
+  border-radius: 12px; padding: 28px;
   width: 100%; max-width: 460px; max-height: 90vh; overflow-y: auto;
   box-shadow: 0 24px 60px rgba(28,24,18,0.18);
 }
@@ -424,23 +402,23 @@ const DASHBOARD_CSS = `
   display: flex; align-items: center; justify-content: space-between;
   margin: -28px -28px 22px;
   padding: 22px 28px;
-  background: linear-gradient(135deg, #EBF2EC 0%, #FAF7F2 100%);
-  border-bottom: 1px solid rgba(61,107,79,0.12);
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
+  background: #FFFFFF;
+  border-bottom: 1px solid rgba(28,24,18,0.08);
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
 }
 .edu-dash-modal-title {
   font-family: 'Cormorant Garamond', serif;
   font-size: 26px; font-weight: 400; font-style: normal; color: #1C1812;
 }
-.edu-dash-modal-close { background: none; border: none; color: rgba(28,24,18,0.5); cursor: pointer; padding: 0; }
+.edu-dash-modal-close { background: none; border: none; color: rgba(28,24,18,0.8); cursor: pointer; padding: 0; }
 .edu-dash-modal-close:hover { color: #1C1812; }
 .edu-dash-modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
 .edu-dash-modal-field { margin-bottom: 14px; }
 .edu-dash-modal-label {
   display: block; font-family: 'Open Sans', sans-serif;
   font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
-  text-transform: uppercase; color: rgba(28,24,18,0.55); margin-bottom: 6px;
+  text-transform: uppercase; color: rgba(28,24,18,0.8); margin-bottom: 6px;
 }
 .edu-dash-modal-input,
 .edu-dash-modal-select {
@@ -460,7 +438,7 @@ const DASHBOARD_CSS = `
 .edu-dash-modal-curr button {
   font-family: 'Open Sans', sans-serif;
   font-size: 12.5px; font-weight: 500;
-  color: rgba(28,24,18,0.7);
+  color: rgba(28,24,18,0.8);
   background: #FAF7F2; border: 1px solid rgba(28,24,18,0.1);
   border-radius: 8px; padding: 9px 12px;
   cursor: pointer; transition: all 0.2s;
@@ -480,27 +458,28 @@ const DASHBOARD_CSS = `
   border-radius: 50%; background: #FFFFFF; transition: left 0.2s;
 }
 .edu-dash-modal-toggle.on .edu-dash-modal-toggle-dot { left: 19px; }
-.edu-dash-modal-toggle-label { font-size: 13px; color: rgba(28,24,18,0.7); font-weight: 500; }
+.edu-dash-modal-toggle-label { font-size: 13px; color: rgba(28,24,18,0.8); font-weight: 500; }
 .edu-dash-modal-actions { display: flex; gap: 10px; margin-top: 22px; }
 .edu-dash-modal-btn {
+  display: inline-flex; align-items: center; justify-content: center;
   font-family: 'Open Sans', sans-serif;
-  font-size: 13px; font-weight: 600; border-radius: 100px;
-  padding: 11px 20px; cursor: pointer; transition: all 0.2s; border: none;
+  font-size: 14px; font-weight: 600; border-radius: 8px;
+  min-height: 44px; padding: 0 24px; cursor: pointer; transition: background 0.2s, border-color 0.2s, color 0.2s; border: none;
 }
 .edu-dash-modal-btn-ghost {
-  background: transparent; border: 1.5px solid rgba(28,24,18,0.15);
-  color: rgba(28,24,18,0.65);
+  background: #FFFFFF; border: 1px solid rgba(28,24,18,0.15);
+  color: #1C1812;
 }
-.edu-dash-modal-btn-ghost:hover { border-color: #3D6B4F; color: #3D6B4F; }
+.edu-dash-modal-btn-ghost:hover { background: rgba(28,24,18,0.03); }
 .edu-dash-modal-btn-primary { flex: 1; background: #3D6B4F; color: #FFFFFF; }
-.edu-dash-modal-btn-primary:hover { background: #5A8F6A; }
+.edu-dash-modal-btn-primary:hover { background: #2D5A3F; }
 .edu-dash-modal-btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
 `;
 
 // — Subject icon helper —
 function subjectIcon(subject: string) {
   const s = subject.toLowerCase();
-  const common = { width: 18, height: 18, fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', strokeWidth: 1.7 } as const;
+  const common = { width: 20, height: 20, fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', strokeWidth: 1.5 } as const;
   if (s.includes('math')) {
     return (
       <svg {...common}>
@@ -935,11 +914,7 @@ export default function HomeschoolDashboard() {
             <div className="morning-insight edu-fade edu-fade-3">
               <div className="morning-insight-head">
                 <div className="morning-insight-label">
-                  <span className="morning-insight-sparkle" aria-hidden="true">
-                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 3l1.7 4.6L18 9l-4.3 1.4L12 15l-1.7-4.6L6 9l4.3-1.4L12 3zM18 14l.9 2.3L21 17l-2.1.7L18 20l-.9-2.3L15 17l2.1-.7L18 14z" />
-                    </svg>
-                  </span>
+                  <span className="morning-insight-dot" aria-hidden="true" />
                   Ei-Core Insight
                 </div>
                 <button
@@ -962,9 +937,9 @@ export default function HomeschoolDashboard() {
               </div>
             ) : children.length === 0 ? (
               <div className="plan-empty">
-                <span className="plan-empty-halo" aria-hidden="true" />
-                <svg className="plan-empty-icon" width="56" height="56" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.4}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                <svg className="plan-empty-icon" width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
                 </svg>
                 <h2 className="plan-empty-title">Add your first learner.</h2>
                 <p className="plan-empty-sub">
@@ -994,10 +969,10 @@ export default function HomeschoolDashboard() {
                         const key = `${child.id}-${lessonIdx}`;
                         const done = !!completed[key];
                         return (
-                          <div key={key} className="plan-block" style={{ background: `${color}14` }}>
+                          <div key={key} className="plan-block">
                             <span className="plan-block-stripe" style={{ background: color }} />
                             <div className="plan-block-body">
-                              <span className="plan-block-icon" style={{ background: `${color}33` }}>
+                              <span className="plan-block-icon">
                                 {subjectIcon(lesson.subject)}
                               </span>
                               <div className="plan-block-text">

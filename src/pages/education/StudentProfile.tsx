@@ -20,19 +20,19 @@ import type { StateStandard } from '../../types/education';
 const PROFILE_CSS = `
 .edu-prof { display: flex; height: 100vh; overflow: hidden; background: #FAF7F2; font-family: 'Open Sans', sans-serif; color: #1C1812; }
 .edu-prof-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #3D6B4F; }
-.edu-prof-title { font-family: 'Cormorant Garamond', serif; font-weight: 400; line-height: 1.1; color: #1C1812; }
-.edu-prof-card { background: #FFFFFF; border: 1px solid rgba(28,24,18,0.1); border-radius: 16px; box-shadow: 0 2px 12px rgba(28,24,18,0.04); }
-.edu-prof-iep { background: #FBF6EE; border: 1px solid rgba(154,106,18,0.22); border-radius: 16px; }
-.edu-prof-input { width: 100%; background: #FFFFFF; border: 1px solid rgba(28,24,18,0.15); border-radius: 12px; color: #1C1812; font-size: 14px; }
+.edu-prof-title { font-family: 'Cormorant Garamond', serif; font-weight: 400; font-style: normal; line-height: 1.1; color: #1C1812; }
+.edu-prof-card { background: #FFFFFF; border: 1px solid rgba(28,24,18,0.08); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.edu-prof-iep { background: #FBF6EE; border: 1px solid rgba(154,106,18,0.22); border-radius: 12px; }
+.edu-prof-input { width: 100%; background: #FFFFFF; border: 1px solid rgba(28,24,18,0.15); border-radius: 8px; color: #1C1812; font-size: 14px; }
 .edu-prof-input::placeholder { color: rgba(28,24,18,0.4); }
 .edu-prof-input:focus { outline: none; border-color: #3D6B4F; box-shadow: 0 0 0 3px rgba(61,107,79,0.15); }
 .edu-prof-input-iep:focus { outline: none; border-color: #9A6A12; box-shadow: 0 0 0 3px rgba(154,106,18,0.15); }
-.edu-prof-label { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #3D6B4F; }
-.edu-prof-label-iep { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #9A6A12; }
-.edu-prof-btn { background: #3D6B4F; color: #fff; border-radius: 9999px; font-weight: 600; }
-.edu-prof-btn:hover { opacity: 0.92; }
-.edu-prof-btn-iep { background: #9A6A12; color: #fff; border-radius: 9999px; font-weight: 600; }
-.edu-prof-btn-iep:hover { opacity: 0.92; }
+.edu-prof-label { font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #3D6B4F; }
+.edu-prof-label-iep { font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #9A6A12; }
+.edu-prof-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #3D6B4F; color: #fff; border-radius: 8px; font-family: 'Open Sans', sans-serif; font-size: 14px; font-weight: 600; min-height: 44px; transition: background-color 0.15s ease; }
+.edu-prof-btn:hover { background: #2D5A3F; }
+.edu-prof-btn-iep { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #9A6A12; color: #fff; border-radius: 8px; font-family: 'Open Sans', sans-serif; font-size: 14px; font-weight: 600; min-height: 44px; transition: background-color 0.15s ease; }
+.edu-prof-btn-iep:hover { background: #815810; }
 `;
 
 function scoreStatus(score: number): CurriculumProgress['status'] {
@@ -143,7 +143,7 @@ function AssessmentModal({
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold" style={scoreColorStyle(scoreNum)}>
                   <span>{scoreNum}%</span>
                   <span className="text-xs font-semibold">
-                    {scoreNum >= 80 ? '✓ Mastered' : scoreNum >= 50 ? '◑ In Progress' : '! Needs Review'}
+                    {scoreNum >= 80 ? 'Mastered' : scoreNum >= 50 ? 'In Progress' : 'Needs Review'}
                   </span>
                 </div>
               )}
@@ -166,13 +166,17 @@ function AssessmentModal({
         </div>
 
         <div className="flex gap-3 mt-5">
-          <button onClick={onClose} className="px-5 py-2.5 rounded-full text-sm font-semibold transition-colors" style={{ border: '1px solid rgba(28,24,18,0.15)', color: 'rgba(28,24,18,0.6)' }}>
+          <button
+            onClick={onClose}
+            className="inline-flex items-center justify-center rounded-lg border bg-white px-6 text-[#1C1812] transition-colors hover:bg-[rgba(28,24,18,0.03)]"
+            style={{ minHeight: 44, borderColor: 'rgba(28,24,18,0.15)', fontFamily: "'Open Sans', sans-serif", fontSize: 14, fontWeight: 600 }}
+          >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
             disabled={!standardId || !hasScore || saving}
-            className="edu-prof-btn flex-1 py-2.5 text-sm disabled:opacity-40 transition-opacity"
+            className="edu-prof-btn flex-1 px-6 disabled:opacity-40"
           >
             {saving ? 'Saving...' : 'Save Assessment'}
           </button>
@@ -468,7 +472,7 @@ export default function StudentProfile() {
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-3 flex-wrap">
-                  <h1 className="edu-prof-title" style={{ fontSize: 32 }}>
+                  <h1 className="edu-prof-title" style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: 36, fontWeight: 400, color: '#1C1812', fontStyle: 'normal' }}>
                     {student.first_name} {student.last_name}
                   </h1>
                   {student.has_iep && (
@@ -484,8 +488,9 @@ export default function StudentProfile() {
                     const band = getGradeBand(student.grade_level);
                     const gb = GRADE_BAND_CONFIG[band];
                     return (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold" style={{ background: 'rgba(61,107,79,0.08)', color: '#3D6B4F', border: '1px solid rgba(61,107,79,0.2)' }}>
-                        {gb.icon} {gb.label}
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold" style={{ background: 'rgba(61,107,79,0.08)', color: '#3D6B4F', border: '1px solid rgba(61,107,79,0.2)' }}>
+                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#3D6B4F', display: 'inline-block' }} />
+                        {gb.label}
                       </span>
                     );
                   })()}
@@ -502,18 +507,10 @@ export default function StudentProfile() {
                 <button
                   onClick={handleAskEiCore}
                   disabled={insightLoading}
-                  className="edu-prof-btn flex items-center gap-2 px-4 py-2 text-sm transition-opacity disabled:opacity-60"
+                  className="edu-prof-btn px-6 disabled:opacity-60"
                 >
-                  {insightLoading ? (
-                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                  ) : (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                    </svg>
-                  )}
-                  Ask Ei-Core about {student.first_name}
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff', display: 'inline-block', opacity: insightLoading ? 0.6 : 1 }} />
+                  {insightLoading ? 'Asking Ei-Core...' : `Ask Ei-Core about ${student.first_name}`}
                 </button>
               </div>
             </div>
@@ -522,16 +519,17 @@ export default function StudentProfile() {
             {insight && (
               <div className="mt-5 p-4 rounded-xl" style={{ border: '1px solid rgba(61,107,79,0.2)', background: 'rgba(61,107,79,0.05)' }}>
                 <div className="flex items-center gap-2 mb-2">
-                  <svg className="w-4 h-4" style={{ color: '#3D6B4F' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                  <span className="text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#3D6B4F' }}>Ei-Core Insight</span>
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#3D6B4F', display: 'inline-block' }} />
+                  <span style={{ fontFamily: "'Open Sans',sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', color: '#3D6B4F', letterSpacing: '0.08em' }}>Ei-Core Insight</span>
                 </div>
-                <p className="text-sm mb-3" style={{ color: 'rgba(28,24,18,0.75)' }}>{insight.summary}</p>
+                <p className="text-sm mb-3" style={{ color: 'rgba(28,24,18,0.8)' }}>{insight.summary}</p>
                 <ul className="space-y-1.5">
                   {insight.recommendations.map((rec, i) => (
-                    <li key={i} className="flex items-start gap-2 text-xs" style={{ color: 'rgba(28,24,18,0.65)' }}>
-                      <span className="font-bold mt-0.5" style={{ color: '#3D6B4F' }}>→</span>
+                    <li key={i} className="flex items-start gap-2 text-xs" style={{ color: 'rgba(28,24,18,0.8)' }}>
+                      <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#3D6B4F" strokeWidth={1.5} className="flex-shrink-0 mt-0.5">
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                        <polyline points="12 5 19 12 12 19" />
+                      </svg>
                       {rec}
                     </li>
                   ))}
@@ -632,11 +630,11 @@ export default function StudentProfile() {
                 </p>
                 <button
                   onClick={openAssessModal}
-                  className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold transition-colors"
-                  style={{ background: 'rgba(61,107,79,0.1)', border: '1px solid rgba(61,107,79,0.25)', color: '#3D6B4F' }}
+                  className="edu-prof-btn px-6"
                 >
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                  <svg width={20} height={20} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
                   </svg>
                   Add Assessment
                 </button>
@@ -695,10 +693,14 @@ export default function StudentProfile() {
                                 setAssignmentModalOpen(true);
                               }}
                               title="Generate Assignment for this standard"
-                              className="flex-shrink-0 px-2 py-1 rounded-full text-[10px] font-semibold transition-colors"
+                              className="flex-shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-semibold transition-colors"
                               style={{ color: '#3D6B4F', border: '1px solid rgba(61,107,79,0.25)', background: 'rgba(61,107,79,0.06)' }}
                             >
-                              📝 Generate
+                              <svg width={14} height={14} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                <path d="M12 20h9" />
+                                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
+                              </svg>
+                              Generate
                             </button>
                           </div>
                         );
@@ -745,10 +747,13 @@ export default function StudentProfile() {
                         {intervention.status !== 'resolved' && (
                           <button
                             onClick={() => handleResolveIntervention(intervention.id)}
-                            className="text-xs font-semibold transition-colors whitespace-nowrap"
+                            className="inline-flex items-center gap-1.5 text-xs font-semibold transition-colors whitespace-nowrap"
                             style={{ color: '#3D6B4F' }}
                           >
-                            Mark Resolved ✓
+                            <svg width={14} height={14} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                              <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                            Mark Resolved
                           </button>
                         )}
                       </div>
@@ -868,18 +873,10 @@ export default function StudentProfile() {
                   <button
                     onClick={handleEiCoreIEP}
                     disabled={iepInsightLoading}
-                    className="edu-prof-btn-iep flex items-center gap-2 px-4 py-2 text-sm transition-opacity disabled:opacity-60"
+                    className="edu-prof-btn-iep px-6 disabled:opacity-60"
                   >
-                    {iepInsightLoading ? (
-                      <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                      </svg>
-                    ) : (
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                      </svg>
-                    )}
-                    Get Recommendations
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff', display: 'inline-block', opacity: iepInsightLoading ? 0.6 : 1 }} />
+                    {iepInsightLoading ? 'Generating...' : 'Get Recommendations'}
                   </button>
                 </div>
 
@@ -888,8 +885,11 @@ export default function StudentProfile() {
                     <p className="text-sm mb-3" style={{ color: 'rgba(28,24,18,0.75)' }}>{iepInsight.summary}</p>
                     <ul className="space-y-2">
                       {iepInsight.recommendations.map((rec, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm" style={{ color: 'rgba(28,24,18,0.75)' }}>
-                          <span className="font-bold mt-0.5 flex-shrink-0" style={{ color: '#9A6A12' }}>→</span>
+                        <li key={i} className="flex items-start gap-2 text-sm" style={{ color: 'rgba(28,24,18,0.8)' }}>
+                          <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#9A6A12" strokeWidth={1.5} className="flex-shrink-0 mt-0.5">
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                            <polyline points="12 5 19 12 12 19" />
+                          </svg>
                           {rec}
                         </li>
                       ))}

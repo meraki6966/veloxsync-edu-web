@@ -26,9 +26,9 @@ const ADV_CSS = `
 .edu-adv-input { width: 100%; background: #FFFFFF; border: 1px solid rgba(28,24,18,0.15); border-radius: 12px; color: #1C1812; font-size: 14px; }
 .edu-adv-input::placeholder { color: rgba(28,24,18,0.4); }
 .edu-adv-input:focus { outline: none; border-color: #3D6B4F; box-shadow: 0 0 0 3px rgba(61,107,79,0.15); }
-.edu-adv-btn { background: #3D6B4F; color: #fff; border-radius: 9999px; font-weight: 600; }
-.edu-adv-btn:hover { opacity: 0.92; }
-.edu-adv-card { background: #FFFFFF; border: 1px solid rgba(28,24,18,0.1); border-radius: 16px; box-shadow: 0 2px 12px rgba(28,24,18,0.04); }
+.edu-adv-btn { background: #3D6B4F; color: #fff; border-radius: 8px; font-weight: 600; transition: background-color 0.2s; }
+.edu-adv-btn:hover { background: #2D5A3F; }
+.edu-adv-card { background: #FFFFFF; border: 1px solid rgba(28,24,18,0.08); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
 `;
 
 interface ChatMessage {
@@ -473,9 +473,12 @@ export default function CurriculumAdvisor() {
           {/* Left: Input Form */}
           <div className="lg:w-80 xl:w-96 overflow-y-auto flex-shrink-0" style={{ borderRight: '1px solid rgba(28,24,18,0.1)', background: '#FFFFFF' }}>
             <div className="p-6">
-              <div className="edu-adv-label mb-2">EI-CORE</div>
-              <h1 className="edu-adv-title mb-1" style={{ fontSize: 28 }}>Ask what to teach next</h1>
-              <p className="text-xs mb-6" style={{ color: 'rgba(28,24,18,0.55)', lineHeight: 1.6 }}>Tell Ei-Core about your child and get personalized ideas for what to teach next.</p>
+              <div className="flex items-center gap-1.5 mb-2">
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#3D6B4F', display: 'inline-block' }} />
+                <span style={{ fontFamily: "'Open Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', color: '#3D6B4F', letterSpacing: '0.08em' }}>EI-CORE</span>
+              </div>
+              <h1 className="edu-adv-title mb-1" style={{ fontSize: 28, fontStyle: 'normal', color: '#1C1812' }}>Ask what to teach next</h1>
+              <p className="text-sm mb-6" style={{ color: 'rgba(28,24,18,0.8)', lineHeight: 1.6 }}>Tell Ei-Core about your child and get personalized ideas for what to teach next.</p>
 
               <div className="space-y-4">
                 <div>
@@ -524,19 +527,20 @@ export default function CurriculumAdvisor() {
                 <button
                   onClick={handleSubmit}
                   disabled={!subject || !gradeLevel || loading}
-                  className="edu-adv-btn w-full flex items-center justify-center gap-2 py-3 text-sm transition-opacity disabled:opacity-40"
+                  className="edu-adv-btn w-full inline-flex items-center justify-center gap-2 px-6 text-sm transition-colors disabled:opacity-40"
+                  style={{ minHeight: 44, fontFamily: "'Open Sans', sans-serif", fontSize: 14, fontWeight: 600 }}
                 >
                   {loading ? (
                     <>
-                      <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                       </svg>
                       Ei-Core is thinking...
                     </>
                   ) : (
                     <>
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      <svg width={20} height={20} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <polyline points="20 6 9 17 4 12" />
                       </svg>
                       Get Recommendations
                     </>
@@ -551,13 +555,11 @@ export default function CurriculumAdvisor() {
             {messages.length === 0 ? (
               <div className="flex-1 flex items-center justify-center p-8">
                 <div className="text-center max-w-sm">
-                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: '#3D6B4F' }}>
-                    <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                  </div>
-                  <h2 className="edu-adv-title mb-2" style={{ fontSize: 26 }}>Ask Ei-Core what to teach next</h2>
-                  <p className="text-sm" style={{ color: 'rgba(28,24,18,0.55)' }}>
+                  <svg width={20} height={20} className="mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="#3D6B4F" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.5C10 4.5 7 4 4 4.5v14c3-.5 6 0 8 2 2-2 5-2.5 8-2v-14c-3-.5-6 0-8 2zM12 6.5v14" />
+                  </svg>
+                  <h2 className="edu-adv-title mb-2" style={{ fontSize: 26, fontStyle: 'normal', color: '#1C1812' }}>Ask Ei-Core what to teach next</h2>
+                  <p className="text-sm" style={{ color: 'rgba(28,24,18,0.8)' }}>
                     Fill in the form and click "Get Recommendations" for personalized guidance on what to teach your child next.
                   </p>
                 </div>
@@ -569,13 +571,9 @@ export default function CurriculumAdvisor() {
                     <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                       <div className={`max-w-2xl ${msg.role === 'user' ? 'ml-12' : 'mr-12'}`}>
                         {msg.role === 'assistant' && (
-                          <div className="flex items-center gap-2 mb-2">
-                            <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: '#3D6B4F' }}>
-                              <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                              </svg>
-                            </div>
-                            <span className="text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#3D6B4F' }}>EI-CORE</span>
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#3D6B4F', display: 'inline-block' }} />
+                            <span style={{ fontFamily: "'Open Sans', sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', color: '#3D6B4F', letterSpacing: '0.08em' }}>EI-CORE</span>
                           </div>
                         )}
                         {msg.isError ? (
@@ -623,21 +621,25 @@ export default function CurriculumAdvisor() {
                                         });
                                         setAssignmentModalOpen(true);
                                       }}
-                                      className="text-[10px] font-semibold whitespace-nowrap px-2 py-1 rounded-full transition-colors"
+                                      className="text-[10px] font-semibold whitespace-nowrap px-2 py-1 rounded-lg transition-colors inline-flex items-center gap-1"
                                       style={{ color: '#3D6B4F', border: '1px solid rgba(61,107,79,0.25)', background: 'rgba(61,107,79,0.06)' }}
                                     >
-                                      📝 Generate Assignment
+                                      <svg width={12} height={12} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                      </svg>
+                                      Generate Assignment
                                     </button>
                                     {recentlySaved.has(rec.id) ? (
-                                      <span className="text-[10px] font-semibold whitespace-nowrap px-2 py-1 rounded-full flex items-center gap-1" style={{ color: '#2E5340', border: '1px solid rgba(61,107,79,0.3)', background: 'rgba(61,107,79,0.12)' }}>
-                                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                      <span className="text-[10px] font-semibold whitespace-nowrap px-2 py-1 rounded-lg flex items-center gap-1" style={{ color: '#2E5340', border: '1px solid rgba(61,107,79,0.3)', background: 'rgba(61,107,79,0.12)' }}>
+                                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><polyline points="20 6 9 17 4 12" /></svg>
                                         Saved
                                       </span>
                                     ) : (
                                       <button
                                         onClick={() => handleSaveToProfile(rec)}
                                         disabled={savingRecId === rec.id}
-                                        className="text-[10px] font-semibold whitespace-nowrap px-2 py-1 rounded-full transition-colors disabled:opacity-50"
+                                        className="text-[10px] font-semibold whitespace-nowrap px-2 py-1 rounded-lg transition-colors disabled:opacity-50"
                                         style={{ color: '#3D6B4F', border: '1px solid rgba(61,107,79,0.25)', background: 'rgba(61,107,79,0.06)' }}
                                       >
                                         {savingRecId === rec.id ? 'Saving...' : 'Save Recommendation'}
@@ -645,7 +647,7 @@ export default function CurriculumAdvisor() {
                                     )}
                                   </div>
                                 </div>
-                                <p className="text-xs mb-3" style={{ color: 'rgba(28,24,18,0.65)' }}>{rec.description}</p>
+                                <p className="text-xs mb-3" style={{ color: 'rgba(28,24,18,0.8)' }}>{rec.description}</p>
                                 {Array.isArray(rec.resources) && rec.resources.length > 0 && (
                                   <div className="flex flex-wrap gap-1.5 mb-2">
                                     {rec.resources.map((r, ri2) => {
@@ -679,7 +681,7 @@ export default function CurriculumAdvisor() {
                                     })}
                                   </div>
                                 )}
-                                <p className="text-[10px] italic" style={{ color: 'rgba(28,24,18,0.45)' }}>{rec.rationale}</p>
+                                <p className="text-[10px]" style={{ color: 'rgba(28,24,18,0.65)' }}>{rec.rationale}</p>
                               </div>
                             ))}
                           </div>
@@ -702,14 +704,15 @@ export default function CurriculumAdvisor() {
                     <button
                       onClick={handleFollowUp}
                       disabled={!followUp.trim() || followUpLoading}
-                      className="edu-adv-btn flex items-center gap-2 px-4 py-2.5 text-sm transition-opacity disabled:opacity-40"
+                      className="edu-adv-btn inline-flex items-center justify-center gap-2 px-6 text-sm transition-colors disabled:opacity-40"
+                      style={{ minHeight: 44, fontFamily: "'Open Sans', sans-serif", fontSize: 14, fontWeight: 600 }}
                     >
                       {followUpLoading ? (
-                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
                       ) : (
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <svg width={20} height={20} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                         </svg>
                       )}
@@ -777,12 +780,10 @@ export default function CurriculumAdvisor() {
             {/* Header */}
             <div className="flex items-start justify-between gap-3 px-6 py-4" style={{ borderBottom: '1px solid rgba(28,24,18,0.08)' }}>
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: '#3D6B4F' }}>
-                  <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-                <h2 className="text-base font-normal" style={{ fontFamily: "'Cormorant Garamond', serif", color: '#1C1812' }}>{resourceModal.title}</h2>
+                <svg width={20} height={20} className="flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="#3D6B4F" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <h2 className="text-base font-normal" style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'normal', color: '#1C1812' }}>{resourceModal.title}</h2>
               </div>
               <button
                 onClick={() => { setResourceModal(null); setResourceSavedOk(false); }}
@@ -804,10 +805,10 @@ export default function CurriculumAdvisor() {
             <div className="flex items-center gap-2 px-6 py-4 flex-wrap" style={{ borderTop: '1px solid rgba(28,24,18,0.08)' }}>
               <button
                 onClick={handleCopyResource}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold transition-colors"
-                style={{ background: '#FFFFFF', border: '1px solid rgba(28,24,18,0.15)', color: 'rgba(28,24,18,0.7)' }}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-colors hover:bg-[rgba(28,24,18,0.03)]"
+                style={{ background: '#FFFFFF', border: '1px solid rgba(28,24,18,0.15)', color: '#1C1812' }}
               >
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                 </svg>
                 Copy to Clipboard
@@ -815,24 +816,24 @@ export default function CurriculumAdvisor() {
               <button
                 onClick={handleSaveResourceToInterventions}
                 disabled={savingResource || resourceSavedOk}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold transition-colors disabled:opacity-60"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-colors disabled:opacity-60"
                 style={{ background: 'rgba(61,107,79,0.12)', border: '1px solid rgba(61,107,79,0.3)', color: '#2E5340' }}
               >
                 {resourceSavedOk ? (
                   <>
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><polyline points="20 6 9 17 4 12" /></svg>
                     Saved!
                   </>
                 ) : savingResource ? (
                   <>
-                    <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
                     Saving...
                   </>
                 ) : (
                   <>
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                     </svg>
                     Save to Support Plans
@@ -841,10 +842,10 @@ export default function CurriculumAdvisor() {
               </button>
               <button
                 onClick={handleDownloadResource}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold transition-colors"
-                style={{ background: '#FFFFFF', border: '1px solid rgba(28,24,18,0.15)', color: 'rgba(28,24,18,0.7)' }}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-colors hover:bg-[rgba(28,24,18,0.03)]"
+                style={{ background: '#FFFFFF', border: '1px solid rgba(28,24,18,0.15)', color: '#1C1812' }}
               >
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                 </svg>
                 Download as Text

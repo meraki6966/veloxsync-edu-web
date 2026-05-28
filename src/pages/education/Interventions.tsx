@@ -15,13 +15,13 @@ const INT_CSS = `
 .edu-int { display: flex; height: 100vh; overflow: hidden; background: #FAF7F2; font-family: 'Open Sans', sans-serif; color: #1C1812; }
 .edu-int-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #3D6B4F; }
 .edu-int-title { font-family: 'Cormorant Garamond', serif; font-size: 36px; font-weight: 400; line-height: 1.1; color: #1C1812; }
-.edu-int-card { background: #FFFFFF; border: 1px solid rgba(28,24,18,0.1); border-radius: 16px; box-shadow: 0 2px 12px rgba(28,24,18,0.04); }
-.edu-int-input { background: #FFFFFF; border: 1px solid rgba(28,24,18,0.15); border-radius: 12px; color: #1C1812; font-size: 14px; }
+.edu-int-card { background: #FFFFFF; border: 1px solid rgba(28,24,18,0.08); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.edu-int-input { background: #FFFFFF; border: 1px solid rgba(28,24,18,0.15); border-radius: 8px; color: #1C1812; font-size: 14px; }
 .edu-int-input::placeholder { color: rgba(28,24,18,0.4); }
 .edu-int-input:focus { outline: none; border-color: #3D6B4F; box-shadow: 0 0 0 3px rgba(61,107,79,0.15); }
 .edu-int-label { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #3D6B4F; }
-.edu-int-btn { background: #3D6B4F; color: #fff; border-radius: 9999px; font-weight: 600; }
-.edu-int-btn:hover { opacity: 0.92; }
+.edu-int-btn { background: #3D6B4F; color: #fff; border-radius: 8px; font-weight: 600; }
+.edu-int-btn:hover { background: #2D5A3F; }
 `;
 
 // soft pill badges — green positive, amber warning, red risk, neutral
@@ -187,13 +187,17 @@ export default function Interventions() {
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-7">
             <div>
-              <div className="edu-int-eyebrow mb-2">EI-CORE</div>
+              <div className="flex items-center gap-2 mb-2">
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#3D6B4F', display: 'inline-block' }} />
+                <span style={{ fontFamily: "'Open Sans',sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', color: '#3D6B4F', letterSpacing: '0.08em' }}>Ei-Core</span>
+              </div>
               <h1 className="edu-int-title">Support Plans</h1>
               <p className="text-sm mt-2" style={{ color: 'rgba(28,24,18,0.6)' }}>Track, manage, and resolve focused support plans for your children.</p>
             </div>
             <button
               onClick={() => setShowAdd(true)}
-              className="edu-int-btn flex items-center gap-2 px-5 py-2.5 text-sm transition-opacity"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#3D6B4F] px-6 text-white transition-colors hover:bg-[#2D5A3F]"
+              style={{ minHeight: 44, fontFamily: "'Open Sans', sans-serif", fontSize: 14, fontWeight: 600 }}
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -257,7 +261,10 @@ export default function Interventions() {
                         <span className={`px-2 py-0.5 text-[10px] font-semibold rounded-full border capitalize ${STATUS_BADGE[item.status ?? ''] ?? STATUS_BADGE['pending']}`}>
                           {(item.status ?? 'pending').replace('_', ' ')}
                         </span>
-                        <span className="px-1.5 py-0.5 text-[9px] font-semibold rounded uppercase tracking-wider" style={{ background: 'rgba(61,107,79,0.1)', color: '#3D6B4F', border: '1px solid rgba(61,107,79,0.2)' }}>Ei-Core</span>
+                        <span className="inline-flex items-center gap-1.5" style={{ fontFamily: "'Open Sans',sans-serif", fontSize: 11, fontWeight: 700, textTransform: 'uppercase', color: '#3D6B4F', letterSpacing: '0.08em' }}>
+                          <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#3D6B4F', display: 'inline-block' }} />
+                          Ei-Core
+                        </span>
                       </div>
                       <p className="text-xs mt-1 truncate" style={{ color: 'rgba(28,24,18,0.5)' }}>{item.description}</p>
                     </div>
@@ -283,10 +290,13 @@ export default function Interventions() {
                       {(item.status ?? 'pending') !== 'resolved' && (
                         <button
                           onClick={() => handleResolve(item.id)}
-                          className="px-4 py-2 rounded-full text-xs font-semibold transition-colors"
-                          style={{ background: 'rgba(61,107,79,0.12)', color: '#2E5340', border: '1px solid rgba(61,107,79,0.3)' }}
+                          className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#3D6B4F] px-6 text-white transition-colors hover:bg-[#2D5A3F]"
+                          style={{ minHeight: 44, fontFamily: "'Open Sans', sans-serif", fontSize: 14, fontWeight: 600 }}
                         >
-                          ✓ Mark Resolved
+                          <svg width={20} height={20} fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                          Mark Resolved
                         </button>
                       )}
                     </div>
@@ -301,7 +311,7 @@ export default function Interventions() {
       {/* Add Support Plan Modal */}
       {showAdd && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center px-4">
-          <div className="rounded-2xl w-full max-w-lg p-6" style={{ background: '#FFFFFF', border: '1px solid rgba(28,24,18,0.1)', fontFamily: "'Open Sans', sans-serif" }}>
+          <div className="w-full max-w-lg p-6" style={{ background: '#FFFFFF', border: '1px solid rgba(28,24,18,0.08)', borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.04)', fontFamily: "'Open Sans', sans-serif" }}>
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-xl font-normal" style={{ fontFamily: "'Cormorant Garamond', serif", color: '#1C1812' }}>Add Support Plan</h2>
               <button onClick={() => setShowAdd(false)} style={{ color: 'rgba(28,24,18,0.5)' }}>
@@ -372,15 +382,16 @@ export default function Interventions() {
             <div className="flex gap-3 mt-5">
               <button
                 onClick={() => setShowAdd(false)}
-                className="px-5 py-2.5 rounded-full text-sm font-semibold transition-colors"
-                style={{ border: '1px solid rgba(28,24,18,0.15)', color: 'rgba(28,24,18,0.6)' }}
+                className="inline-flex items-center justify-center rounded-lg border bg-white px-6 text-[#1C1812] transition-colors hover:bg-[rgba(28,24,18,0.03)]"
+                style={{ minHeight: 44, borderColor: 'rgba(28,24,18,0.15)', fontFamily: "'Open Sans', sans-serif", fontSize: 14, fontWeight: 600 }}
               >
                 Cancel
               </button>
               <button
                 onClick={handleAdd}
                 disabled={saving || !addForm.student_id || !addForm.description}
-                className="edu-int-btn flex-1 py-2.5 text-sm disabled:opacity-40 transition-opacity"
+                className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-[#3D6B4F] px-6 text-white transition-colors hover:bg-[#2D5A3F] disabled:opacity-40"
+                style={{ minHeight: 44, fontFamily: "'Open Sans', sans-serif", fontSize: 14, fontWeight: 600 }}
               >
                 {saving ? 'Saving...' : 'Add Support Plan'}
               </button>
