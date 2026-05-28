@@ -324,10 +324,18 @@ export default function EduOnboarding() {
           overall_progress: 0,
         });
         setChildSaved(true);
-      } catch {
-        // Silently degrade — the parent profile is saved locally and we
-        // can still advance to the dashboard. They can add the child later.
+      } catch (err) {
+        // Surface the failure instead of degrading silently — otherwise the
+        // child never gets created and the dashboard lands empty with no
+        // explanation. Log for debugging, show the parent an error, and stay
+        // on this step so they can retry (or use "Skip for now").
+        console.error('Failed to add child during onboarding:', err);
         setChildSaved(false);
+        setError(
+          'We could not save your child just now. Please try again, or skip for now and add them from your dashboard.'
+        );
+        setSubmitting(false);
+        return;
       }
     }
     setSubmitting(false);

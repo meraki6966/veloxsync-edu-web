@@ -262,15 +262,6 @@ export default function EducationSidebar({
           </Link>
 
           <Link
-            to="/education/dashboard#children"
-            className="edu-sidebar-link"
-            onClick={onMobileClose}
-          >
-            <Icon d={ICONS.children} />
-            <span>Children</span>
-          </Link>
-
-          <Link
             to="/education/pacing"
             className={`edu-sidebar-link${isActive('/education/pacing') ? ' active' : ''}`}
             onClick={onMobileClose}
