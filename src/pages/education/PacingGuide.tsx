@@ -1,88 +1,106 @@
 // src/pages/education/PacingGuide.tsx
-// VeloxSync for Education — Daily Plan (V3 cream/green)
+// VeloxSync for Education — Daily Plan (V3 cream/green, homeschool children)
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dashboard, edu } from '../../api';
 import EducationSidebar from '../../components/EducationSidebar';
-import type { EduProfile, Classroom, Student } from '../../types/education';
-import { GRADE_BAND_CONFIG } from '../../types/education';
+import type { EduProfile, HomeschoolChild } from '../../types/education';
 
-interface PacingStandard {
+// A single lesson block in a child's daily plan.
+interface Lesson {
   id: string;
-  code: string;
-  description: string;
   subject: string;
-  mastery_pct?: number;
+  title: string;
+  desc: string;
+  duration: number;
 }
 
-interface SupportStudent {
-  id: string;
-  first_name: string;
-  last_name: string;
-  grade_level: string;
-  reason: string;
-  overall_progress: number;
+// A generated daily plan for one child.
+interface DayPlan {
+  childId: string;
+  childName: string;
+  gradeLabel: string;
+  curriculum?: string;
+  hasIep: boolean;
+  lessons: Lesson[];
 }
 
-interface PacingData {
-  this_week: PacingStandard[];
-  behind_schedule: PacingStandard[];
-  ready_to_advance: PacingStandard[];
-  students_needing_support: SupportStudent[];
-  recommendations: string[];
+// Rotating accent colors — one per lesson block (stripe + soft tint).
+const LESSON_COLORS = ['#3D6B4F', '#6B4F8F', '#B8794A', '#2A7F7F'];
+
+// ── Grade helpers ───────────────────────────────────────────────────────────────
+
+type GradeBand = 'K-2' | '3-5' | '6-8' | '9-12';
+
+function gradeBand(grade: string): GradeBand {
+  if (grade === 'K' || grade === '1' || grade === '2') return 'K-2';
+  if (grade === '3' || grade === '4' || grade === '5') return '3-5';
+  if (grade === '6' || grade === '7' || grade === '8') return '6-8';
+  return '9-12';
 }
 
-// Category accent colors — left stripe + soft tint per section.
-const CAT_GREEN = '#3D6B4F';   // This week's focus
-const CAT_PEACH = '#B8794A';   // Behind schedule
-const CAT_LAVENDER = '#6B4F8F'; // Ready to advance
+function gradeLabel(grade: string): string {
+  return grade === 'K' ? 'Kindergarten' : `Grade ${grade}`;
+}
 
-// ── Mock fallback ─────────────────────────────────────────────────────────────
+// ── Mock daily plan ─────────────────────────────────────────────────────────────
+// Age-appropriate lesson templates by grade band. Real plans come from Ei-Core
+// in a later phase; these let the Generate button work immediately.
 
-function buildMockPacing(classroom: Classroom, students: Student[]): PacingData {
-  const gb = classroom.grade_band;
-  const subj = classroom.subject ?? 'ELA';
+type LessonTemplate = Omit<Lesson, 'id'>;
 
-  const thisWeek: PacingStandard[] = [
-    { id: '1', code: `${gb}.${subj}.W1`, description: `Understand foundational concepts in ${subj} appropriate to ${gb} level`, subject: subj, mastery_pct: 58 },
-    { id: '2', code: `${gb}.${subj}.W2`, description: `Apply grade-appropriate vocabulary and conventions in ${subj} tasks`, subject: subj, mastery_pct: 63 },
-    { id: '3', code: `${gb}.${subj}.W3`, description: `Analyze and respond to ${subj} texts using evidence-based reasoning`, subject: subj, mastery_pct: 47 },
-  ];
-  const behind: PacingStandard[] = [
-    { id: '4', code: `${gb}.${subj}.B1`, description: `Demonstrate understanding of core ${subj} principles through written expression`, subject: subj, mastery_pct: 29 },
-    { id: '5', code: `${gb}.${subj}.B2`, description: `Connect ${subj} concepts to real-world applications and cross-curricular themes`, subject: subj, mastery_pct: 35 },
-  ];
-  const ready: PacingStandard[] = [
-    { id: '6', code: `${gb}.${subj}.R1`, description: `Produce clear and coherent writing appropriate to task and audience`, subject: subj, mastery_pct: 88 },
-    { id: '7', code: `${gb}.${subj}.R2`, description: `Demonstrate command of grammar conventions in writing and speaking`, subject: subj, mastery_pct: 91 },
-  ];
+const LESSON_TEMPLATES: Record<GradeBand, LessonTemplate[]> = {
+  'K-2': [
+    { subject: 'Math', title: 'Counting & Number Sense', desc: 'Count, compare, and build numbers with hands-on manipulatives.', duration: 20 },
+    { subject: 'Reading', title: 'Phonics & Read-Aloud', desc: 'Sound out words, then read a short story together.', duration: 20 },
+    { subject: 'Science', title: 'Science Exploration', desc: 'A guided nature walk or sensory activity — observe and wonder.', duration: 15 },
+  ],
+  '3-5': [
+    { subject: 'Math', title: 'Multiplication & Fractions', desc: 'Practice problems with visual models and a quick game.', duration: 25 },
+    { subject: 'Reading', title: 'Reading Comprehension', desc: 'Read a passage and answer questions about the main idea.', duration: 20 },
+    { subject: 'Science', title: 'Hands-On Science', desc: 'Run a simple experiment and record what happens.', duration: 25 },
+    { subject: 'Writing', title: 'Writing Workshop', desc: 'Draft a short paragraph with a clear topic sentence.', duration: 20 },
+  ],
+  '6-8': [
+    { subject: 'Math', title: 'Pre-Algebra', desc: 'Equations, ratios, and step-by-step problem solving.', duration: 30 },
+    { subject: 'Literature', title: 'Literature & Analysis', desc: 'Read a chapter, then discuss theme and character.', duration: 25 },
+    { subject: 'Science', title: 'Life & Physical Science', desc: 'Investigate a concept with a guided lab activity.', duration: 25 },
+    { subject: 'Coding', title: 'Python Basics', desc: 'Variables, loops, and a small build project.', duration: 30 },
+  ],
+  '9-12': [
+    { subject: 'Advanced Math', title: 'Algebra II / Pre-Calculus', desc: 'Functions, graphing, and applied problem sets.', duration: 35 },
+    { subject: 'Literature', title: 'Literature & Composition', desc: 'Close-read a text and outline an analytical essay.', duration: 30 },
+    { subject: 'Science', title: 'Biology / Chemistry', desc: 'Work through a lab with written analysis.', duration: 30 },
+    { subject: 'Coding', title: 'React & Python', desc: 'Build a component and a small script — portfolio work.', duration: 40 },
+  ],
+};
 
-  const atRisk = students
-    .filter(s => s.overall_progress < 50)
-    .slice(0, 5)
-    .map(s => ({
-      id: s.id,
-      first_name: s.first_name,
-      last_name: s.last_name,
-      grade_level: s.grade_level,
-      overall_progress: s.overall_progress,
-      reason: s.overall_progress < 30 ? 'Significantly below grade level — immediate support needed' : 'Below 50% mastery — targeted small-group instruction recommended',
-    }));
+function buildLessonsForChild(child: HomeschoolChild): Lesson[] {
+  const templates = LESSON_TEMPLATES[gradeBand(child.grade_level)];
+  return templates.map((t, i) => ({ ...t, id: `${child.id}-${i}` }));
+}
 
-  return {
-    this_week: thisWeek,
-    behind_schedule: behind,
-    ready_to_advance: ready,
-    students_needing_support: atRisk,
-    recommendations: [
-      `Focus Week's core skill for ${gb}: prioritize the three standards above before introducing new content`,
-      `${behind.length} standards are behind pacing. Consider 15-minute daily spiral review to close gaps before end of unit`,
-      `${ready.length} standards are mastered class-wide — these students are ready for enrichment or acceleration activities`,
-      atRisk.length > 0 ? `${atRisk.length} student${atRisk.length > 1 ? 's' : ''} may benefit from Tier 2 small-group intervention this week` : 'All students are on pace — maintain current instruction cadence',
-      `Upcoming: ensure all assessments are completed before end-of-unit review on Friday`,
-    ],
-  };
+// Forward-compatible mapping for when the real Ei-Core endpoint returns lessons.
+// Returns null when the response has no usable lesson data, so we fall back to mock.
+function coerceLessons(data: unknown, childId: string): Lesson[] | null {
+  const obj = data as { lessons?: unknown } | unknown[] | null;
+  const raw = Array.isArray(obj) ? obj : (Array.isArray((obj as { lessons?: unknown })?.lessons) ? (obj as { lessons: unknown[] }).lessons : null);
+  if (!raw || raw.length === 0) return null;
+  const lessons = raw
+    .map((item, i): Lesson | null => {
+      const l = item as Record<string, unknown>;
+      if (!l || (l.subject == null && l.title == null && l.name == null)) return null;
+      return {
+        id: `${childId}-real-${(l.id as string | number) ?? i}`,
+        subject: String(l.subject ?? 'Lesson'),
+        title: String(l.title ?? l.name ?? 'Lesson'),
+        desc: String(l.desc ?? l.description ?? ''),
+        duration: Number(l.duration ?? l.minutes ?? 25) || 25,
+      };
+    })
+    .filter((l): l is Lesson => l !== null);
+  return lessons.length ? lessons : null;
 }
 
 // ── V3 styles (cream/green) ─────────────────────────────────────────────────────
@@ -145,7 +163,7 @@ const PACING_CSS = `
 .pacing-btn:hover { background: #5A8F6A; }
 .pacing-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
-/* Classroom context badge */
+/* Child context badge */
 .pacing-context { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; flex-wrap: wrap; }
 .pacing-context-badge {
   display: inline-flex; align-items: center; gap: 6px;
@@ -162,10 +180,6 @@ const PACING_CSS = `
   text-transform: uppercase; color: #3D6B4F; margin-bottom: 14px;
 }
 .pacing-section-label .pacing-count { color: rgba(28,24,18,0.4); font-weight: 600; letter-spacing: 0.04em; }
-.pacing-section-empty {
-  background: #FFFFFF; border: 1px dashed rgba(28,24,18,0.15); border-radius: 16px;
-  padding: 22px; text-align: center; font-size: 13px; color: rgba(28,24,18,0.5);
-}
 
 .pacing-blocks { display: flex; flex-direction: column; gap: 12px; }
 .pacing-block {
@@ -183,23 +197,15 @@ const PACING_CSS = `
 }
 .pacing-block-text { flex: 1; min-width: 0; }
 .pacing-block-title {
-  font-size: 13px; font-weight: 700; color: #1C1812; margin: 0 0 3px;
-  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  font-size: 14px; font-weight: 600; color: #1C1812; margin: 0 0 3px;
 }
-.pacing-block-code {
-  font-family: Verdana, Geneva, sans-serif; font-size: 10px; font-weight: 700;
-  letter-spacing: 0.04em; color: #3D6B4F; background: #EBF2EC;
-  border: 1px solid rgba(61,107,79,0.2); padding: 2px 8px; border-radius: 100px;
-}
-.pacing-block-subject { font-size: 11px; font-weight: 400; color: rgba(28,24,18,0.45); }
 .pacing-block-desc { font-size: 12px; color: rgba(28,24,18,0.6); line-height: 1.55; margin: 0; }
 .pacing-block-meta { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
 .pacing-pill {
   font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 100px; white-space: nowrap;
 }
-.pacing-pill-high { color: #2F6B45; background: #E3F0E6; }
-.pacing-pill-mid  { color: #8A6320; background: #F8EEDC; }
-.pacing-pill-low  { color: #A8413D; background: #F6E2E1; }
+.pacing-pill-duration { color: rgba(28,24,18,0.72); }
+.pacing-pill-focus { color: #6B4F8F; background: #EDE6F6; }
 .pacing-check {
   width: 24px; height: 24px; border-radius: 50%;
   border: 1.5px solid rgba(28,24,18,0.18); background: #FFFFFF; cursor: pointer;
@@ -211,34 +217,6 @@ const PACING_CSS = `
 .pacing-check svg { color: #FFFFFF; opacity: 0; transition: opacity 0.2s; width: 14px; height: 14px; }
 .pacing-check.is-done svg { opacity: 1; }
 
-/* Support list */
-.pacing-card {
-  background: #FFFFFF; border: 1px solid rgba(28,24,18,0.1); border-radius: 16px;
-  padding: 24px 26px; margin-bottom: 24px; box-shadow: 0 2px 14px rgba(28,24,18,0.04);
-}
-.pacing-support-row { display: flex; align-items: center; gap: 16px; padding: 12px 0; border-top: 1px solid rgba(28,24,18,0.07); }
-.pacing-support-row:first-of-type { border-top: none; }
-.pacing-support-avatar {
-  width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 13px; font-weight: 700; color: #8A6320; background: #F8EEDC; border: 1px solid rgba(184,121,74,0.3);
-}
-.pacing-support-info { flex: 1; min-width: 0; }
-.pacing-support-name { font-size: 14px; font-weight: 600; color: #1C1812; }
-.pacing-support-reason { font-size: 12px; color: rgba(28,24,18,0.55); margin-top: 2px; }
-.pacing-support-pct { text-align: right; flex-shrink: 0; }
-.pacing-support-pct-val { font-size: 16px; font-weight: 700; color: #A8413D; }
-.pacing-support-pct-label { font-size: 10px; color: rgba(28,24,18,0.45); text-transform: uppercase; letter-spacing: 0.08em; }
-
-/* Recommendations */
-.pacing-recs { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
-.pacing-rec { display: flex; align-items: flex-start; gap: 12px; font-size: 13px; color: rgba(28,24,18,0.75); line-height: 1.6; }
-.pacing-rec-num {
-  width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; margin-top: 1px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 700; color: #3D6B4F; background: #EBF2EC; border: 1px solid rgba(61,107,79,0.2);
-}
-
 /* Empty state */
 .pacing-empty {
   background: #FFFFFF; border: 1px dashed rgba(28,24,18,0.15); border-radius: 16px;
@@ -247,6 +225,13 @@ const PACING_CSS = `
 .pacing-empty-icon { color: #3D6B4F; margin: 0 auto 16px; display: block; }
 .pacing-empty-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 400; color: #1C1812; margin: 0 0 8px; }
 .pacing-empty-sub { font-size: 13px; color: rgba(28,24,18,0.55); line-height: 1.6; margin: 0; }
+.pacing-empty-btn {
+  display: inline-flex; align-items: center; gap: 8px; margin-top: 18px;
+  font-family: 'Open Sans', sans-serif; font-size: 14px; font-weight: 600; color: #FFFFFF;
+  background: #3D6B4F; border: none; cursor: pointer; padding: 12px 24px; border-radius: 100px;
+  transition: background 0.2s;
+}
+.pacing-empty-btn:hover { background: #5A8F6A; }
 `;
 
 let pacingStylesInjected = false;
@@ -277,21 +262,21 @@ function subjectIcon(subject: string) {
       </svg>
     );
   }
-  if (s.includes('read') || s.includes('ela') || s.includes('english')) {
+  if (s.includes('read') || s.includes('ela') || s.includes('english') || s.includes('liter')) {
     return (
       <svg {...common}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.5C10 4.5 7 4 4 4.5v14c3-.5 6 0 8 2 2-2 5-2.5 8-2v-14c-3-.5-6 0-8 2zM12 6.5v14" />
       </svg>
     );
   }
-  if (s.includes('science') || s.includes('nature')) {
+  if (s.includes('science') || s.includes('nature') || s.includes('biology') || s.includes('chem')) {
     return (
       <svg {...common}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M10 3v6.5L4 19a2 2 0 001.7 3h12.6a2 2 0 001.7-3L14 9.5V3M9 3h6" />
       </svg>
     );
   }
-  if (s.includes('cod') || s.includes('python')) {
+  if (s.includes('cod') || s.includes('python') || s.includes('react')) {
     return (
       <svg {...common}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M9 8l-5 4 5 4M15 8l5 4-5 4M14 6l-4 12" />
@@ -322,84 +307,15 @@ function subjectIcon(subject: string) {
   );
 }
 
-function masteryPillClass(pct?: number) {
-  if (pct === undefined) return 'pacing-pill-mid';
-  if (pct >= 80) return 'pacing-pill-high';
-  if (pct >= 50) return 'pacing-pill-mid';
-  return 'pacing-pill-low';
-}
-
-// ── Section of standards rendered as lesson-style blocks ────────────────────────
-
-function PacingSection({
-  label, color, standards, emptyMsg, completed, onToggle,
-}: {
-  label: string;
-  color: string;
-  standards: PacingStandard[];
-  emptyMsg: string;
-  completed: Record<string, boolean>;
-  onToggle: (id: string) => void;
-}) {
-  return (
-    <section className="pacing-section">
-      <span className="pacing-section-label">
-        {label} <span className="pacing-count">· {standards.length} standard{standards.length !== 1 ? 's' : ''}</span>
-      </span>
-      {standards.length === 0 ? (
-        <div className="pacing-section-empty">{emptyMsg}</div>
-      ) : (
-        <div className="pacing-blocks">
-          {standards.map(s => {
-            const done = !!completed[s.id];
-            return (
-              <div key={s.id} className="pacing-block" style={{ background: `${color}12` }}>
-                <span className="pacing-block-stripe" style={{ background: color }} />
-                <span className="pacing-block-icon" style={{ background: `${color}26`, color }}>
-                  {subjectIcon(s.subject)}
-                </span>
-                <div className="pacing-block-text">
-                  <p className="pacing-block-title">
-                    <span className="pacing-block-code">{s.code}</span>
-                    <span className="pacing-block-subject">{s.subject}</span>
-                  </p>
-                  <p className="pacing-block-desc">{s.description}</p>
-                </div>
-                <div className="pacing-block-meta">
-                  {s.mastery_pct !== undefined && (
-                    <span className={`pacing-pill ${masteryPillClass(s.mastery_pct)}`}>{s.mastery_pct}%</span>
-                  )}
-                  <button
-                    type="button"
-                    className={`pacing-check${done ? ' is-done' : ''}`}
-                    onClick={() => onToggle(s.id)}
-                    aria-pressed={done}
-                    aria-label={done ? 'Mark incomplete' : 'Mark complete'}
-                  >
-                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </section>
-  );
-}
-
 // ── Main page ─────────────────────────────────────────────────────────────────
 
 export default function PacingGuide() {
   const navigate = useNavigate();
   const [user, setUser] = useState<{ first_name?: string; last_name?: string } | null>(null);
   const [eduProfile, setEduProfile] = useState<EduProfile | null>(null);
-  const [classrooms, setClassrooms] = useState<Classroom[]>([]);
-  const [students, setStudents] = useState<Student[]>([]);
+  const [children, setChildren] = useState<HomeschoolChild[]>([]);
   const [selectedId, setSelectedId] = useState('');
-  const [pacing, setPacing] = useState<PacingData | null>(null);
+  const [plan, setPlan] = useState<DayPlan | null>(null);
   const [generating, setGenerating] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [completed, setCompleted] = useState<Record<string, boolean>>({});
@@ -410,43 +326,51 @@ export default function PacingGuide() {
     const raw = localStorage.getItem('eduProfile');
     if (raw) setEduProfile(JSON.parse(raw) as EduProfile);
     dashboard.me().then(r => setUser(r.data)).catch(() => navigate('/education/login'));
-    loadInit();
+    loadChildren();
   }, []);
 
-  const loadInit = async () => {
+  const loadChildren = async () => {
     try {
-      const [clRes, stRes] = await Promise.allSettled([edu.listClassrooms(), edu.listStudents()]);
-      if (clRes.status === 'fulfilled') {
-        const clData = clRes.value.data;
-        const cls: Classroom[] = Array.isArray(clData) ? clData : (Array.isArray(clData?.classrooms) ? clData.classrooms : []);
-        setClassrooms(cls);
-        if (cls.length > 0) setSelectedId(cls[0].id);
-      }
-      if (stRes.status === 'fulfilled') { const sd = stRes.value.data; setStudents(Array.isArray(sd) ? sd : (Array.isArray(sd?.students) ? sd.students : [])); }
-    } catch { /* silent */ }
+      const res = await edu.listHomeschoolChildren();
+      const d = res.data;
+      const list: HomeschoolChild[] = Array.isArray(d) ? d : (Array.isArray(d?.children) ? d.children : []);
+      setChildren(list);
+      if (list.length > 0) setSelectedId(list[0].id);
+    } catch {
+      setChildren([]);
+    }
   };
 
   const handleGenerate = async () => {
-    if (!selectedId) return;
+    const child = children.find(c => c.id === selectedId);
+    if (!child) return;
     setGenerating(true);
     setCompleted({});
+
+    let lessons: Lesson[] | null = null;
     try {
-      const res = await edu.getPacingGuide(selectedId);
-      setPacing(res.data);
+      // Best-effort real call — when Ei-Core lands it will return lesson data.
+      const res = await edu.getPacingGuide(child.id);
+      lessons = coerceLessons(res.data, child.id);
     } catch {
-      const classroom = classrooms.find(c => c.id === selectedId);
-      if (classroom) setPacing(buildMockPacing(classroom, students));
-    } finally {
-      setGenerating(false);
+      lessons = null;
     }
+    if (!lessons) lessons = buildLessonsForChild(child);
+
+    setPlan({
+      childId: child.id,
+      childName: child.first_name,
+      gradeLabel: gradeLabel(child.grade_level),
+      curriculum: child.curriculum_type,
+      hasIep: child.has_iep,
+      lessons,
+    });
+    setGenerating(false);
   };
 
   const toggleComplete = (id: string) => setCompleted(prev => ({ ...prev, [id]: !prev[id] }));
 
-  const classroom = classrooms.find(c => c.id === selectedId);
-  const gbCfg = classroom ? GRADE_BAND_CONFIG[classroom.grade_band as keyof typeof GRADE_BAND_CONFIG] : null;
-  const safeSupport = pacing ? (Array.isArray(pacing.students_needing_support) ? pacing.students_needing_support : []) : [];
-  const safeRecs = pacing ? (Array.isArray(pacing.recommendations) ? pacing.recommendations : []) : [];
+  const selectedChild = children.find(c => c.id === selectedId) || null;
 
   return (
     <div className="edu-pacing">
@@ -474,16 +398,17 @@ export default function PacingGuide() {
               <select
                 className="pacing-select"
                 value={selectedId}
-                onChange={e => { setSelectedId(e.target.value); setPacing(null); setCompleted({}); }}
+                onChange={e => { setSelectedId(e.target.value); setPlan(null); setCompleted({}); }}
+                disabled={children.length === 0}
               >
-                <option value="">Select a learner group…</option>
-                {classrooms.map(c => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
+                <option value="">Select a child…</option>
+                {children.map(c => (
+                  <option key={c.id} value={c.id}>{`${c.first_name} ${c.last_name}`.trim()}</option>
                 ))}
               </select>
               <button className="pacing-btn" onClick={handleGenerate} disabled={!selectedId || generating}>
                 {generating ? (
-                  <svg width="16" height="16" className="pacing-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} style={{ animation: 'eduSpin 0.8s linear infinite' }}>
+                  <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} style={{ animation: 'eduSpin 0.8s linear infinite' }}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
                 ) : (
@@ -496,88 +421,81 @@ export default function PacingGuide() {
             </div>
           </div>
 
-          {/* Classroom context badge */}
-          {classroom && gbCfg && (
+          {/* Selected child context badge */}
+          {selectedChild && (
             <div className="pacing-context">
-              <span className="pacing-context-badge">{gbCfg.icon} {classroom.name} · {gbCfg.label}</span>
-              <span className="pacing-context-meta">{students.length} learners loaded</span>
+              <span className="pacing-context-badge">{selectedChild.first_name} · {gradeLabel(selectedChild.grade_level)}</span>
+              <span className="pacing-context-meta">{selectedChild.curriculum_type} approach</span>
             </div>
           )}
 
-          {/* Empty state */}
-          {!pacing && !generating && (
-            <div className="pacing-empty">
-              <svg className="pacing-empty-icon" width="52" height="52" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.4}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <h2 className="pacing-empty-title">Build today's plan.</h2>
-              <p className="pacing-empty-sub">Select a learner group and Ei-Core will build a focused daily plan from your family's pacing.</p>
-            </div>
+          {/* Empty states */}
+          {!plan && !generating && (
+            children.length === 0 ? (
+              <div className="pacing-empty">
+                <svg className="pacing-empty-icon" width="52" height="52" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.4}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+                <h2 className="pacing-empty-title">No children yet.</h2>
+                <p className="pacing-empty-sub">Add your first child from your dashboard, then come back to build their daily plan.</p>
+                <button className="pacing-empty-btn" onClick={() => navigate('/education/dashboard')}>
+                  Go to dashboard
+                </button>
+              </div>
+            ) : (
+              <div className="pacing-empty">
+                <svg className="pacing-empty-icon" width="52" height="52" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.4}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <h2 className="pacing-empty-title">Build today's plan.</h2>
+                <p className="pacing-empty-sub">Select a child and Ei-Core will build a focused daily plan tailored to their grade level.</p>
+              </div>
+            )
           )}
 
-          {/* Pacing data */}
-          {pacing && (
-            <>
-              <PacingSection
-                label="This Week's Focus"
-                color={CAT_GREEN}
-                standards={pacing.this_week}
-                emptyMsg="No standards assigned for this week"
-                completed={completed}
-                onToggle={toggleComplete}
-              />
-              <PacingSection
-                label="Behind Schedule"
-                color={CAT_PEACH}
-                standards={pacing.behind_schedule}
-                emptyMsg="Great — no standards are behind schedule"
-                completed={completed}
-                onToggle={toggleComplete}
-              />
-              <PacingSection
-                label="Ready to Advance"
-                color={CAT_LAVENDER}
-                standards={pacing.ready_to_advance}
-                emptyMsg="No standards have reached mastery yet"
-                completed={completed}
-                onToggle={toggleComplete}
-              />
-
-              {/* Learners needing support */}
-              {safeSupport.length > 0 && (
-                <div className="pacing-card">
-                  <span className="pacing-section-label">Learners Needing Extra Support This Week</span>
-                  {safeSupport.map(s => (
-                    <div key={s.id} className="pacing-support-row">
-                      <div className="pacing-support-avatar">{s.first_name[0]}{s.last_name[0]}</div>
-                      <div className="pacing-support-info">
-                        <p className="pacing-support-name">{s.first_name} {s.last_name}</p>
-                        <p className="pacing-support-reason">{s.reason}</p>
+          {/* Generated daily plan */}
+          {plan && (
+            <section className="pacing-section">
+              <span className="pacing-section-label">
+                Today's Plan · {plan.childName}
+                <span className="pacing-count"> · {plan.lessons.length} lesson{plan.lessons.length !== 1 ? 's' : ''}</span>
+              </span>
+              <div className="pacing-blocks">
+                {plan.lessons.map((lesson, i) => {
+                  const color = LESSON_COLORS[i % LESSON_COLORS.length];
+                  const done = !!completed[lesson.id];
+                  return (
+                    <div key={lesson.id} className="pacing-block" style={{ background: `${color}12` }}>
+                      <span className="pacing-block-stripe" style={{ background: color }} />
+                      <span className="pacing-block-icon" style={{ background: `${color}26`, color }}>
+                        {subjectIcon(lesson.subject)}
+                      </span>
+                      <div className="pacing-block-text">
+                        <p className="pacing-block-title">{lesson.subject} — {lesson.title}</p>
+                        <p className="pacing-block-desc">{lesson.desc}</p>
                       </div>
-                      <div className="pacing-support-pct">
-                        <div className="pacing-support-pct-val">{s.overall_progress}%</div>
-                        <div className="pacing-support-pct-label">progress</div>
+                      <div className="pacing-block-meta">
+                        {plan.hasIep && (
+                          <span className="pacing-pill pacing-pill-focus">Focus Mode</span>
+                        )}
+                        <span className="pacing-pill pacing-pill-duration" style={{ background: color }}>{lesson.duration} min</span>
+                        <button
+                          type="button"
+                          className={`pacing-check${done ? ' is-done' : ''}`}
+                          onClick={() => toggleComplete(lesson.id)}
+                          aria-pressed={done}
+                          aria-label={done ? 'Mark incomplete' : 'Mark complete'}
+                        >
+                          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        </button>
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Ei-Core recommendations */}
-              {safeRecs.length > 0 && (
-                <div className="pacing-card">
-                  <span className="pacing-section-label">Ei-Core Pacing Recommendations</span>
-                  <ul className="pacing-recs">
-                    {safeRecs.map((rec, i) => (
-                      <li key={i} className="pacing-rec">
-                        <span className="pacing-rec-num">{i + 1}</span>
-                        {rec}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </>
+                  );
+                })}
+              </div>
+            </section>
           )}
         </div>
       </main>
