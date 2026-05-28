@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { edu } from '../../api';
 import { US_STATES } from '../../types/education';
 
 const CURRICULUM_TYPES = [
@@ -12,8 +11,6 @@ const CURRICULUM_TYPES = [
   'Textbook',
 ] as const;
 type CurriculumApproach = typeof CURRICULUM_TYPES[number];
-
-const GRADE_LEVELS = ['K', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
 
 const ONBOARDING_CSS = `
 .edu-onboarding {
@@ -259,22 +256,10 @@ export default function EduOnboarding() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
 
-  // Step 1
+  // Step 1 — parent / family profile
   const [firstName, setFirstName] = useState('');
   const [state, setState] = useState('');
   const [curriculumApproach, setCurriculumApproach] = useState<CurriculumApproach>('Eclectic');
-
-  // Step 2
-  const [childName, setChildName] = useState('');
-  const [childGrade, setChildGrade] = useState('3');
-  const [childAge, setChildAge] = useState('');
-  const [hasIep, setHasIep] = useState(false);
-  const [iepNotes, setIepNotes] = useState('');
-
-  // Step 3
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState('');
-  const [childSaved, setChildSaved] = useState(false);
 
   useEffect(() => {
     const styleEl = document.createElement('style');
@@ -303,45 +288,6 @@ export default function EduOnboarding() {
     setStep(2);
   };
 
-  const saveChildAndFinish = async (skip: boolean) => {
-    setSubmitting(true);
-    setError('');
-    persistProfile();
-
-    if (!skip && childName.trim()) {
-      try {
-        await edu.addHomeschoolChild({
-          first_name: childName.trim(),
-          last_name: '',
-          grade_level: childGrade,
-          age: parseInt(childAge, 10) || undefined,
-          curriculum_type: curriculumApproach,
-          subjects: ['Math', 'ELA', 'Science', 'Social Studies'],
-          strengths: [],
-          challenge_areas: [],
-          has_iep: hasIep,
-          iep_notes: hasIep ? iepNotes.trim() : undefined,
-          overall_progress: 0,
-        });
-        setChildSaved(true);
-      } catch (err) {
-        // Surface the failure instead of degrading silently — otherwise the
-        // child never gets created and the dashboard lands empty with no
-        // explanation. Log for debugging, show the parent an error, and stay
-        // on this step so they can retry (or use "Skip for now").
-        console.error('Failed to add child during onboarding:', err);
-        setChildSaved(false);
-        setError(
-          'We could not save your child just now. Please try again, or skip for now and add them from your dashboard.'
-        );
-        setSubmitting(false);
-        return;
-      }
-    }
-    setSubmitting(false);
-    setStep(3);
-  };
-
   const goToDashboard = () => navigate('/education/dashboard');
 
   return (
@@ -350,7 +296,7 @@ export default function EduOnboarding() {
         <div className="edu-onboarding-eyebrow">VeloxSync for Education</div>
 
         <div className="edu-onboarding-stepper">
-          {[1, 2, 3].map((s) => (
+          {[1, 2].map((s) => (
             <div key={s} className={`edu-onboarding-stepper-dot${s <= step ? ' active' : ''}`} />
           ))}
         </div>
@@ -417,117 +363,11 @@ export default function EduOnboarding() {
 
         {step === 2 && (
           <div className="edu-onboarding-card">
-            <h1 className="edu-onboarding-title">Tell us about your <em>first learner.</em></h1>
-            <p className="edu-onboarding-sub">You can add more children later.</p>
-
-            {error && <div className="edu-onboarding-error">{error}</div>}
-
-            <div className="edu-onboarding-field">
-              <label className="edu-onboarding-label" htmlFor="child-name">Child's first name</label>
-              <input
-                id="child-name"
-                className="edu-onboarding-input"
-                value={childName}
-                onChange={(e) => setChildName(e.target.value)}
-                placeholder="e.g. Elijah"
-              />
-            </div>
-
-            <div className="edu-onboarding-row">
-              <div className="edu-onboarding-field">
-                <label className="edu-onboarding-label" htmlFor="child-grade">Grade level</label>
-                <select
-                  id="child-grade"
-                  className="edu-onboarding-select"
-                  value={childGrade}
-                  onChange={(e) => setChildGrade(e.target.value)}
-                >
-                  {GRADE_LEVELS.map((g) => (
-                    <option key={g} value={g}>{g === 'K' ? 'K' : `Grade ${g}`}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="edu-onboarding-field">
-                <label className="edu-onboarding-label" htmlFor="child-age">Age</label>
-                <input
-                  id="child-age"
-                  className="edu-onboarding-input"
-                  type="number"
-                  min={4}
-                  max={20}
-                  value={childAge}
-                  onChange={(e) => setChildAge(e.target.value)}
-                  placeholder="e.g. 8"
-                />
-              </div>
-            </div>
-
-            <div className="edu-onboarding-toggle-row">
-              <button
-                type="button"
-                aria-pressed={hasIep}
-                className={`edu-onboarding-toggle${hasIep ? ' on' : ''}`}
-                onClick={() => setHasIep((v) => !v)}
-              >
-                <span className="edu-onboarding-toggle-dot" />
-              </button>
-              <span className="edu-onboarding-toggle-label">
-                This child has an IEP or learning accommodation
-              </span>
-            </div>
-
-            {hasIep && (
-              <div className="edu-onboarding-field">
-                <label className="edu-onboarding-label" htmlFor="iep-notes">Accommodation notes</label>
-                <input
-                  id="iep-notes"
-                  className="edu-onboarding-input"
-                  value={iepNotes}
-                  onChange={(e) => setIepNotes(e.target.value)}
-                  placeholder="e.g. Extended time, ADHD focus support"
-                />
-              </div>
-            )}
-
-            <div className="edu-onboarding-actions">
-              <button
-                type="button"
-                className="edu-onboarding-btn edu-onboarding-btn-ghost"
-                onClick={() => saveChildAndFinish(true)}
-                disabled={submitting}
-              >
-                Skip for now
-              </button>
-              <button
-                type="button"
-                className="edu-onboarding-btn edu-onboarding-btn-primary"
-                onClick={() => saveChildAndFinish(false)}
-                disabled={submitting || !childName.trim()}
-              >
-                {submitting ? 'Saving…' : 'Continue'}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {step === 3 && (
-          <div className="edu-onboarding-card">
             <h1 className="edu-onboarding-title">Your family is <em>set up.</em></h1>
             <p className="edu-onboarding-sub">
-              Ei-Core will generate your first daily plan in the next 24 hours.
+              Head to your dashboard to add your first child. Ei-Core will generate
+              personalized insights within 24 hours.
             </p>
-
-            {childSaved && childName.trim() && (
-              <div className="edu-onboarding-summary">
-                <div className="edu-onboarding-summary-label">First learner added</div>
-                <div className="edu-onboarding-summary-name">{childName.trim()}</div>
-                <div className="edu-onboarding-summary-meta">
-                  {childGrade === 'K' ? 'Kindergarten' : `Grade ${childGrade}`}
-                  {childAge ? ` · Age ${childAge}` : ''}
-                  {hasIep ? ' · Accommodation on file' : ''}
-                </div>
-              </div>
-            )}
 
             <div className="edu-onboarding-actions">
               <button

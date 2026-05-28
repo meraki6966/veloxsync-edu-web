@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import type { EduProfile } from '../types/education';
 
 interface EduSidebarProps {
@@ -25,6 +25,7 @@ const ICONS = {
   settings: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z',
   zap:      'M13 10V3L4 14h7v7l9-11h-7z',
   logo:     'M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z',
+  signout:  'M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1',
 };
 
 const SIDEBAR_CSS = `
@@ -196,6 +197,29 @@ const SIDEBAR_CSS = `
   color: rgba(250,247,242,0.45);
   margin-top: 2px;
 }
+.edu-sidebar-signout {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 14px 12px;
+  padding: 8px 12px;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 12px;
+  /* The cream sidebar text convention is rgba(28,24,18,0.4); on the dark
+     sidebar that ink would be invisible, so we use the cream tone at the
+     same 0.4 opacity. Hover turns green, per spec. */
+  color: rgba(250,247,242,0.4);
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: color 0.15s, background 0.15s;
+}
+.edu-sidebar-signout:hover {
+  color: #8FBF9F;
+  background: rgba(143,191,159,0.08);
+}
+.edu-sidebar-signout svg { flex-shrink: 0; }
 `;
 
 let stylesInjected = false;
@@ -221,6 +245,14 @@ export default function EducationSidebar({
 }: EduSidebarProps) {
   ensureStyles();
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleSignOut = () => {
+    localStorage.removeItem('edu_token');
+    localStorage.removeItem('edu_user');
+    localStorage.removeItem('eduProfile');
+    navigate('/education/login');
+  };
 
   const isActive = (path: string) => {
     if (path === '/education/dashboard') {
@@ -333,6 +365,11 @@ export default function EducationSidebar({
             <div className="edu-sidebar-user-role">Homeschool Parent</div>
           </div>
         </div>
+
+        <button type="button" className="edu-sidebar-signout" onClick={handleSignOut}>
+          <Icon d={ICONS.signout} />
+          <span>Sign out</span>
+        </button>
       </aside>
     </>
   );
