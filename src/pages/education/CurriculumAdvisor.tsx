@@ -1,5 +1,5 @@
 // src/pages/education/CurriculumAdvisor.tsx
-// VeloxSync for Education — Ei-Core Curriculum Advisor
+// VeloxSync for Education — Ei-Core Curriculum Advisor (V3 homeschool)
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -18,6 +18,18 @@ const LEARNING_STYLE_OPTIONS = [
   { value: 'reading_writing', label: 'Reading/Writing' },
   { value: 'mixed', label: 'Mixed / Universal Design' },
 ];
+
+const ADV_CSS = `
+.edu-adv { display: flex; height: 100vh; overflow: hidden; background: #FAF7F2; font-family: 'Open Sans', sans-serif; color: #1C1812; }
+.edu-adv-label { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #3D6B4F; }
+.edu-adv-title { font-family: 'Cormorant Garamond', serif; font-weight: 400; color: #1C1812; }
+.edu-adv-input { width: 100%; background: #FFFFFF; border: 1px solid rgba(28,24,18,0.15); border-radius: 12px; color: #1C1812; font-size: 14px; }
+.edu-adv-input::placeholder { color: rgba(28,24,18,0.4); }
+.edu-adv-input:focus { outline: none; border-color: #3D6B4F; box-shadow: 0 0 0 3px rgba(61,107,79,0.15); }
+.edu-adv-btn { background: #3D6B4F; color: #fff; border-radius: 9999px; font-weight: 600; }
+.edu-adv-btn:hover { opacity: 0.92; }
+.edu-adv-card { background: #FFFFFF; border: 1px solid rgba(28,24,18,0.1); border-radius: 16px; box-shadow: 0 2px 12px rgba(28,24,18,0.04); }
+`;
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -75,6 +87,14 @@ export default function CurriculumAdvisor() {
   };
 
   useEffect(() => {
+    const styleEl = document.createElement('style');
+    styleEl.setAttribute('data-edu-adv', 'true');
+    styleEl.textContent = ADV_CSS;
+    document.head.appendChild(styleEl);
+    return () => { document.head.removeChild(styleEl); };
+  }, []);
+
+  useEffect(() => {
     const raw = localStorage.getItem('eduProfile');
     if (raw) {
       const prof = JSON.parse(raw) as EduProfile;
@@ -94,8 +114,6 @@ export default function CurriculumAdvisor() {
       const raw = res.data;
       console.log('[Ei-Core] Full response:', raw);
 
-      // Handle all possible API response shapes:
-      // string | [...] | { recommendations: [...] } | { data: [...] } | any object with an array property
       let recs: CurriculumRecommendation[] = [];
       let summary = '';
 
@@ -109,20 +127,18 @@ export default function CurriculumAdvisor() {
         if (Array.isArray(known)) {
           recs = known;
         } else {
-          // Fall back to first array property found
           const firstArr = Object.values(raw as Record<string, unknown>).find(v => Array.isArray(v));
           if (firstArr) recs = firstArr as CurriculumRecommendation[];
         }
       }
 
-      // Always show something — fallback if API returned nothing useful
       if (recs.length === 0) {
         recs = generateFallbackRecs(String(params.grade_level), String(params.subject), String(params.learning_style));
       }
 
       const assistantMsg: ChatMessage = {
         role: 'assistant',
-        content: summary || `Here are ${recs.length} curriculum recommendations for Grade ${params.grade_level} ${params.subject} tailored to ${params.learning_style} learners.`,
+        content: summary || `Here are ${recs.length} ideas for what to teach your Grade ${params.grade_level} ${params.subject} learner, tailored to ${params.learning_style} learning.`,
         recommendations: recs,
         timestamp: new Date(),
       };
@@ -156,14 +172,13 @@ export default function CurriculumAdvisor() {
 
     const userMessage: ChatMessage = {
       role: 'user',
-      content: `Find curriculum recommendations for Grade ${gradeLevel} ${subject} in ${state || 'any state'}. Learning style: ${learningStyle}. ${gaps ? `Gaps/context: ${gaps}` : ''}`,
+      content: `What should I teach next for Grade ${gradeLevel} ${subject}${state ? ` in ${state}` : ''}? Learning style: ${learningStyle}. ${gaps ? `My child is struggling with: ${gaps}` : ''}`,
       timestamp: new Date(),
     };
     setMessages(prev => [...prev, userMessage]);
 
     await runAdvisorQuery(params);
     setLoading(false);
-    // Scroll the results panel to top so the first recommendation is fully visible
     requestAnimationFrame(() => {
       if (resultsContainerRef.current) resultsContainerRef.current.scrollTop = 0;
     });
@@ -171,7 +186,6 @@ export default function CurriculumAdvisor() {
 
   const handleRetry = async () => {
     if (!lastQueryRef.current) return;
-    // Remove last error message then retry
     setMessages(prev => prev.slice(0, -1));
     setLoading(true);
     await runAdvisorQuery(lastQueryRef.current);
@@ -181,18 +195,18 @@ export default function CurriculumAdvisor() {
   const generateFallbackRecs = (grade: string, subj: string, style: string): CurriculumRecommendation[] => [
     {
       id: `rec-1-${Date.now()}`,
-      title: `Differentiated ${subj} Unit — Grade ${grade}`,
-      description: `A comprehensive unit designed for Grade ${grade} ${subj} that incorporates multiple learning modalities with emphasis on ${style} approaches.`,
+      title: `${subj} Unit for Your Child — Grade ${grade}`,
+      description: `A flexible unit designed for a Grade ${grade} ${subj} learner that blends multiple learning modalities with emphasis on ${style} approaches.`,
       resources: [`${subj} Standards Workbook`, 'Manipulative Kit', 'Digital Practice Platform'],
       grade_level: grade,
       subject: subj,
       learning_style: style,
-      rationale: `Research shows ${style} learners in Grade ${grade} ${subj} benefit from multi-sensory instruction with clear scaffolding.`,
+      rationale: `${style} learners in Grade ${grade} ${subj} tend to benefit from multi-sensory instruction with clear scaffolding.`,
     },
     {
       id: `rec-2-${Date.now()}`,
       title: `Project-Based Learning: ${subj} Investigation`,
-      description: `A 3-week project-based learning sequence that connects ${subj} concepts to real-world applications for Grade ${grade} students.`,
+      description: `A 3-week project-based sequence that connects ${subj} concepts to real-world life around your home for a Grade ${grade} learner.`,
       resources: ['Project Planning Template', 'Rubric Framework', 'Community Connection Guide'],
       grade_level: grade,
       subject: subj,
@@ -201,23 +215,23 @@ export default function CurriculumAdvisor() {
     },
     {
       id: `rec-3-${Date.now()}`,
-      title: `Small Group Intervention: ${subj} Mastery`,
-      description: `Targeted intervention protocol for Grade ${grade} students showing gaps in foundational ${subj} skills, with daily 15-minute small group sessions.`,
-      resources: ['Intervention Tracking Sheet', 'Skills Progression Chart', 'Quick Assessment Cards'],
+      title: `Focused Practice: ${subj} Mastery`,
+      description: `Targeted extra support for a Grade ${grade} child showing gaps in foundational ${subj} skills, with short daily 15-minute focused sessions you guide together.`,
+      resources: ['Practice Tracking Sheet', 'Skills Progression Chart', 'Quick Assessment Cards'],
       grade_level: grade,
       subject: subj,
       learning_style: style,
-      rationale: `Small group instruction with frequent formative assessment closes Grade ${grade} ${subj} gaps 30% faster than whole-class re-teaching.`,
+      rationale: `Short focused practice with frequent check-ins closes Grade ${grade} ${subj} gaps faster than repeating whole lessons.`,
     },
     {
       id: `rec-4-${Date.now()}`,
-      title: `Cross-Curricular ${subj} Integration`,
-      description: `Units that weave ${subj} standards into ${subj === 'Math' ? 'science and art' : subj === 'ELA' ? 'social studies and science' : 'multiple subject areas'} for deeper learning and transfer.`,
-      resources: ['Cross-Curricular Map', 'Integrated Lesson Templates', 'Assessment Alignment Guide'],
+      title: `Cross-Subject ${subj} Integration`,
+      description: `Units that weave ${subj} standards into ${subj === 'Math' ? 'science and art' : subj === 'ELA' ? 'social studies and science' : 'multiple subjects'} for deeper learning and transfer.`,
+      resources: ['Cross-Subject Map', 'Integrated Lesson Templates', 'Assessment Alignment Guide'],
       grade_level: grade,
       subject: subj,
       learning_style: style,
-      rationale: `Cross-curricular integration deepens conceptual understanding and helps students transfer ${subj} skills to novel contexts.`,
+      rationale: `Cross-subject integration deepens understanding and helps your child transfer ${subj} skills to new situations.`,
     },
   ];
 
@@ -248,7 +262,7 @@ export default function CurriculumAdvisor() {
       const recs = raw?.recommendations ?? raw?.data ?? raw?.results ?? (Array.isArray(raw) ? raw : undefined);
       const assistantMsg: ChatMessage = {
         role: 'assistant',
-        content: content || `For your Grade ${gradeLevel} ${subject} question: consider targeted small-group instruction, formative check-ins every 2–3 lessons, and differentiated materials matched to the specific gap. Would you like a detailed activity plan?`,
+        content: content || `For your Grade ${gradeLevel} ${subject} question: try short focused practice, quick check-ins every 2–3 lessons, and materials matched to the specific gap. Want a detailed activity plan?`,
         recommendations: Array.isArray(recs) ? recs : undefined,
         timestamp: new Date(),
       };
@@ -256,13 +270,12 @@ export default function CurriculumAdvisor() {
     } catch {
       const assistantMsg: ChatMessage = {
         role: 'assistant',
-        content: `For Grade ${gradeLevel} ${subject} (${learningStyle} learners${state ? ` in ${state}` : ''}): consider targeted small-group instruction, formative check-ins every 2–3 lessons, and differentiated materials matched to the specific gap. Would you like a detailed activity plan or intervention sequence?`,
+        content: `For Grade ${gradeLevel} ${subject} (${learningStyle} learners${state ? ` in ${state}` : ''}): try short focused practice, quick check-ins every 2–3 lessons, and materials matched to the specific gap. Want a detailed activity plan or support sequence?`,
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, assistantMsg]);
     } finally {
       setFollowUpLoading(false);
-      // Scroll panel to bottom so the new follow-up response is visible
       requestAnimationFrame(() => {
         if (resultsContainerRef.current) {
           resultsContainerRef.current.scrollTop = resultsContainerRef.current.scrollHeight;
@@ -350,7 +363,7 @@ export default function CurriculumAdvisor() {
         elements.push(
           <ul key={`ul-${key}`} className="list-disc list-inside space-y-1 my-2 pl-1">
             {bulletBuffer.map((b, i) => (
-              <li key={i} className="text-sm text-slate-200 leading-relaxed">{renderInline(b)}</li>
+              <li key={i} className="text-sm leading-relaxed" style={{ color: 'rgba(28,24,18,0.75)' }}>{renderInline(b)}</li>
             ))}
           </ul>
         );
@@ -362,7 +375,7 @@ export default function CurriculumAdvisor() {
       const parts = str.split(/(\*\*[^*]+\*\*)/g);
       return parts.map((p, i) =>
         p.startsWith('**') && p.endsWith('**')
-          ? <strong key={i} className="font-bold text-white">{p.slice(2, -2)}</strong>
+          ? <strong key={i} className="font-bold" style={{ color: '#1C1812' }}>{p.slice(2, -2)}</strong>
           : p
       );
     };
@@ -371,17 +384,17 @@ export default function CurriculumAdvisor() {
       if (line.startsWith('## ')) {
         flushBullets(String(idx));
         elements.push(
-          <h2 key={idx} className="text-base font-black text-white mt-4 mb-1 first:mt-0">{line.slice(3)}</h2>
+          <h2 key={idx} className="text-base font-bold mt-4 mb-1 first:mt-0" style={{ color: '#1C1812' }}>{line.slice(3)}</h2>
         );
       } else if (line.startsWith('# ')) {
         flushBullets(String(idx));
         elements.push(
-          <h1 key={idx} className="text-lg font-black text-white mt-4 mb-2 first:mt-0">{line.slice(2)}</h1>
+          <h1 key={idx} className="text-lg font-bold mt-4 mb-2 first:mt-0" style={{ color: '#1C1812' }}>{line.slice(2)}</h1>
         );
       } else if (line.startsWith('### ')) {
         flushBullets(String(idx));
         elements.push(
-          <h3 key={idx} className="text-sm font-black text-white mt-3 mb-1">{line.slice(4)}</h3>
+          <h3 key={idx} className="text-sm font-bold mt-3 mb-1" style={{ color: '#1C1812' }}>{line.slice(4)}</h3>
         );
       } else if (line.match(/^[-*] /)) {
         bulletBuffer.push(line.slice(2));
@@ -391,7 +404,7 @@ export default function CurriculumAdvisor() {
       } else {
         flushBullets(String(idx));
         elements.push(
-          <p key={idx} className="text-sm text-slate-200 leading-relaxed">{renderInline(line)}</p>
+          <p key={idx} className="text-sm leading-relaxed" style={{ color: 'rgba(28,24,18,0.75)' }}>{renderInline(line)}</p>
         );
       }
     });
@@ -417,7 +430,6 @@ export default function CurriculumAdvisor() {
       setRecentlySaved(prev => new Set(prev).add(rec.id));
       setTimeout(() => setRecentlySaved(prev => { const n = new Set(prev); n.delete(rec.id); return n; }), 3000);
     } catch {
-      // Optimistic fallback
       setRecentlySaved(prev => new Set(prev).add(rec.id));
       setTimeout(() => setRecentlySaved(prev => { const n = new Set(prev); n.delete(rec.id); return n; }), 3000);
       setSavedInterventions(prev => [{
@@ -439,7 +451,7 @@ export default function CurriculumAdvisor() {
   };
 
   return (
-    <div className="flex h-screen bg-slate-950 overflow-hidden">
+    <div className="edu-adv">
       <EducationSidebar
         user={user}
         eduProfile={eduProfile}
@@ -448,91 +460,71 @@ export default function CurriculumAdvisor() {
       />
 
       <main className="flex-1 flex flex-col overflow-hidden">
-        <div className="md:hidden flex items-center gap-3 px-4 py-3 border-b border-slate-800">
-          <button onClick={() => setMobileOpen(true)} className="text-slate-400 hover:text-white">
+        <div className="md:hidden flex items-center gap-3 px-4 py-3" style={{ borderBottom: '1px solid rgba(28,24,18,0.1)' }}>
+          <button onClick={() => setMobileOpen(true)} style={{ color: 'rgba(28,24,18,0.6)' }}>
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <span className="text-white font-black">Curriculum Advisor</span>
+          <span className="font-semibold" style={{ color: '#1C1812' }}>Curriculum Advisor</span>
         </div>
 
         <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
           {/* Left: Input Form */}
-          <div className="lg:w-80 xl:w-96 border-r border-slate-800 overflow-y-auto flex-shrink-0">
+          <div className="lg:w-80 xl:w-96 overflow-y-auto flex-shrink-0" style={{ borderRight: '1px solid rgba(28,24,18,0.1)', background: '#FFFFFF' }}>
             <div className="p-6">
-              <div className="flex items-center gap-2 mb-1">
-                <svg className="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
-                <h1 className="text-lg font-black text-white">Curriculum Advisor</h1>
-              </div>
-              <p className="text-slate-400 text-xs mb-6">Ei-Core generates curriculum recommendations personalized to your class.</p>
+              <div className="edu-adv-label mb-2">EI-CORE</div>
+              <h1 className="edu-adv-title mb-1" style={{ fontSize: 28 }}>Ask what to teach next</h1>
+              <p className="text-xs mb-6" style={{ color: 'rgba(28,24,18,0.55)', lineHeight: 1.6 }}>Tell Ei-Core about your child and get personalized ideas for what to teach next.</p>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-1.5">Grade Level</label>
-                  <select
-                    value={gradeLevel}
-                    onChange={e => setGradeLevel(e.target.value)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
+                  <label className="edu-adv-label block mb-1.5">Grade Level</label>
+                  <select value={gradeLevel} onChange={e => setGradeLevel(e.target.value)} className="edu-adv-input px-3 py-2.5">
                     {GRADE_LEVELS.map(g => <option key={g} value={g}>{g === 'K' ? 'Kindergarten' : `Grade ${g}`}</option>)}
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-1.5">State <span className="text-slate-600 normal-case font-normal">(optional)</span></label>
-                  <select
-                    value={state}
-                    onChange={e => setState(e.target.value)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
+                  <label className="edu-adv-label block mb-1.5">State <span className="normal-case font-normal" style={{ color: 'rgba(28,24,18,0.4)' }}>(optional)</span></label>
+                  <select value={state} onChange={e => setState(e.target.value)} className="edu-adv-input px-3 py-2.5">
                     <option value="">Any state</option>
                     {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-1.5">Subject *</label>
-                  <select
-                    value={subject}
-                    onChange={e => setSubject(e.target.value)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
+                  <label className="edu-adv-label block mb-1.5">Subject *</label>
+                  <select value={subject} onChange={e => setSubject(e.target.value)} className="edu-adv-input px-3 py-2.5">
                     <option value="">Select subject...</option>
                     {SUBJECTS.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-1.5">Learning Style</label>
-                  <select
-                    value={learningStyle}
-                    onChange={e => setLearningStyle(e.target.value)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
+                  <label className="edu-adv-label block mb-1.5">Learning Style</label>
+                  <select value={learningStyle} onChange={e => setLearningStyle(e.target.value)} className="edu-adv-input px-3 py-2.5">
                     {LEARNING_STYLE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-1.5">
-                    Gaps / Notes <span className="text-slate-600 normal-case font-normal">(optional)</span>
+                  <label className="edu-adv-label block mb-1.5">
+                    What is your child struggling with? <span className="normal-case font-normal" style={{ color: 'rgba(28,24,18,0.4)' }}>(optional)</span>
                   </label>
                   <textarea
                     value={gaps}
                     onChange={e => setGaps(e.target.value)}
-                    placeholder="e.g. Students struggle with fractions, 5 students have IEPs, low engagement with traditional methods..."
+                    placeholder="e.g. struggles with fractions, loses focus on long readings, wants more hands-on activities..."
                     rows={4}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                    className="edu-adv-input px-3 py-2.5 resize-none"
                   />
                 </div>
 
                 <button
                   onClick={handleSubmit}
                   disabled={!subject || !gradeLevel || loading}
-                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-sky-500 text-white font-black text-sm hover:opacity-90 transition-opacity disabled:opacity-40"
+                  className="edu-adv-btn w-full flex items-center justify-center gap-2 py-3 text-sm transition-opacity disabled:opacity-40"
                 >
                   {loading ? (
                     <>
@@ -559,14 +551,14 @@ export default function CurriculumAdvisor() {
             {messages.length === 0 ? (
               <div className="flex-1 flex items-center justify-center p-8">
                 <div className="text-center max-w-sm">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-sky-400 flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: '#3D6B4F' }}>
                     <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                   </div>
-                  <h2 className="text-lg font-black text-white mb-2">Ei-Core Curriculum Advisor</h2>
-                  <p className="text-slate-400 text-sm">
-                    Fill in the form and click "Get Recommendations" to receive personalized curriculum guidance for your class.
+                  <h2 className="edu-adv-title mb-2" style={{ fontSize: 26 }}>Ask Ei-Core what to teach next</h2>
+                  <p className="text-sm" style={{ color: 'rgba(28,24,18,0.55)' }}>
+                    Fill in the form and click "Get Recommendations" for personalized guidance on what to teach your child next.
                   </p>
                 </div>
               </div>
@@ -578,18 +570,18 @@ export default function CurriculumAdvisor() {
                       <div className={`max-w-2xl ${msg.role === 'user' ? 'ml-12' : 'mr-12'}`}>
                         {msg.role === 'assistant' && (
                           <div className="flex items-center gap-2 mb-2">
-                            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-600 to-sky-400 flex items-center justify-center">
+                            <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: '#3D6B4F' }}>
                               <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                               </svg>
                             </div>
-                            <span className="text-xs font-black text-blue-400">Ei-Core Advisor</span>
+                            <span className="text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: '#3D6B4F' }}>EI-CORE</span>
                           </div>
                         )}
                         {msg.isError ? (
-                          <div className="rounded-2xl px-4 py-3 text-sm bg-red-500/10 border border-red-500/25 text-red-300 rounded-tl-sm">
+                          <div className="rounded-2xl px-4 py-3 text-sm rounded-tl-sm" style={{ background: 'rgba(176,58,46,0.08)', border: '1px solid rgba(176,58,46,0.25)', color: '#B03A2E' }}>
                             <div className="flex items-start gap-2 mb-2">
-                              <svg className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                               </svg>
                               <span>{msg.content}</span>
@@ -597,17 +589,17 @@ export default function CurriculumAdvisor() {
                             <button
                               onClick={handleRetry}
                               disabled={loading}
-                              className="mt-1 px-3 py-1.5 rounded-lg bg-red-500/15 border border-red-500/25 text-red-300 text-xs font-black hover:bg-red-500/25 transition-colors disabled:opacity-50"
+                              className="mt-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors disabled:opacity-50"
+                              style={{ background: 'rgba(176,58,46,0.12)', border: '1px solid rgba(176,58,46,0.25)', color: '#B03A2E' }}
                             >
                               Try Again
                             </button>
                           </div>
                         ) : (
-                          <div className={`rounded-2xl px-4 py-3 text-sm ${
-                            msg.role === 'user'
-                              ? 'bg-blue-600 text-white rounded-tr-sm'
-                              : 'bg-slate-800 border border-slate-700/50 text-slate-200 rounded-tl-sm'
-                          }`}>
+                          <div className={`rounded-2xl px-4 py-3 text-sm ${msg.role === 'user' ? 'rounded-tr-sm text-white' : 'rounded-tl-sm'}`}
+                            style={msg.role === 'user'
+                              ? { background: '#3D6B4F' }
+                              : { background: '#FFFFFF', border: '1px solid rgba(28,24,18,0.1)', color: 'rgba(28,24,18,0.8)' }}>
                             {msg.content}
                           </div>
                         )}
@@ -616,9 +608,9 @@ export default function CurriculumAdvisor() {
                         {Array.isArray(msg.recommendations) && msg.recommendations.length > 0 && (
                           <div className="mt-3 space-y-3">
                             {msg.recommendations.map((rec, ri) => (
-                              <div key={ri} className="bg-slate-800/80 border border-slate-700/50 rounded-2xl p-4">
+                              <div key={ri} className="edu-adv-card p-4">
                                 <div className="flex items-start justify-between gap-2 mb-2">
-                                  <h3 className="font-black text-white text-sm">{rec.title}</h3>
+                                  <h3 className="font-semibold text-sm" style={{ color: '#1C1812' }}>{rec.title}</h3>
                                   <div className="flex items-center gap-1.5 flex-shrink-0">
                                     <button
                                       onClick={() => {
@@ -631,12 +623,13 @@ export default function CurriculumAdvisor() {
                                         });
                                         setAssignmentModalOpen(true);
                                       }}
-                                      className="text-[10px] font-black text-teal-400 hover:text-teal-300 whitespace-nowrap border border-teal-500/20 px-2 py-1 rounded-lg bg-teal-500/5 hover:bg-teal-500/10 transition-colors"
+                                      className="text-[10px] font-semibold whitespace-nowrap px-2 py-1 rounded-full transition-colors"
+                                      style={{ color: '#3D6B4F', border: '1px solid rgba(61,107,79,0.25)', background: 'rgba(61,107,79,0.06)' }}
                                     >
                                       📝 Generate Assignment
                                     </button>
                                     {recentlySaved.has(rec.id) ? (
-                                      <span className="text-[10px] font-black text-emerald-400 whitespace-nowrap border border-emerald-500/25 px-2 py-1 rounded-lg bg-emerald-500/10 flex items-center gap-1">
+                                      <span className="text-[10px] font-semibold whitespace-nowrap px-2 py-1 rounded-full flex items-center gap-1" style={{ color: '#2E5340', border: '1px solid rgba(61,107,79,0.3)', background: 'rgba(61,107,79,0.12)' }}>
                                         <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
                                         Saved
                                       </span>
@@ -644,14 +637,15 @@ export default function CurriculumAdvisor() {
                                       <button
                                         onClick={() => handleSaveToProfile(rec)}
                                         disabled={savingRecId === rec.id}
-                                        className="text-[10px] font-black text-blue-400 hover:text-blue-300 whitespace-nowrap border border-blue-500/20 px-2 py-1 rounded-lg bg-blue-500/5 hover:bg-blue-500/10 transition-colors disabled:opacity-50"
+                                        className="text-[10px] font-semibold whitespace-nowrap px-2 py-1 rounded-full transition-colors disabled:opacity-50"
+                                        style={{ color: '#3D6B4F', border: '1px solid rgba(61,107,79,0.25)', background: 'rgba(61,107,79,0.06)' }}
                                       >
                                         {savingRecId === rec.id ? 'Saving...' : 'Save Recommendation'}
                                       </button>
                                     )}
                                   </div>
                                 </div>
-                                <p className="text-xs text-slate-300 mb-3">{rec.description}</p>
+                                <p className="text-xs mb-3" style={{ color: 'rgba(28,24,18,0.65)' }}>{rec.description}</p>
                                 {Array.isArray(rec.resources) && rec.resources.length > 0 && (
                                   <div className="flex flex-wrap gap-1.5 mb-2">
                                     {rec.resources.map((r, ri2) => {
@@ -662,7 +656,8 @@ export default function CurriculumAdvisor() {
                                           key={ri2}
                                           onClick={() => handleResourceTagClick(r, rec)}
                                           disabled={isLoading}
-                                          className="px-2 py-1 rounded-lg bg-blue-500/10 border border-blue-500/15 text-blue-400 text-[10px] font-semibold hover:bg-blue-500/20 hover:border-blue-500/30 hover:text-blue-300 transition-colors disabled:opacity-60 flex items-center gap-1"
+                                          className="px-2 py-1 rounded-lg text-[10px] font-semibold transition-colors disabled:opacity-60 flex items-center gap-1"
+                                          style={{ background: 'rgba(61,107,79,0.08)', border: '1px solid rgba(61,107,79,0.18)', color: '#3D6B4F' }}
                                         >
                                           {isLoading ? (
                                             <>
@@ -684,7 +679,7 @@ export default function CurriculumAdvisor() {
                                     })}
                                   </div>
                                 )}
-                                <p className="text-[10px] text-slate-500 italic">{rec.rationale}</p>
+                                <p className="text-[10px] italic" style={{ color: 'rgba(28,24,18,0.45)' }}>{rec.rationale}</p>
                               </div>
                             ))}
                           </div>
@@ -695,19 +690,19 @@ export default function CurriculumAdvisor() {
                 </div>
 
                 {/* Follow-up input */}
-                <div className="border-t border-slate-800 p-4 flex-shrink-0">
+                <div className="p-4 flex-shrink-0" style={{ borderTop: '1px solid rgba(28,24,18,0.1)', background: '#FFFFFF' }}>
                   <div className="flex gap-2">
                     <input
                       value={followUp}
                       onChange={e => setFollowUp(e.target.value)}
                       onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleFollowUp(); } }}
                       placeholder="Ask a follow-up question..."
-                      className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="edu-adv-input flex-1 px-4 py-2.5 text-sm"
                     />
                     <button
                       onClick={handleFollowUp}
                       disabled={!followUp.trim() || followUpLoading}
-                      className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-bold hover:bg-blue-700 transition-colors disabled:opacity-40"
+                      className="edu-adv-btn flex items-center gap-2 px-4 py-2.5 text-sm transition-opacity disabled:opacity-40"
                     >
                       {followUpLoading ? (
                         <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -724,15 +719,16 @@ export default function CurriculumAdvisor() {
               </>
             )}
 
-            {/* Saved Recommendations — bottom of right panel, collapsed by default */}
+            {/* Saved Recommendations */}
             {savedInterventions.length > 0 && (
-              <div className="border-t border-slate-800 flex-shrink-0">
+              <div className="flex-shrink-0" style={{ borderTop: '1px solid rgba(28,24,18,0.1)', background: '#FFFFFF' }}>
                 <button
                   onClick={() => setShowSaved(v => !v)}
-                  className="w-full flex items-center justify-between px-4 py-3 text-xs font-black text-slate-400 hover:text-white hover:bg-slate-800/40 transition-colors"
+                  className="w-full flex items-center justify-between px-4 py-3 text-xs font-semibold transition-colors hover:bg-[rgba(61,107,79,0.03)]"
+                  style={{ color: 'rgba(28,24,18,0.6)' }}
                 >
                   <span className="flex items-center gap-1.5">
-                    <svg className="w-3.5 h-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <svg className="w-3.5 h-3.5" style={{ color: '#3D6B4F' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                     </svg>
                     Saved Recommendations ({savedInterventions.length})
@@ -744,22 +740,23 @@ export default function CurriculumAdvisor() {
                 {showSaved && (
                   <div className="overflow-y-auto p-4 pt-0 space-y-2" style={{ maxHeight: '30vh' }}>
                     {savedInterventions.map((item) => (
-                      <div key={item.id} className="bg-slate-800/40 border border-slate-700/40 rounded-xl px-3 py-2.5">
+                      <div key={item.id} className="rounded-xl px-3 py-2.5" style={{ background: '#FAF7F2', border: '1px solid rgba(28,24,18,0.08)' }}>
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1 min-w-0">
-                            <p className="text-xs font-black text-white">{item.student_name || item.subject || 'Saved Recommendation'}</p>
-                            {item.subject && <p className="text-[10px] text-blue-400 mt-0.5">{item.subject}</p>}
-                            {item.created_at && <p className="text-[10px] text-slate-500 mt-0.5">{new Date(item.created_at).toLocaleDateString()}</p>}
+                            <p className="text-xs font-semibold" style={{ color: '#1C1812' }}>{item.student_name || item.subject || 'Saved Recommendation'}</p>
+                            {item.subject && <p className="text-[10px] mt-0.5" style={{ color: '#3D6B4F' }}>{item.subject}</p>}
+                            {item.created_at && <p className="text-[10px] mt-0.5" style={{ color: 'rgba(28,24,18,0.4)' }}>{new Date(item.created_at).toLocaleDateString()}</p>}
                           </div>
                           <button
                             onClick={() => setExpandedSavedId(expandedSavedId === item.id ? null : item.id)}
-                            className="text-[10px] font-black text-slate-400 hover:text-white border border-slate-600 px-2 py-1 rounded-lg hover:border-slate-500 transition-colors flex-shrink-0"
+                            className="text-[10px] font-semibold px-2 py-1 rounded-full transition-colors flex-shrink-0"
+                            style={{ color: 'rgba(28,24,18,0.6)', border: '1px solid rgba(28,24,18,0.15)' }}
                           >
                             {expandedSavedId === item.id ? 'Close' : 'View'}
                           </button>
                         </div>
                         {expandedSavedId === item.id && (
-                          <p className="text-[11px] text-slate-300 leading-relaxed mt-2 pt-2 border-t border-slate-700/50 whitespace-pre-wrap">
+                          <p className="text-[11px] leading-relaxed mt-2 pt-2 whitespace-pre-wrap" style={{ color: 'rgba(28,24,18,0.7)', borderTop: '1px solid rgba(28,24,18,0.08)' }}>
                             {item.description}
                           </p>
                         )}
@@ -775,21 +772,22 @@ export default function CurriculumAdvisor() {
 
       {/* Resource Generation Modal */}
       {resourceModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <div className="rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl" style={{ background: '#FFFFFF', border: '1px solid rgba(28,24,18,0.1)', fontFamily: "'Open Sans', sans-serif" }}>
             {/* Header */}
-            <div className="flex items-start justify-between gap-3 px-6 py-4 border-b border-slate-800">
+            <div className="flex items-start justify-between gap-3 px-6 py-4" style={{ borderBottom: '1px solid rgba(28,24,18,0.08)' }}>
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-600 to-sky-400 flex items-center justify-center flex-shrink-0">
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: '#3D6B4F' }}>
                   <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
-                <h2 className="text-sm font-black text-white">{resourceModal.title}</h2>
+                <h2 className="text-base font-normal" style={{ fontFamily: "'Cormorant Garamond', serif", color: '#1C1812' }}>{resourceModal.title}</h2>
               </div>
               <button
                 onClick={() => { setResourceModal(null); setResourceSavedOk(false); }}
-                className="text-slate-400 hover:text-white transition-colors"
+                className="transition-colors"
+                style={{ color: 'rgba(28,24,18,0.5)' }}
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -803,10 +801,11 @@ export default function CurriculumAdvisor() {
             </div>
 
             {/* Actions */}
-            <div className="flex items-center gap-2 px-6 py-4 border-t border-slate-800 flex-wrap">
+            <div className="flex items-center gap-2 px-6 py-4 flex-wrap" style={{ borderTop: '1px solid rgba(28,24,18,0.08)' }}>
               <button
                 onClick={handleCopyResource}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 text-xs font-black hover:text-white hover:border-slate-600 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold transition-colors"
+                style={{ background: '#FFFFFF', border: '1px solid rgba(28,24,18,0.15)', color: 'rgba(28,24,18,0.7)' }}
               >
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -816,7 +815,8 @@ export default function CurriculumAdvisor() {
               <button
                 onClick={handleSaveResourceToInterventions}
                 disabled={savingResource || resourceSavedOk}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600/15 border border-emerald-500/25 text-emerald-400 text-xs font-black hover:bg-emerald-600/25 transition-colors disabled:opacity-60"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold transition-colors disabled:opacity-60"
+                style={{ background: 'rgba(61,107,79,0.12)', border: '1px solid rgba(61,107,79,0.3)', color: '#2E5340' }}
               >
                 {resourceSavedOk ? (
                   <>
@@ -835,13 +835,14 @@ export default function CurriculumAdvisor() {
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                     </svg>
-                    Save to Interventions
+                    Save to Support Plans
                   </>
                 )}
               </button>
               <button
                 onClick={handleDownloadResource}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 text-xs font-black hover:text-white hover:border-slate-600 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold transition-colors"
+                style={{ background: '#FFFFFF', border: '1px solid rgba(28,24,18,0.15)', color: 'rgba(28,24,18,0.7)' }}
               >
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />

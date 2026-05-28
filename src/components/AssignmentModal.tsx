@@ -1,13 +1,19 @@
 // src/components/AssignmentModal.tsx
 // VeloxSync for Education — AI Assignment Generator Modal
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { edu } from '../api';
 import { US_STATES } from '../types/education';
 
+const ASSIGNMENT_MODAL_CSS = `
+.edu-am-input { background: #FFFFFF; border: 1px solid rgba(28,24,18,0.15); color: #1C1812; }
+.edu-am-input::placeholder { color: rgba(28,24,18,0.4); }
+.edu-am-input:focus { border-color: #3D6B4F; box-shadow: 0 0 0 3px rgba(61,107,79,0.15); }
+`;
+
 // ── Constants ──────────────────────────────────────────────────────────────
 
-const CURRICULUM_TYPES = ['Traditional', 'Charlotte Mason', 'Classical', 'Eclectic', 'Online'];
+const CURRICULUM_TYPES = ['Classical', 'Charlotte Mason', 'Unschooling', 'Eclectic', 'Online', 'Textbook'];
 const GRADE_LEVELS = ['K', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
 const LEARNING_STYLE_OPTIONS = [
   { value: 'visual', label: 'Visual' },
@@ -309,7 +315,7 @@ function buildMockAssignment(cfg: AssignmentConfig): GeneratedAssignment {
     },
   ];
 
-  // Teacher Notes & Bridge
+  // Parent Notes & Bridge
   const teacherNotes = isMath
     ? `Watch for students who skip showing their work — the reasoning process matters as much as the answer. For early finishers, extend with: "Create your own ${topic} problem and swap with a partner."`
     : isSci
@@ -351,7 +357,7 @@ function RenderSection({ s }: { s: AssignmentSection }) {
         <div className="grid grid-cols-3 gap-3">
           {s.cards.map((card, i) => (
             <div key={i} className="border border-slate-200 rounded-xl p-3 bg-slate-50">
-              <p className="text-xs font-black text-teal-700 mb-1.5">{card.title}</p>
+              <p className="text-xs font-black text-[#3D6B4F] mb-1.5">{card.title}</p>
               <p className="text-xs text-slate-600 leading-relaxed">{card.content}</p>
             </div>
           ))}
@@ -370,7 +376,7 @@ function RenderSection({ s }: { s: AssignmentSection }) {
               <ul className="space-y-1.5">
                 {col.items.map((item, j) => (
                   <li key={j} className="text-xs text-slate-600 flex gap-1.5 items-start">
-                    <span className="text-teal-500 mt-0.5 flex-shrink-0">→</span>
+                    <span className="text-[#3D6B4F] mt-0.5 flex-shrink-0">→</span>
                     {item}
                   </li>
                 ))}
@@ -461,7 +467,7 @@ ${sectionHTML}
 <table><tr><th>Criterion</th><th>Distinguished</th><th>Proficient</th><th>Apprentice</th><th>Novice</th></tr>
 ${assignment.rubric.map(r => `<tr><td><strong>${r.criterion}</strong></td><td>${r.distinguished}</td><td>${r.proficient}</td><td>${r.apprentice}</td><td>${r.novice}</td></tr>`).join('')}
 </table>
-<div class="notes"><strong>Teacher Notes:</strong> ${assignment.teacherNotes}<br><br><strong>Bridge to Next Lesson:</strong> ${assignment.bridgeToNext}</div>
+<div class="notes"><strong>Parent Notes:</strong> ${assignment.teacherNotes}<br><br><strong>Bridge to Next Lesson:</strong> ${assignment.bridgeToNext}</div>
 </body></html>`);
   win.document.close();
   win.print();
@@ -495,7 +501,7 @@ function copyAssignmentText(assignment: GeneratedAssignment, cfg: AssignmentConf
   lines.push('── RUBRIC ──');
   assignment.rubric.forEach(r => lines.push(`  ${r.criterion}: Distinguished — ${r.distinguished} | Proficient — ${r.proficient}`));
   lines.push('');
-  lines.push(`Teacher Notes: ${assignment.teacherNotes}`);
+  lines.push(`Parent Notes: ${assignment.teacherNotes}`);
   lines.push(`Bridge to Next: ${assignment.bridgeToNext}`);
   return lines.join('\n');
 }
@@ -539,12 +545,12 @@ function AssignmentPreview({
         </div>
 
         {/* Standard + I Can */}
-        <div className="rounded-xl border border-teal-200 bg-teal-50 px-4 py-3">
-          <span className="inline-block px-2 py-0.5 rounded-md bg-teal-700 text-white text-[10px] font-black uppercase tracking-wider mb-2">
+        <div className="rounded-xl border px-4 py-3" style={{ borderColor: 'rgba(61,107,79,0.25)', background: 'rgba(61,107,79,0.06)' }}>
+          <span className="inline-block px-2 py-0.5 rounded-md text-white text-[10px] font-black uppercase tracking-wider mb-2" style={{ background: '#3D6B4F' }}>
             {assignment.standardCode}
           </span>
-          <p className="text-sm font-semibold text-teal-900">
-            <span className="text-teal-600 font-black">I Can: </span>{assignment.iCanStatement}
+          <p className="text-sm font-semibold" style={{ color: '#1C1812' }}>
+            <span className="font-black" style={{ color: '#3D6B4F' }}>I Can: </span>{assignment.iCanStatement}
           </p>
         </div>
 
@@ -617,16 +623,16 @@ function AssignmentPreview({
           </div>
         </div>
 
-        {/* Teacher Notes */}
+        {/* Parent Notes */}
         <div className="border border-slate-200 rounded-xl p-4 bg-slate-50">
-          <p className="text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Teacher Notes</p>
+          <p className="text-xs font-black text-slate-500 uppercase tracking-wider mb-2">Parent Notes</p>
           <p className="text-sm text-slate-700 leading-relaxed">{assignment.teacherNotes}</p>
         </div>
 
         {/* Bridge */}
-        <div className="border border-teal-100 rounded-xl p-4 bg-teal-50/50">
-          <p className="text-xs font-black text-teal-600 uppercase tracking-wider mb-2">Bridge to Next Lesson</p>
-          <p className="text-sm text-teal-800 leading-relaxed">{assignment.bridgeToNext}</p>
+        <div className="rounded-xl p-4" style={{ border: '1px solid rgba(61,107,79,0.2)', background: 'rgba(61,107,79,0.05)' }}>
+          <p className="text-xs font-black uppercase tracking-wider mb-2" style={{ color: '#3D6B4F' }}>Bridge to Next Lesson</p>
+          <p className="text-sm leading-relaxed" style={{ color: '#2E5340' }}>{assignment.bridgeToNext}</p>
         </div>
       </div>
 
@@ -634,7 +640,8 @@ function AssignmentPreview({
       <div className="sticky bottom-0 border-t border-slate-200 px-6 py-3 flex gap-2 flex-shrink-0 bg-white z-10">
         <button
           onClick={onDownload}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900 text-white text-xs font-black hover:bg-slate-800 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black transition-colors"
+          style={{ background: '#FFFFFF', border: '1px solid rgba(28,24,18,0.15)', color: 'rgba(28,24,18,0.75)' }}
         >
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -644,16 +651,13 @@ function AssignmentPreview({
         <button
           onClick={onSave}
           disabled={saving || saved}
-          className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black transition-colors ${
-            saved
-              ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
-              : 'bg-teal-600 text-white hover:bg-teal-700'
-          } disabled:opacity-60`}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black transition-colors text-white disabled:opacity-60"
+          style={{ background: saved ? '#5B8C6E' : '#3D6B4F' }}
         >
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d={saved ? 'M5 13l4 4L19 7' : 'M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z'} />
           </svg>
-          {saved ? 'Saved!' : saving ? 'Saving...' : 'Save to Student'}
+          {saved ? 'Saved!' : saving ? 'Saving...' : 'Save to Child'}
         </button>
         <button
           onClick={onCopy}
@@ -680,7 +684,7 @@ export default function AssignmentModal({ isOpen, onClose, prefill = {} }: Assig
   const [state, setState] = useState(prefill.state ?? '');
   const [subject, setSubject] = useState(prefill.subject ?? '');
   const [learningStyle, setLearningStyle] = useState(prefill.learningStyle ?? 'mixed');
-  const [curriculumType, setCurriculumType] = useState('Traditional');
+  const [curriculumType, setCurriculumType] = useState('Eclectic');
   const [topic, setTopic] = useState(prefill.topic ?? '');
   const [specificStandard, setSpecificStandard] = useState(
     prefill.standardCode ? `${prefill.standardCode}${prefill.standardDescription ? ' — ' + prefill.standardDescription.slice(0, 80) : ''}` : ''
@@ -693,6 +697,15 @@ export default function AssignmentModal({ isOpen, onClose, prefill = {} }: Assig
   const [copied, setCopied] = useState(false);
 
   const cfg: AssignmentConfig = { gradeLevel, state, subject, learningStyle, curriculumType, topic, specificStandard };
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const styleEl = document.createElement('style');
+    styleEl.setAttribute('data-edu-assignment-modal', 'true');
+    styleEl.textContent = ASSIGNMENT_MODAL_CSS;
+    document.head.appendChild(styleEl);
+    return () => { document.head.removeChild(styleEl); };
+  }, [isOpen]);
 
   const handleGenerate = async () => {
     if (!subject || !gradeLevel) return;
@@ -733,7 +746,7 @@ export default function AssignmentModal({ isOpen, onClose, prefill = {} }: Assig
         student_name: `${assignment.emoji} ${assignment.title}`,
         type: 'enrichment',
         subject: subject,
-        description: `${assignment.iCanStatement}\n\nStandard: ${assignment.standardCode}\nDuration: ${assignment.duration}\n\nTeacher Notes: ${assignment.teacherNotes}`,
+        description: `${assignment.iCanStatement}\n\nStandard: ${assignment.standardCode}\nDuration: ${assignment.duration}\n\nParent Notes: ${assignment.teacherNotes}`,
         priority: 'medium',
         status: 'pending',
         resources: assignment.materials,
@@ -764,23 +777,24 @@ export default function AssignmentModal({ isOpen, onClose, prefill = {} }: Assig
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm">
-      <div className="fixed inset-2 md:inset-4 z-50 bg-[#0C1F36] rounded-2xl border border-slate-700 flex flex-col overflow-hidden shadow-2xl">
+    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm">
+      <div className="fixed inset-2 md:inset-4 z-50 rounded-2xl flex flex-col overflow-hidden shadow-2xl" style={{ background: '#FAF7F2', border: '1px solid rgba(28,24,18,0.1)', fontFamily: "'Open Sans', sans-serif" }}>
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-700 flex-shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 flex-shrink-0" style={{ borderBottom: '1px solid rgba(28,24,18,0.1)', background: '#FFFFFF' }}>
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-teal-600 to-teal-400 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: '#3D6B4F' }}>
               <span className="text-sm">📝</span>
             </div>
             <div>
-              <h2 className="text-base font-black text-white">AI Assignment Generator</h2>
-              <p className="text-xs text-slate-400">Ei-Core builds a complete, printable assignment in seconds</p>
+              <h2 className="text-lg font-normal" style={{ fontFamily: "'Cormorant Garamond', serif", color: '#1C1812' }}>Assignment Builder</h2>
+              <p className="text-xs" style={{ color: 'rgba(28,24,18,0.55)' }}>Ei-Core builds a complete, printable assignment in seconds</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition-colors"
+            className="w-8 h-8 rounded-xl flex items-center justify-center transition-colors"
+            style={{ background: 'rgba(28,24,18,0.05)', color: 'rgba(28,24,18,0.6)' }}
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -792,16 +806,16 @@ export default function AssignmentModal({ isOpen, onClose, prefill = {} }: Assig
         <div className="flex-1 flex overflow-hidden min-h-0">
 
           {/* Left: Config */}
-          <div className="w-[320px] border-r border-slate-700 overflow-y-auto flex-shrink-0 p-6 space-y-4">
-            <p className="text-xs text-slate-500 uppercase font-black tracking-wider">Assignment Configuration</p>
+          <div className="w-[320px] overflow-y-auto flex-shrink-0 p-6 space-y-4" style={{ borderRight: '1px solid rgba(28,24,18,0.1)', background: '#FAF7F2' }}>
+            <p className="text-[11px] uppercase font-semibold tracking-[0.12em]" style={{ color: '#3D6B4F' }}>Assignment Configuration</p>
 
             {/* Grade Level */}
             <div>
-              <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-1.5">Grade Level</label>
+              <label className="block text-[11px] font-semibold uppercase tracking-[0.12em] mb-1.5" style={{ color: '#3D6B4F' }}>Grade Level</label>
               <select
                 value={gradeLevel}
                 onChange={e => setGradeLevel(e.target.value)}
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="edu-am-input w-full rounded-xl px-3 py-2.5 text-sm focus:outline-none"
               >
                 {GRADE_LEVELS.map(g => <option key={g} value={g}>{g === 'K' ? 'Kindergarten' : `Grade ${g}`}</option>)}
               </select>
@@ -809,11 +823,11 @@ export default function AssignmentModal({ isOpen, onClose, prefill = {} }: Assig
 
             {/* State */}
             <div>
-              <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-1.5">State <span className="text-slate-600 normal-case font-normal">(optional)</span></label>
+              <label className="block text-[11px] font-semibold uppercase tracking-[0.12em] mb-1.5" style={{ color: '#3D6B4F' }}>State <span className="normal-case font-normal" style={{ color: 'rgba(28,24,18,0.4)' }}>(optional)</span></label>
               <select
                 value={state}
                 onChange={e => setState(e.target.value)}
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="edu-am-input w-full rounded-xl px-3 py-2.5 text-sm focus:outline-none"
               >
                 <option value="">Any state / No standard preference</option>
                 {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
@@ -822,11 +836,11 @@ export default function AssignmentModal({ isOpen, onClose, prefill = {} }: Assig
 
             {/* Subject */}
             <div>
-              <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-1.5">Subject *</label>
+              <label className="block text-[11px] font-semibold uppercase tracking-[0.12em] mb-1.5" style={{ color: '#3D6B4F' }}>Subject *</label>
               <select
                 value={subject}
                 onChange={e => setSubject(e.target.value)}
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="edu-am-input w-full rounded-xl px-3 py-2.5 text-sm focus:outline-none"
               >
                 <option value="">Select subject...</option>
                 {SUBJECTS.map(s => <option key={s} value={s}>{s}</option>)}
@@ -835,23 +849,23 @@ export default function AssignmentModal({ isOpen, onClose, prefill = {} }: Assig
 
             {/* Learning Style */}
             <div>
-              <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-1.5">Learning Style</label>
+              <label className="block text-[11px] font-semibold uppercase tracking-[0.12em] mb-1.5" style={{ color: '#3D6B4F' }}>Learning Style</label>
               <select
                 value={learningStyle}
                 onChange={e => setLearningStyle(e.target.value)}
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="edu-am-input w-full rounded-xl px-3 py-2.5 text-sm focus:outline-none"
               >
                 {LEARNING_STYLE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
               </select>
             </div>
 
-            {/* Curriculum Type */}
+            {/* Curriculum Approach */}
             <div>
-              <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-1.5">Curriculum Type</label>
+              <label className="block text-[11px] font-semibold uppercase tracking-[0.12em] mb-1.5" style={{ color: '#3D6B4F' }}>Curriculum Approach</label>
               <select
                 value={curriculumType}
                 onChange={e => setCurriculumType(e.target.value)}
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="edu-am-input w-full rounded-xl px-3 py-2.5 text-sm focus:outline-none"
               >
                 {CURRICULUM_TYPES.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
@@ -859,27 +873,27 @@ export default function AssignmentModal({ isOpen, onClose, prefill = {} }: Assig
 
             {/* Topic */}
             <div>
-              <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-1.5">Topic / Focus *</label>
+              <label className="block text-[11px] font-semibold uppercase tracking-[0.12em] mb-1.5" style={{ color: '#3D6B4F' }}>Topic / Focus *</label>
               <input
                 type="text"
                 value={topic}
                 onChange={e => setTopic(e.target.value)}
                 placeholder="e.g. fractions, Republic leaders, photosynthesis"
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="edu-am-input w-full rounded-xl px-3 py-2.5 text-sm focus:outline-none"
               />
             </div>
 
             {/* Specific Standard */}
             <div>
-              <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-1.5">
-                Specific Standard <span className="text-slate-600 normal-case font-normal">(optional)</span>
+              <label className="block text-[11px] font-semibold uppercase tracking-[0.12em] mb-1.5" style={{ color: '#3D6B4F' }}>
+                Specific Standard <span className="normal-case font-normal" style={{ color: 'rgba(28,24,18,0.4)' }}>(optional)</span>
               </label>
               <input
                 type="text"
                 value={specificStandard}
                 onChange={e => setSpecificStandard(e.target.value)}
-                placeholder="e.g. CCSS.MATH.5.NF.A.1"
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-white text-sm placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                placeholder="e.g. state standard code"
+                className="edu-am-input w-full rounded-xl px-3 py-2.5 text-sm focus:outline-none"
               />
             </div>
 
@@ -887,7 +901,8 @@ export default function AssignmentModal({ isOpen, onClose, prefill = {} }: Assig
             <button
               onClick={handleGenerate}
               disabled={!subject || !gradeLevel || generating}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-black text-sm transition-colors disabled:opacity-40"
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-full text-white font-semibold text-sm transition-opacity disabled:opacity-40"
+              style={{ background: '#3D6B4F' }}
             >
               {generating ? (
                 <>
@@ -910,25 +925,25 @@ export default function AssignmentModal({ isOpen, onClose, prefill = {} }: Assig
           {/* Right: Preview */}
           <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
             {!assignment && !generating ? (
-              <div className="h-full flex items-center justify-center p-8">
+              <div className="h-full flex items-center justify-center p-8" style={{ background: '#FFFFFF' }}>
                 <div className="text-center max-w-sm">
                   <div className="text-5xl mb-4">📝</div>
-                  <h3 className="text-base font-black text-white mb-2">Assignment Preview</h3>
-                  <p className="text-slate-400 text-sm leading-relaxed">
-                    Fill in the configuration on the left and click "Generate Assignment" to see a complete, printable assignment with rubric, differentiation options, and teacher notes.
+                  <h3 className="text-xl font-normal mb-2" style={{ fontFamily: "'Cormorant Garamond', serif", color: '#1C1812' }}>Assignment Preview</h3>
+                  <p className="text-sm leading-relaxed" style={{ color: 'rgba(28,24,18,0.55)' }}>
+                    Fill in the configuration on the left and click "Generate Assignment" to see a complete, printable assignment with rubric, differentiation options, and parent notes.
                   </p>
                 </div>
               </div>
             ) : generating ? (
-              <div className="h-full flex items-center justify-center p-8">
+              <div className="h-full flex items-center justify-center p-8" style={{ background: '#FFFFFF' }}>
                 <div className="text-center">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-600 to-teal-400 flex items-center justify-center mx-auto mb-4 animate-pulse">
+                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 animate-pulse" style={{ background: '#3D6B4F' }}>
                     <svg className="w-8 h-8 text-white animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                   </div>
-                  <p className="text-white font-black text-base">Ei-Core is building your assignment...</p>
-                  <p className="text-slate-400 text-sm mt-1">Standards · Rubric · Activities · Differentiation</p>
+                  <p className="font-semibold text-base" style={{ color: '#1C1812' }}>Ei-Core is building your assignment...</p>
+                  <p className="text-sm mt-1" style={{ color: 'rgba(28,24,18,0.55)' }}>Standards · Rubric · Activities · Differentiation</p>
                 </div>
               </div>
             ) : assignment ? (
