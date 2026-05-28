@@ -419,8 +419,8 @@ export default function EduLanding() {
           <a href="#faq">FAQ</a>
         </div>
         <div className="nav-actions">
-          <button className="btn-nav-ghost">Sign in</button>
-          <button className="btn-nav-primary">Start free trial</button>
+          <button className="btn-nav-ghost" onClick={() => { window.location.href = '/education/login'; }}>Sign in</button>
+          <button className="btn-nav-primary" onClick={() => { window.location.href = '/education/checkout'; }}>Start free trial</button>
         </div>
       </nav>
 
@@ -445,7 +445,7 @@ export default function EduLanding() {
             <span className="hero-tag hero-tag-blue">K-12 STEM &amp; Coding</span>
           </div>
           <div className="hero-actions">
-            <button className="btn-primary">Start free — 14 days</button>
+            <button className="btn-primary" onClick={() => { window.location.href = '/education/checkout'; }}>Start free — 14 days</button>
             <button className="btn-secondary">See how it works</button>
           </div>
           <div className="hero-proof">
@@ -825,7 +825,7 @@ export default function EduLanding() {
             <li><div className="pricing-check"><CheckSvg /></div>Portfolio-ready progress reports, FERPA compliant</li>
             <li><div className="pricing-check"><CheckSvg /></div>IEP accommodation tracking and support</li>
           </ul>
-          <button className="pricing-btn">Start your 14-day free trial</button>
+          <button className="pricing-btn" onClick={() => { window.location.href = '/education/checkout'; }}>Start your 14-day free trial</button>
           <div className="pricing-note">No credit card required. Cancel any time.</div>
         </div>
       </section>
@@ -876,7 +876,7 @@ export default function EduLanding() {
           <h2 className="cta-headline">Your child is ready<br />to <em>catch up.</em></h2>
           <p className="cta-sub">14 days free. No credit card. ADHD support and a full coding platform included on day one.</p>
           <div className="cta-actions">
-            <button className="btn-cta-primary">Start free trial</button>
+            <button className="btn-cta-primary" onClick={() => { window.location.href = '/education/checkout'; }}>Start free trial</button>
             <a href={CALENDLY_URL} className="btn-cta-ghost" target="_blank" rel="noopener noreferrer">Book a call</a>
           </div>
           <p className="cta-note">// 14-day free trial — no credit card — FERPA compliant — cancel any time</p>
