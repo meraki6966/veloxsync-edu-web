@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { auth } from '../../api';
+import { auth, eduBilling } from '../../api';
 
 const CHECKOUT_CSS = `
 .edu-checkout {
@@ -349,7 +349,27 @@ export default function EduCheckout() {
       if (data.user) {
         localStorage.setItem('edu_user', JSON.stringify(data.user));
       }
-      navigate('/education/onboarding');
+
+      // Account created — open Stripe Checkout for the selected billing cadence.
+      // success_url lands the family on the dashboard; on any failure we fall back
+      // to onboarding so the user is never stuck.
+      try {
+        const checkoutRes = await eduBilling.checkout(billing, {
+          success_url: `${window.location.origin}/education/dashboard?checkout=success`,
+          cancel_url: `${window.location.origin}/education/checkout?canceled=true`,
+        });
+        const url = checkoutRes.data?.url;
+        if (url) {
+          window.location.href = url;
+          return;
+        }
+        // No URL returned — continue to onboarding rather than blocking the user.
+        navigate('/education/onboarding');
+      } catch {
+        setError('Your account is ready, but we couldn’t open checkout. Taking you to setup…');
+        setSubmitting(false);
+        setTimeout(() => navigate('/education/onboarding'), 1500);
+      }
     } catch (err: unknown) {
       const e = err as { response?: { data?: { message?: string; error?: string } }; message?: string };
       const msg =

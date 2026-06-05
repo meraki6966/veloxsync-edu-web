@@ -202,14 +202,19 @@ export const edu = {
     api.post('/api/edu/documents', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
   listDocuments: () =>
     api.get('/api/edu/documents'),
+
+  // Billing status (mirrors eduBilling.status)
+  getBillingStatus: () =>
+    api.get('/api/edu/billing/status'),
 };
 
 // ========================================
 // EDU BILLING — Stripe checkout & trial
 // ========================================
 export const eduBilling = {
-  checkout: (plan: string, urls?: { success_url?: string; cancel_url?: string }) =>
-    api.post('/api/edu/billing/checkout', { plan, ...urls }),
+  // Family Plan checkout — priceType is the billing cadence ('monthly' | 'annual').
+  checkout: (priceType: 'monthly' | 'annual', urls?: { success_url?: string; cancel_url?: string }) =>
+    api.post('/api/edu/billing/checkout', { priceType, ...urls }),
   portal: () =>
     api.post('/api/edu/billing/portal', {}),
   status: () =>
