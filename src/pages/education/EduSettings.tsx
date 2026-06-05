@@ -84,6 +84,33 @@ function deviceLabel(): string {
   return os ? `${browser} on ${os}` : browser;
 }
 
+// Applies the chosen theme's CSS variables to the document root.
+// Full page-by-page dark styling is a later global CSS pass — this just sets
+// the root tokens + a data attribute so the preference is live immediately.
+function applyTheme(t: ThemeOption) {
+  if (typeof document === 'undefined') return;
+  const root = document.documentElement;
+  const prefersDark =
+    typeof window !== 'undefined' &&
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const isDark = t === 'Dark' || (t === 'System' && prefersDark);
+
+  if (isDark) {
+    root.style.setProperty('--edu-bg', '#1C1812');
+    root.style.setProperty('--edu-text', '#FAF7F2');
+    root.style.setProperty('--edu-card-bg', '#2A2520');
+    root.style.setProperty('--edu-card-border', 'rgba(250,247,242,0.1)');
+    root.setAttribute('data-edu-theme', 'dark');
+  } else {
+    root.style.removeProperty('--edu-bg');
+    root.style.removeProperty('--edu-text');
+    root.style.removeProperty('--edu-card-bg');
+    root.style.removeProperty('--edu-card-border');
+    root.setAttribute('data-edu-theme', 'light');
+  }
+}
+
 function childDisplayName(c: HomeschoolChild): string {
   const full = `${c.first_name ?? ''} ${c.last_name ?? ''}`.trim();
   return full || c.first_name || 'Child';
@@ -109,6 +136,7 @@ export default function EduSettings() {
   // APPEARANCE
   const [theme, setTheme] = useState<ThemeOption>('Light');
   const [accent, setAccent] = useState<string>('#3D6B4F');
+  const [appearanceMsg, setAppearanceMsg] = useState<string | null>(null);
 
   // SUBSCRIPTION
   const [planName, setPlanName] = useState('Homeschool');
@@ -142,10 +170,13 @@ export default function EduSettings() {
     }
   }, []);
 
-  // Appearance: read persisted prefs on mount
+  // Appearance: read persisted prefs on mount and apply theme immediately
   useEffect(() => {
     const t = localStorage.getItem('edu_theme');
-    if (t === 'Light' || t === 'Dark' || t === 'System') setTheme(t);
+    const resolved: ThemeOption =
+      t === 'Light' || t === 'Dark' || t === 'System' ? t : 'Light';
+    setTheme(resolved);
+    applyTheme(resolved);
     const a = localStorage.getItem('edu_accent');
     if (a) setAccent(a);
   }, []);
@@ -255,11 +286,21 @@ export default function EduSettings() {
   const handleThemeChange = (t: ThemeOption) => {
     setTheme(t);
     localStorage.setItem('edu_theme', t);
+    applyTheme(t);
+    setAppearanceMsg('Theme saved. Dark mode coming soon.');
   };
 
   const handleAccentChange = (a: string) => {
     setAccent(a);
     localStorage.setItem('edu_accent', a);
+    setAppearanceMsg('Accent color saved.');
+  };
+
+  const handleSaveAppearance = () => {
+    localStorage.setItem('edu_theme', theme);
+    localStorage.setItem('edu_accent', accent);
+    applyTheme(theme);
+    setAppearanceMsg('Preferences saved. Dark mode coming soon.');
   };
 
   const handleManageSubscription = async () => {
@@ -422,7 +463,7 @@ export default function EduSettings() {
               </div>
             </div>
 
-            <div className="edu-field" style={{ marginBottom: 0 }}>
+            <div className="edu-field">
               <label>Accent color</label>
               <div className="edu-swatches">
                 {ACCENT_SWATCHES.map((c) => (
@@ -436,6 +477,13 @@ export default function EduSettings() {
                   />
                 ))}
               </div>
+            </div>
+
+            <div style={{ marginTop: 4 }}>
+              <button type="button" className="edu-btn-primary" onClick={handleSaveAppearance}>
+                Save preferences
+              </button>
+              {appearanceMsg && <div className="edu-msg ok">{appearanceMsg}</div>}
             </div>
           </section>
 
