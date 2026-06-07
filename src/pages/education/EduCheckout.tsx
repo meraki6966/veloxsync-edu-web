@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { auth, eduBilling } from '../../api';
 
 const CHECKOUT_CSS = `
@@ -174,6 +174,26 @@ const CHECKOUT_CSS = `
   margin-top: 1px;
 }
 .edu-checkout-check svg { width: 9px; height: 9px; }
+.edu-checkout-beta {
+  background: #EBF2EC;
+  border: 1.5px solid rgba(61,107,79,0.35);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  text-align: left;
+}
+.edu-checkout-beta-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #3D6B4F;
+  margin-bottom: 4px;
+}
+.edu-checkout-beta-sub {
+  font-size: 13px;
+  font-weight: 300;
+  color: rgba(28,24,18,0.65);
+  line-height: 1.6;
+}
 .edu-checkout-form-divider {
   margin: 8px 0 24px;
   display: flex;
@@ -300,6 +320,8 @@ const CheckSvg = () => (
 
 export default function EduCheckout() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isBeta = searchParams.get('beta') === 'true';
   const [billing, setBilling] = useState<'monthly' | 'annual'>('monthly');
 
   const [email, setEmail] = useState('');
@@ -348,6 +370,12 @@ export default function EduCheckout() {
       localStorage.setItem('edu_token', token);
       if (data.user) {
         localStorage.setItem('edu_user', JSON.stringify(data.user));
+      }
+
+      // Beta testers skip payment entirely — straight to onboarding.
+      if (isBeta) {
+        navigate('/education/onboarding');
+        return;
       }
 
       // Account created — open Stripe Checkout for the selected billing cadence.
@@ -426,6 +454,15 @@ export default function EduCheckout() {
               </li>
             ))}
           </ul>
+
+          {isBeta && (
+            <div className="edu-checkout-beta">
+              <div className="edu-checkout-beta-title">Beta Access — Free for 30 Days</div>
+              <div className="edu-checkout-beta-sub">
+                No credit card required. You are getting early access while we gather feedback from real families.
+              </div>
+            </div>
+          )}
 
           <div className="edu-checkout-form-divider">Create your account</div>
 
