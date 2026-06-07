@@ -427,10 +427,6 @@ export default function EduLanding() {
       {/* HERO */}
       <section className="hero">
         <div className="hero-left">
-          <div className="hero-eyebrow">
-            <div className="hero-eyebrow-dot"></div>
-            <span>Powered by Ei-Core&trade; AI</span>
-          </div>
           <h1 className="hero-headline">
             Your child is not<br />
             <span className="strike">behind.</span><br />
@@ -760,7 +756,6 @@ export default function EduLanding() {
             <span className="section-label">Ei-Core&trade; for Education</span>
             <h2 className="eicore-headline">The AI that thinks like a <em>specialist.</em><br />Costs like an app.</h2>
             <p className="eicore-sub">Ei-Core is not a chatbot. It is a continuous intelligence engine that monitors every child, supports ADHD and cognitive differences, guides your STEM path, and gives you specific actions — not advice.</p>
-            <button className="btn-white">See Ei-Core in action</button>
           </div>
           <div className="eicore-card">
             <div className="eicore-card-header">
