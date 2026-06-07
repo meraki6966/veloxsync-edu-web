@@ -915,9 +915,9 @@ export default function EduLanding() {
           <div className="footer-col">
             <h4>Resources</h4>
             <a href="#">State Standards Library</a>
-            <a href="#">Help Center</a>
-            <a href="#">FERPA Policy</a>
-            <a href="#">Blog</a>
+            <a href="/support">Support</a>
+            <a href="/education/faq">FAQ</a>
+            <a href="/education/privacy">Privacy Policy</a>
             <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer">Book a call</a>
           </div>
           <div className="footer-col">
@@ -930,7 +930,7 @@ export default function EduLanding() {
         <div className="footer-bottom">
           <div className="footer-copy">&copy; 2026 Meraki is Love, LLC. VeloxSync and Ei-Core are trademarks of Meraki is Love, LLC.</div>
           <div className="footer-legal">
-            <a href="#">Privacy</a>
+            <a href="/education/privacy">Privacy</a>
             <a href="#">Terms</a>
             <a href="#">FERPA</a>
             <a href="#">Cookies</a>

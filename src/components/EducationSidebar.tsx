@@ -219,6 +219,21 @@ const SIDEBAR_CSS = `
   background: rgba(143,191,159,0.08);
 }
 .edu-sidebar-signout svg { flex-shrink: 0; }
+.edu-sidebar-footer-links {
+  display: flex;
+  gap: 14px;
+  margin: 0 28px 10px;
+}
+.edu-sidebar-footer-links a {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 11px;
+  color: rgba(250,247,242,0.4);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.edu-sidebar-footer-links a:hover {
+  color: #8FBF9F;
+}
 `;
 
 let stylesInjected = false;
@@ -368,6 +383,12 @@ export default function EducationSidebar({
           <Icon d={ICONS.signout} />
           <span>Sign out</span>
         </button>
+
+        <div className="edu-sidebar-footer-links">
+          <Link to="/education/privacy" onClick={onMobileClose}>Privacy</Link>
+          <Link to="/education/support" onClick={onMobileClose}>Support</Link>
+          <Link to="/education/faq" onClick={onMobileClose}>FAQ</Link>
+        </div>
       </aside>
     </>
   );
