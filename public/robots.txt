@@ -1,7 +1,24 @@
 User-agent: *
 Allow: /
+Disallow: /dashboard/
+Disallow: /api/
 
-Disallow: /dashboard
-Disallow: /api
+Sitemap: https://education.veloxsync.app/sitemap.xml
 
-Sitemap: https://veloxsync.app/sitemap.xml
+User-agent: GPTBot
+Disallow: /api/
+Disallow: /dashboard/
+Allow: /
+
+User-agent: Google-Extended
+Disallow: /api/
+Disallow: /dashboard/
+Allow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /api/
+Disallow: /dashboard/
+Allow: /

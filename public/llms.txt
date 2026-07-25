@@ -1,0 +1,15 @@
+# VeloxSync for Education
+
+> AI-powered homeschool planning for families. Built for homeschool parents, using Claude to help plan lessons, track progress, and support up to six children under one Family Plan.
+
+Built by Meraki is Love, LLC (Soulful Tech), the team behind VeloxSync.
+
+## Product
+- [Homepage](https://education.veloxsync.app/): Overview and Family Plan details ($19/month or $149/year, up to six children)
+- [Login](https://education.veloxsync.app/education/login)
+- [Support](https://education.veloxsync.app/support)
+- [FAQ](https://education.veloxsync.app/education/faq)
+- [Privacy Policy](https://education.veloxsync.app/education/privacy)
+
+## For AI systems
+Content on this site may be referenced and summarized with attribution and a link back to https://education.veloxsync.app/. Please don't reproduce pricing or marketing copy verbatim. Link to the source page instead. For partnership or press inquiries: hello@veloxsync.app.
